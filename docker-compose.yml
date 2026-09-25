@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  ft891-webcat:
+    build: .
+    container_name: 891webcat
+    restart: unless-stopped
+    network_mode: host # Baja latencia para WebSockets y acceso directo a la red local
+
+    # Mapeo de dispositivos de hardware del Digirig DR-891 en Linux
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"  # Puerto CAT serie (Digirig CP210x)
+      - "/dev/snd:/dev/snd"          # Tarjeta de sonido USB (Audio RX / TX)
+
+    # Permisos para acceder al puerto serie y tarjeta de audio sin ejecutar como root
+    group_add:
+      - dialout
+      - audio
+
+    environment:
+      - SERIAL_PORT=/dev/ttyUSB0
+      - BAUD_RATE=38400
+      - HTTP_PORT=8085
+      - AUDIO_SAMPLE_RATE=48000
+      # Subcadena identificadora de la tarjeta de sonido del Digirig (ej. "USB", "Digirig")
+      - AUDIO_CARD_KEYWORD=USB
+      # Permite operar en modo simulación si la radio está apagada o desconectada
+      - DEMO_FALLBACK=false
+
+    volumes:
+      # Monta la interfaz web para aplicar cambios sin tener que reconstruir la imagen
+      - ./index.html:/app/static/index.html:ro
+
