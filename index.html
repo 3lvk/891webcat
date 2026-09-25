@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Yaesu FT-891 WebCAT Station</title>
+  <title>Yaesu FT-891 WebCAT & FT8/FT4 Station</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -171,7 +171,7 @@
         <div>
           <div class="flex items-center gap-1.5 flex-wrap">
             <h1 class="font-lcd font-bold tracking-wider text-sm sm:text-base uppercase">FT-891 Web CAT</h1>
-            <span class="px-1.5 py-0.2 text-[9px] font-mono font-bold rounded bg-amber-950/80 text-amber-400 border border-amber-800/80">v3.0 DX</span>
+            <span class="px-1.5 py-0.2 text-[9px] font-mono font-bold rounded bg-amber-950/80 text-amber-400 border border-amber-800/80">v3.7 FT8/FT4</span>
           </div>
           <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono">Digirig DR-891 @ Linux</p>
         </div>
@@ -182,18 +182,27 @@
       </span>
     </div>
 
-    <div class="flex items-center justify-between sm:justify-end gap-1.5 text-xs w-full sm:w-auto font-mono">
-      <button id="btn-power" class="flex-1 sm:flex-none bg-red-950 hover:bg-red-900 text-red-400 border border-red-800 font-semibold px-2.5 py-1.5 rounded transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 text-[11px]" title="Encender / Standby FT-891">
+    <!-- Navegación y Accesos Rápidos de Módulos -->
+    <div class="flex items-center justify-between sm:justify-end gap-1.5 text-xs w-full sm:w-auto font-mono flex-wrap">
+      <button id="nav-btn-radio" onclick="switchGlobalModule('radio')" class="px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1">
+        <span>📻</span> Control Radio
+      </button>
+
+      <button id="nav-btn-ft8" onclick="switchGlobalModule('ft8')" class="px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1">
+        <span>📟</span> FT8 / FT4
+      </button>
+
+      <button id="btn-power" class="bg-red-950 hover:bg-red-900 text-red-400 border border-red-800 font-semibold px-2.5 py-1.5 rounded transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 text-[11px]" title="Encender / Standby FT-891">
         <span id="power-indicator" class="w-2 h-2 rounded-full bg-red-600"></span>
         <span id="power-btn-label">STANDBY</span>
       </button>
 
-      <button id="btn-audio-engine" class="flex-1 sm:flex-none theme-card hover:bg-emerald-950 text-emerald-400 px-2.5 py-1.5 rounded border border-emerald-700/60 font-mono text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95" title="Iniciar motor de audio Web RX/TX">
+      <button id="btn-audio-engine" class="theme-card hover:bg-emerald-950 text-emerald-400 px-2.5 py-1.5 rounded border border-emerald-700/60 font-mono text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95" title="Iniciar motor de audio Web RX/TX">
         <span id="audio-engine-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
         <span id="audio-engine-label">Audio Web</span>
       </button>
 
-      <button id="btn-theme-toggle" class="theme-card hover:border-amber-400 px-2.5 py-1.5 rounded border transition text-xs flex items-center gap-1" title="Cambiar tema Claro / Oscuro">
+      <button id="btn-theme-toggle" class="theme-card hover:border-amber-400 px-2.5 py-1.5 rounded border transition text-xs" title="Cambiar tema Claro / Oscuro">
         <span id="theme-icon">☀️</span>
       </button>
 
@@ -205,21 +214,24 @@
 
   <nav class="lg:hidden theme-panel border-b px-2 py-1.5 sticky top-[57px] sm:top-[61px] z-20 flex gap-1 font-mono text-xs">
     <button id="tab-btn-radio" onclick="switchMobileTab('radio')" class="flex-1 py-1.5 px-2 rounded font-bold text-center border border-amber-500/80 bg-amber-950/40 text-amber-300 flex items-center justify-center gap-1.5">
-      <span>📻</span> Radio & Dial
+      <span>📻</span> Radio
+    </button>
+    <button id="tab-btn-ft8" onclick="switchMobileTab('ft8')" class="flex-1 py-1.5 px-2 rounded font-medium text-center border border-slate-700 theme-card text-cyan-400 flex items-center justify-center gap-1.5">
+      <span>📟</span> FT8/FT4
     </button>
     <button id="tab-btn-spots" onclick="switchMobileTab('spots')" class="flex-1 py-1.5 px-2 rounded font-medium text-center border border-slate-700 theme-card text-slate-400 flex items-center justify-center gap-1.5">
-      <span>🎯</span> Spots & DX <span id="spots-count-badge" class="px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-400 text-[10px] border border-cyan-800 font-bold ml-1">0</span>
+      <span>🎯</span> Spots <span id="spots-count-badge" class="px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-400 text-[10px] border border-cyan-800 font-bold ml-0.5">0</span>
     </button>
   </nav>
 
-  <main class="flex-1 p-2.5 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 max-w-[1700px] w-full mx-auto">
+  <main id="module-main-radio" class="flex-1 p-2.5 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 max-w-[1700px] w-full mx-auto">
     
-    <!-- Columna Izquierda: Panel de Radio, VFO, Audio y Filtros DSP de FI -->
+    <!-- Columna Izquierda: Panel de Control del Radio FT-891 -->
     <div class="lg:col-span-7 flex flex-col gap-3 sm:gap-4">
-
       <section id="panel-rig" class="mobile-tab-content">
         <div class="theme-panel rounded-xl p-3 sm:p-4 border shadow-xl relative overflow-hidden space-y-3 sm:space-y-3.5">
           
+          <!-- Barra superior de estados de recepción y transmisión -->
           <div class="flex items-center justify-between pb-2 border-b border-slate-700/60 text-xs font-mono flex-wrap gap-2">
             <div class="flex items-center gap-3 sm:gap-4">
               <div class="flex items-center gap-1.5">
@@ -257,6 +269,7 @@
               </div>
             </div>
 
+            <!-- Frecuencia Principal y Sub-VFO -->
             <div class="flex items-baseline justify-between my-0.5 sm:my-1">
               <div class="flex items-baseline font-lcd font-bold text-amber-400 tracking-tight glow-amber">
                 <span id="freq-mhz" class="text-3xl sm:text-6xl md:text-7xl">14.250</span>
@@ -269,6 +282,7 @@
               </div>
             </div>
 
+            <!-- Indicador S-Meter Dinámico -->
             <div class="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-amber-900/60 font-mono">
               <div class="flex justify-between items-center text-[9px] sm:text-[10px] text-amber-500/80 mb-1">
                 <span class="tracking-wider uppercase font-semibold text-amber-600 truncate mr-2">SEÑAL RX (S-METER / dBm)</span>
@@ -309,6 +323,7 @@
               </div>
             </div>
 
+            <!-- Dial VFO con saltos numéricos y rueda táctil -->
             <div class="md:col-span-7 flex items-center justify-between gap-1.5 sm:gap-2 theme-card p-2 sm:p-2.5 rounded-lg border">
               <div class="flex items-center gap-1 flex-1 justify-end">
                 <button id="btn-tune-down-10" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Bajar 10 pasos">
@@ -325,8 +340,7 @@
                 </button>
               </div>
 
-              <!-- VFO Knob rotatorio táctil -->
-              <div id="vfo-knob" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-2 border-slate-500 shadow-inner flex items-center justify-center cursor-ns-resize select-none relative shrink-0 mx-2 sm:mx-3" title="Arrastra, rueda o desliza con el dedo en móvil">
+              <div id="vfo-knob" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-2 border-slate-500 shadow-inner flex items-center justify-center cursor-ns-resize select-none relative shrink-0 mx-2 sm:mx-3" title="Arrastra, rueda o desliza con el dedo">
                 <div class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-500 shadow-[0_0_10px_#ff9800]"></div>
                 <div class="absolute top-1.5 w-1.5 h-2.5 bg-slate-300 rounded-sm"></div>
               </div>
@@ -357,7 +371,7 @@
             <div class="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 px-1 mt-1.5 font-mono">
               <div class="flex items-center gap-2">
                 <span>Modo PTT:</span>
-                <button id="btn-toggle-ptt-mode" class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold text-amber-500" title="Cambiar entre Mantener presionado o Pulsar para Activar/Desactivar">
+                <button id="btn-toggle-ptt-mode" class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold text-amber-500">
                   MANTENER
                 </button>
               </div>
@@ -508,6 +522,7 @@
               </div>
             </div>
 
+            <!-- Ajuste de Ancho de FI (WIDTH) y Desplazamiento (SHIFT) -->
             <div class="mt-2.5 theme-card p-2.5 sm:p-3 rounded-lg border grid grid-cols-1 md:grid-cols-12 gap-3 items-center font-mono text-xs">
               <div class="md:col-span-7 space-y-1.5">
                 <div class="flex items-center justify-between">
@@ -544,7 +559,6 @@
 
         </div>
       </section>
-
     </div>
 
     <div class="lg:col-span-5 flex flex-col">
@@ -555,7 +569,7 @@
               <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
               SPOTS & DX CLUSTER EN VIVO
             </h2>
-            <p class="text-[10px] sm:text-[11px] font-mono text-slate-400">POTA, LLOTA, SOTA y DX Summit con QSY directo</p>
+            <p class="text-[10px] sm:text-[11px] font-mono text-slate-400">POTA, LLOTA, SOTA y DX con QSY automático a FT8/SSB/CW</p>
           </div>
           <button id="btn-refresh-spots" class="theme-btn hover:border-cyan-400 text-cyan-500 p-1.5 rounded border text-xs transition" title="Refrescar Spots">
             <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -563,7 +577,6 @@
         </div>
 
         <div class="space-y-1.5 my-2 text-xs font-mono">
-          <!-- Filtro de Programas (Multi-selección) -->
           <div>
             <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Programas:</span>
             <div id="filter-programs-group" class="flex flex-wrap gap-1 mt-0.5">
@@ -575,7 +588,6 @@
             </div>
           </div>
 
-          <!-- Filtro de Bandas (Multi-selección) -->
           <div>
             <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Bandas:</span>
             <div id="filter-bands-group" class="flex flex-wrap gap-1 mt-0.5">
@@ -593,22 +605,21 @@
             </div>
           </div>
 
-          <!-- Filtro de Modos (Multi-selección) -->
           <div>
             <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Modos:</span>
             <div id="filter-modes-group" class="flex flex-wrap gap-1 mt-0.5">
               <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold border btn-active-theme" data-mode="ALL">TODOS</button>
               <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="SSB">SSB</button>
               <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="CW">CW</button>
+              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border text-cyan-400" data-mode="FT8">FT8</button>
+              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border text-amber-400" data-mode="FT4">FT4</button>
               <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="DATA">DATA</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="AM">AM</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="FM">FM</button>
             </div>
           </div>
         </div>
 
         <div class="relative mb-2">
-          <input type="text" id="search-spots" placeholder="Buscar indicativo, ref (ej: K-1234, CL-0014) o DX..." class="w-full theme-btn border text-xs rounded px-2.5 py-1.5 focus:outline-none font-mono">
+          <input type="text" id="search-spots" placeholder="Buscar indicativo, ref o DX..." class="w-full theme-btn border text-xs rounded px-2.5 py-1.5 focus:outline-none font-mono">
         </div>
 
         <div id="spots-list" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[380px] max-h-[720px]"></div>
@@ -622,6 +633,250 @@
 
   </main>
 
+  <main id="module-main-ft8" class="hidden flex-1 p-2.5 sm:p-4 max-w-[1700px] w-full mx-auto flex flex-col gap-3 font-mono">
+    
+    <div class="theme-panel rounded-xl p-3 border shadow-xl flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+        <div class="flex items-center gap-2">
+          <span class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+          <h2 class="font-lcd font-bold text-base sm:text-lg tracking-wider text-cyan-400">MÓDULO FT8 / FT4</h2>
+        </div>
+
+        <div class="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded border border-slate-700">
+          <span class="text-slate-400 text-[10px]">UTC:</span>
+          <span id="ft8-utc-clock" class="font-bold text-amber-400 text-sm">00:00:00z</span>
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button id="btn-mode-ft8" onclick="setFt8Mode('FT8')" class="px-2.5 py-1 rounded theme-btn border font-bold btn-active-theme text-xs">FT8 (15s)</button>
+          <button id="btn-mode-ft4" onclick="setFt8Mode('FT4')" class="px-2.5 py-1 rounded theme-btn border font-bold text-xs">FT4 (7.5s)</button>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso del Ciclo UTC -->
+      <div class="flex-1 w-full md:max-w-md mx-2">
+        <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
+          <span>CICLO: <span id="ft8-slot-indicator" class="font-bold text-cyan-400">EVEN (:00 / :30)</span></span>
+          <span id="ft8-cycle-seconds" class="font-bold text-amber-400">0.0s / 15.0s</span>
+        </div>
+        <div class="w-full h-2.5 bg-slate-900 rounded border border-slate-700 overflow-hidden relative">
+          <div id="ft8-cycle-bar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 w-0 transition-all duration-100"></div>
+        </div>
+      </div>
+
+      <!-- Frecuencias Predefinidas FT8 -->
+      <div class="flex items-center gap-1 flex-wrap justify-end">
+        <span class="text-[10px] text-slate-400 mr-1">QSY FT8:</span>
+        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(7074000, '40m')">40m</button>
+        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(10136000, '30m')">30m</button>
+        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold btn-active-theme" onclick="tuneFt8Preset(14074000, '20m')">20m</button>
+        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(21074000, '15m')">15m</button>
+        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(28074000, '10m')">10m</button>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1">
+      
+      <!-- Columna Izquierda: Mensajes Decodificados de la Banda -->
+      <div class="lg:col-span-7 theme-panel rounded-xl p-3 border shadow-xl flex flex-col">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <span>📡</span> ACTIVIDAD EN BANDA (DECODES)
+            </span>
+            <span id="ft8-decodes-badge" class="px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-300 text-[10px] border border-cyan-800">0 decodes</span>
+          </div>
+
+          <div class="flex items-center gap-2 text-[10px]">
+            <label class="flex items-center gap-1 cursor-pointer">
+              <input type="checkbox" id="check-only-cq" onchange="renderFt8Decodes()" class="accent-cyan-500 rounded">
+              <span>Solo CQ</span>
+            </label>
+            <button onclick="clearFt8Decodes()" class="px-2 py-0.5 rounded theme-btn border hover:text-red-400">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-12 text-[10px] text-slate-400 py-1.5 border-b border-slate-800 font-bold px-1 select-none">
+          <span class="col-span-2">UTC</span>
+          <span class="col-span-1 text-center">dB</span>
+          <span class="col-span-2 text-center">DT</span>
+          <span class="col-span-2 text-right">FREQ</span>
+          <span class="col-span-5 pl-3">MENSAJE FT8</span>
+        </div>
+
+        <div id="ft8-decodes-list" class="flex-1 overflow-y-auto space-y-0.5 pr-1 min-h-[360px] max-h-[640px] text-xs font-mono">
+          <div class="p-6 text-center text-slate-500 text-xs">Esperando fin de ciclo para decodificar señales en la banda...</div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha: Automatización y Secuencia de QSO -->
+      <div class="lg:col-span-5 flex flex-col gap-3">
+        
+        <!-- Tarjeta de Control de Estación y Configuración -->
+        <div class="theme-panel rounded-xl p-3 border shadow-xl text-xs space-y-2.5">
+          <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 font-bold">
+            <span class="text-amber-400 uppercase tracking-wider">CONFIGURACIÓN ESTACIÓN</span>
+            <span id="ft8-tx-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">TX LISTO</span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div>
+              <span class="text-[9px] text-slate-400 font-bold">MI INDICATIVO:</span>
+              <input type="text" id="ft8-my-call" value="LU1AA" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-2 py-1 text-center font-bold text-amber-400 uppercase">
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 font-bold">MI GRID (4):</span>
+              <input type="text" id="ft8-my-grid" value="FF46" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-2 py-1 text-center font-bold text-amber-400 uppercase">
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 font-bold">AUDIO TX (Hz):</span>
+              <input type="number" id="ft8-tx-freq" value="1250" step="10" min="200" max="3000" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-2 py-1 text-center font-bold text-cyan-400">
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 font-bold">CICLO TX:</span>
+              <select id="ft8-tx-slot-select" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1.5 py-1 text-center font-bold text-xs">
+                <option value="even">EVEN (:00/:30)</option>
+                <option value="odd">ODD (:15/:45)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between pt-1 border-t border-slate-800 text-[11px] flex-wrap gap-2">
+            <label class="flex items-center gap-1.5 cursor-pointer font-bold text-emerald-400" title="Avanza solo cuando la otra estación responde con su reporte">
+              <input type="checkbox" id="check-auto-seq" checked class="accent-emerald-500 rounded">
+              <span>Auto-Secuencia (FSM)</span>
+            </label>
+
+            <label class="flex items-center gap-1.5 cursor-pointer font-bold text-amber-400" title="Llama CQ continuamente, atiende al corresponsal que responda y retoma el CQ al finalizar el QSO">
+              <input type="checkbox" id="check-auto-cq-loop" onchange="toggleAutoCqMode(this.checked)" class="accent-amber-500 rounded">
+              <span>Auto-CQ Continuo</span>
+            </label>
+
+            <label class="flex items-center gap-1.5 cursor-pointer font-bold text-cyan-400">
+              <input type="checkbox" id="check-auto-tx" class="accent-cyan-500 rounded">
+              <span>Auto-Armar TX</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Secuencia de QSO Actual -->
+        <div class="theme-panel rounded-xl p-3 border shadow-xl text-xs space-y-2 flex-1 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 font-bold">
+              <div class="flex items-center gap-2">
+                <span class="text-cyan-400 uppercase tracking-wider">SECUENCIA DE QSO</span>
+                <span id="ft8-target-badge" class="px-2 py-0.2 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">DX: NINGUNO</span>
+              </div>
+              <button onclick="resetCurrentQso()" class="text-[10px] text-slate-400 hover:text-white">Reiniciar</button>
+            </div>
+
+            <!-- Panel de estado del intercambio actual -->
+            <div id="qso-fsm-feedback" class="my-1.5 p-1.5 rounded bg-slate-900 border border-slate-700 text-[10px] text-slate-300 flex items-center justify-between">
+              <span>ESTADO QSO: <strong id="fsm-status-label" class="text-amber-400">En espera de corresponsal</strong></span>
+              <span id="fsm-retry-counter" class="text-slate-400 font-bold">Intento: 0/5</span>
+            </div>
+
+            <!-- Datos del DX Seleccionado -->
+            <div class="grid grid-cols-3 gap-2 my-2">
+              <div>
+                <span class="text-[9px] text-slate-400 font-bold">ESTACIÓN DX:</span>
+                <input type="text" id="qso-dx-call" placeholder="K1JT" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-2 py-1 font-bold text-cyan-400 uppercase">
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 font-bold">GRID DX:</span>
+                <input type="text" id="qso-dx-grid" placeholder="FN20" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-2 py-1 font-bold text-cyan-400 uppercase">
+              </div>
+              <div>
+                <span class="text-[9px] text-slate-400 font-bold">REPORTE SNR:</span>
+                <input type="text" id="qso-dx-report" value="-10" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-2 py-1 font-bold text-amber-400">
+              </div>
+            </div>
+
+            <!-- Mensajes Tx 1 a Tx 6 -->
+            <div class="space-y-1.5 mt-2 select-none">
+              <div id="tx-row-1" onclick="selectTxMessageRow(1)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 1</span>
+                  <span id="tx-label-1" class="font-bold text-xs">CQ LU1AA FF46</span>
+                </div>
+                <input type="radio" name="tx-msg-sel" id="radio-tx-1" checked class="accent-amber-500">
+              </div>
+
+              <div id="tx-row-2" onclick="selectTxMessageRow(2)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 2</span>
+                  <span id="tx-label-2" class="font-bold text-xs">DXCALL LU1AA FF46</span>
+                </div>
+                <input type="radio" name="tx-msg-sel" id="radio-tx-2" class="accent-amber-500">
+              </div>
+
+              <div id="tx-row-3" onclick="selectTxMessageRow(3)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 3</span>
+                  <span id="tx-label-3" class="font-bold text-xs">DXCALL LU1AA -10</span>
+                </div>
+                <input type="radio" name="tx-msg-sel" id="radio-tx-3" class="accent-amber-500">
+              </div>
+
+              <div id="tx-row-4" onclick="selectTxMessageRow(4)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 4</span>
+                  <span id="tx-label-4" class="font-bold text-xs">DXCALL LU1AA R-10</span>
+                </div>
+                <input type="radio" name="tx-msg-sel" id="radio-tx-4" class="accent-amber-500">
+              </div>
+
+              <div id="tx-row-5" onclick="selectTxMessageRow(5)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 5</span>
+                  <span id="tx-label-5" class="font-bold text-xs">DXCALL LU1AA RR73</span>
+                </div>
+                <input type="radio" name="tx-msg-sel" id="radio-tx-5" class="accent-amber-500">
+              </div>
+
+              <div id="tx-row-6" onclick="selectTxMessageRow(6)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
+                <div class="flex items-center gap-2">
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 6</span>
+                  <span id="tx-label-6" class="font-bold text-xs">DXCALL LU1AA 73</span>
+                </div>
+                <input type="radio" name="tx-msg-sel" id="radio-tx-6" class="accent-amber-500">
+              </div>
+            </div>
+          </div>
+
+          <!-- Botones de Acción de Transmisión FT8 -->
+          <div class="pt-2 border-t border-slate-800 flex flex-col gap-2">
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btn-arm-ft8-tx" onclick="toggleFt8TxArmed()" class="py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
+                <span>⚡</span>
+                <span id="lbl-arm-ft8-tx">HABILITAR TX (PROX)</span>
+              </button>
+
+              <button onclick="abortFt8Tx()" class="py-2.5 px-3 rounded-lg bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 font-bold tracking-wider flex items-center justify-center gap-2 active:scale-95 transition">
+                <span>⏹️</span>
+                <span>DETENER TX (HALT)</span>
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between text-[11px] pt-1">
+              <button onclick="logCurrentQso()" class="px-3 py-1 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold flex items-center gap-1 shadow-sm">
+                <span>📝</span> Guardar QSO en Log
+              </button>
+              <button onclick="exportAdifLog()" class="px-2.5 py-1 rounded theme-btn border text-slate-300 hover:text-white flex items-center gap-1">
+                <span>💾</span> Exportar ADIF
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal de Entrada Directa de Frecuencia -->
   <div id="modal-freq" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="theme-panel border rounded-xl max-w-sm w-full p-4 text-xs font-mono shadow-2xl">
       <div class="flex justify-between items-center pb-2 border-b border-slate-700/60">
@@ -672,13 +927,13 @@
       wsCat: null
     };
 
-    const RX_RING_SIZE = 48000 * 2; // 2 segundos de capacidad a 48kHz
+    const RX_RING_SIZE = 48000 * 2;
     const rxRingBuffer = new Float32Array(RX_RING_SIZE);
     let rxWriteIndex = 0;
     let rxReadIndex = 0.0;
     let rxBufferedSamples = 0;
     let rxPrebuffering = true;
-    let rxTargetBufferSamples = 5760; // ~120ms colchón elástico
+    let rxTargetBufferSamples = 5760;
 
     const AudioEngine = {
       active: false,
@@ -692,6 +947,30 @@
       txProcessorNode: null,
       txGain: 1.0,
       isPttPressed: false
+    };
+
+    const Ft8State = {
+      ws: null,
+      connected: false,
+      mode: 'FT8',
+      slotDuration: 15.0,
+      myCall: localStorage.getItem('ft8_my_call') || 'LU1AA',
+      myGrid: localStorage.getItem('ft8_my_grid') || 'FF46',
+      txFreq: parseInt(localStorage.getItem('ft8_tx_freq') || '1250', 10),
+      txSlot: 'even',
+      txArmed: false,
+      activeTxRow: 1,
+      dxCall: '',
+      dxGrid: '',
+      dxReport: '-10',
+      mySentReport: '-10',
+      autoSeq: true,
+      autoTxOnSpot: true,
+      autoCq: false,
+      retryCount: 0,
+      maxRetries: 5,
+      decodes: [],
+      completedQSOs: JSON.parse(localStorage.getItem('ft8_qso_log') || '[]')
     };
 
     function resampleAudio(input, fromRate, toRate) {
@@ -712,7 +991,6 @@
 
     let allSpots = [];
 
-    // Conjuntos de filtros multi-selección activos
     const ActiveFilters = {
       programs: new Set(['ALL']),
       bands: new Set(['ALL']),
@@ -837,7 +1115,7 @@
       } else if (v <= 40) {
         sUnit = 'S-2'; dbm = -115; activeSegments = 4 + Math.round(((v - 27) / 13) * 2);
       } else if (v <= 55) {
-        sUnit = 'S-3'; dbm = -109; activeSegments = 6 + Math.round(((v - 55) / 15) * 3);
+        sUnit = 'S-3'; dbm = -109; activeSegments = 6 + Math.round(((v - 40) / 15) * 3);
       } else if (v <= 65) {
         sUnit = 'S-4'; dbm = -103; activeSegments = 9 + Math.round(((v - 55) / 10) * 2);
       } else if (v <= 80) {
@@ -1116,96 +1394,11 @@
       }
     }
 
-    async function initAudioEngine() {
-      if (AudioEngine.active) {
-        if (AudioEngine.audioCtx && AudioEngine.audioCtx.state === 'suspended') {
-          await AudioEngine.audioCtx.resume();
-        }
-        return;
-      }
-
-      if (window.isSecureContext === false && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-        showQsyAlert('⚠️ En móvil se requiere HTTPS para usar el micrófono');
-      }
-
+    function setupAudioRxSocket(clientRate) {
+      if (!AudioEngine.active) return;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      
       try {
-        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-        AudioEngine.audioCtx = new AudioCtxClass();
-        if (AudioEngine.audioCtx.state === 'suspended') {
-          await AudioEngine.audioCtx.resume();
-        }
-
-        const clientRate = AudioEngine.audioCtx.sampleRate;
-        rxTargetBufferSamples = Math.round(clientRate * 0.12); // ~120ms de colchón adaptativo
-
-        // Procesador de reproducción RX continua con PLL y compensación suave de deriva de reloj
-        AudioEngine.rxProcessorNode = AudioEngine.audioCtx.createScriptProcessor(1024, 1, 1);
-        AudioEngine.rxProcessorNode.onaudioprocess = (e) => {
-          const out = e.outputBuffer.getChannelData(0);
-          const frames = out.length;
-
-          if (RigState.isTx || AudioEngine.isPttPressed || RigState.audioMuted) {
-            out.fill(0);
-            rxBufferedSamples = 0;
-            rxReadIndex = rxWriteIndex;
-            rxPrebuffering = true;
-            return;
-          }
-
-          if (rxPrebuffering) {
-            if (rxBufferedSamples >= rxTargetBufferSamples) {
-              rxPrebuffering = false;
-            } else {
-              out.fill(0);
-              return;
-            }
-          }
-
-          // Control Adaptativo de Reloj (PLL)
-          const diff = rxBufferedSamples - rxTargetBufferSamples;
-          let playbackRate = 1.0;
-
-          if (diff > 1200) {
-            playbackRate = 1.015;
-          } else if (diff > 400) {
-            playbackRate = 1.005;
-          } else if (diff < -1200) {
-            playbackRate = 0.985;
-          } else if (diff < -400) {
-            playbackRate = 0.995;
-          }
-
-          for (let i = 0; i < frames; i++) {
-            if (rxBufferedSamples <= 1.5) {
-              out[i] = 0;
-            } else {
-              const idx0 = Math.floor(rxReadIndex);
-              const frac = rxReadIndex - idx0;
-              const idx1 = (idx0 + 1) % RX_RING_SIZE;
-              
-              out[i] = rxRingBuffer[idx0] * (1.0 - frac) + rxRingBuffer[idx1] * frac;
-
-              rxReadIndex = (rxReadIndex + playbackRate) % RX_RING_SIZE;
-              rxBufferedSamples = Math.max(0, rxBufferedSamples - playbackRate);
-            }
-          }
-        };
-
-        // Oscilador mudo auxiliar para mantener el hilo WebKit activo en iOS
-        const dummyOsc = AudioEngine.audioCtx.createOscillator();
-        const dummyGain = AudioEngine.audioCtx.createGain();
-        dummyGain.gain.value = 0.0000001;
-        dummyOsc.connect(dummyGain);
-        dummyGain.connect(AudioEngine.rxProcessorNode);
-        dummyOsc.start();
-
-        AudioEngine.rxGainNode = AudioEngine.audioCtx.createGain();
-        AudioEngine.rxGainNode.gain.value = 0.75;
-
-        AudioEngine.rxProcessorNode.connect(AudioEngine.rxGainNode);
-        AudioEngine.rxGainNode.connect(AudioEngine.audioCtx.destination);
-
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         AudioEngine.rxWs = new WebSocket(`${protocol}//${window.location.host}/ws/audio/rx`);
         AudioEngine.rxWs.binaryType = 'arraybuffer';
 
@@ -1235,8 +1428,123 @@
           }
         };
 
+        AudioEngine.rxWs.onclose = () => {
+          if (AudioEngine.active) {
+            setTimeout(() => setupAudioRxSocket(clientRate), 2500);
+          }
+        };
+
+        AudioEngine.rxWs.onerror = () => {
+          if (AudioEngine.rxWs) AudioEngine.rxWs.close();
+        };
+      } catch (err) {
+        console.warn('Error iniciando socket RX:', err);
+      }
+    }
+
+    function setupAudioTxSocket() {
+      if (!AudioEngine.active) return;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+      try {
         AudioEngine.txWs = new WebSocket(`${protocol}//${window.location.host}/ws/audio/tx`);
         AudioEngine.txWs.binaryType = 'arraybuffer';
+
+        AudioEngine.txWs.onclose = () => {
+          if (AudioEngine.active) {
+            setTimeout(setupAudioTxSocket, 2500);
+          }
+        };
+
+        AudioEngine.txWs.onerror = () => {
+          if (AudioEngine.txWs) AudioEngine.txWs.close();
+        };
+      } catch (err) {
+        console.warn('Error iniciando socket TX:', err);
+      }
+    }
+
+    async function initAudioEngine() {
+      if (AudioEngine.active) {
+        if (AudioEngine.audioCtx && AudioEngine.audioCtx.state === 'suspended') {
+          await AudioEngine.audioCtx.resume();
+        }
+        return;
+      }
+
+      try {
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        AudioEngine.audioCtx = new AudioCtxClass();
+        if (AudioEngine.audioCtx.state === 'suspended') {
+          await AudioEngine.audioCtx.resume();
+        }
+
+        const clientRate = AudioEngine.audioCtx.sampleRate;
+        rxTargetBufferSamples = Math.round(clientRate * 0.12);
+
+        AudioEngine.rxProcessorNode = AudioEngine.audioCtx.createScriptProcessor(1024, 1, 1);
+        AudioEngine.rxProcessorNode.onaudioprocess = (e) => {
+          const out = e.outputBuffer.getChannelData(0);
+          const frames = out.length;
+
+          if (RigState.isTx || AudioEngine.isPttPressed || RigState.audioMuted) {
+            out.fill(0);
+            rxBufferedSamples = 0;
+            rxReadIndex = rxWriteIndex;
+            rxPrebuffering = true;
+            return;
+          }
+
+          if (rxPrebuffering) {
+            if (rxBufferedSamples >= rxTargetBufferSamples) {
+              rxPrebuffering = false;
+            } else {
+              out.fill(0);
+              return;
+            }
+          }
+
+          const diff = rxBufferedSamples - rxTargetBufferSamples;
+          let playbackRate = 1.0;
+
+          if (diff > 1200) playbackRate = 1.015;
+          else if (diff > 400) playbackRate = 1.005;
+          else if (diff < -1200) playbackRate = 0.985;
+          else if (diff < -400) playbackRate = 0.995;
+
+          for (let i = 0; i < frames; i++) {
+            if (rxBufferedSamples <= 1.5) {
+              out[i] = 0;
+            } else {
+              const idx0 = Math.floor(rxReadIndex);
+              const frac = rxReadIndex - idx0;
+              const idx1 = (idx0 + 1) % RX_RING_SIZE;
+              
+              out[i] = rxRingBuffer[idx0] * (1.0 - frac) + rxRingBuffer[idx1] * frac;
+
+              rxReadIndex = (rxReadIndex + playbackRate) % RX_RING_SIZE;
+              rxBufferedSamples = Math.max(0, rxBufferedSamples - playbackRate);
+            }
+          }
+        };
+
+        const dummyOsc = AudioEngine.audioCtx.createOscillator();
+        const dummyGain = AudioEngine.audioCtx.createGain();
+        dummyGain.gain.value = 0.0000001;
+        dummyOsc.connect(dummyGain);
+        dummyGain.connect(AudioEngine.rxProcessorNode);
+        dummyOsc.start();
+
+        AudioEngine.rxGainNode = AudioEngine.audioCtx.createGain();
+        AudioEngine.rxGainNode.gain.value = 0.75;
+
+        AudioEngine.rxProcessorNode.connect(AudioEngine.rxGainNode);
+        AudioEngine.rxGainNode.connect(AudioEngine.audioCtx.destination);
+
+        AudioEngine.active = true;
+
+        setupAudioRxSocket(clientRate);
+        setupAudioTxSocket();
 
         try {
           const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -1251,7 +1559,6 @@
               }
             });
           } catch (eConst) {
-            console.warn('[AudioEngine] Restricciones estrictas rechazadas en PC, reintentando con audio básico:', eConst);
             stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           }
           AudioEngine.txMicStream = stream;
@@ -1285,7 +1592,7 @@
               vuBar.style.width = RigState.isTx ? `${Math.min(100, Math.round(rms * 180))}%` : '0%';
             }
 
-            if (RigState.isTx && AudioEngine.txWs && AudioEngine.txWs.readyState === WebSocket.OPEN) {
+            if (AudioEngine.isPttPressed && AudioEngine.txWs && AudioEngine.txWs.readyState === WebSocket.OPEN) {
               AudioEngine.txWs.send(pcm.buffer);
             }
           };
@@ -1298,15 +1605,12 @@
           keepAliveGain.connect(AudioEngine.audioCtx.destination);
         } catch (micErr) {
           console.warn('Microphone permission not granted:', micErr);
-          showQsyAlert('⚠️ Sin acceso al micrófono. Revisa permisos en el navegador');
         }
 
-        AudioEngine.active = true;
         const dot = document.getElementById('audio-engine-dot');
         if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]';
       } catch (err) {
         console.error('Audio engine activation failed:', err);
-        showQsyAlert('Error iniciando motor de audio: ' + err.message);
       }
     }
 
@@ -1335,7 +1639,8 @@
         rxPrebuffering = true;
         RigState.txStartTime = Date.now();
         RigState.swrHighCount = 0;
-        sendCATCommand('TX1;');
+        const isData = RigState.mode.includes('DATA');
+        sendCATCommand(isData ? 'TX2;' : 'TX1;');
       } else {
         rxBufferedSamples = 0;
         rxReadIndex = rxWriteIndex;
@@ -1385,8 +1690,8 @@
 
     function normalizeRadioMode(modeStr, freqHz) {
       const m = (modeStr || '').toUpperCase().trim();
+      if (m.includes('FT8') || m.includes('FT4') || m.includes('DATA')) return { name: 'DATA-U', cat: 'MD0C' };
       if (m.includes('CW')) return { name: 'CW-U', cat: 'MD03' };
-      if (m.includes('DATA') || m.includes('FT8') || m.includes('FT4')) return { name: 'DATA-U', cat: 'MD0C' };
       if (m.includes('AM')) return { name: 'AM', cat: 'MD05' };
       if (m.includes('FM')) return { name: 'FM', cat: 'MD04' };
       if (m.includes('LSB')) return { name: 'LSB', cat: 'MD01' };
@@ -1394,11 +1699,14 @@
       return freqHz < 10000000 ? { name: 'LSB', cat: 'MD01' } : { name: 'USB', cat: 'MD02' };
     }
 
-    function performQSY(freqHz, modeStr, spotLabel) {
+    function performQSY(freqHz, modeStr, spotLabel, activatorCall, grid) {
       let target = Math.round(Number(freqHz));
       if (target < 1000000) target *= 1000;
 
       const radioMode = normalizeRadioMode(modeStr, target);
+      const isDigital = (modeStr || '').toUpperCase().includes('FT8') ||
+                        (modeStr || '').toUpperCase().includes('FT4') ||
+                        (modeStr || '').toUpperCase().includes('DATA');
 
       if (RigState.activeVfo === 'A') {
         RigState.freqA = target;
@@ -1414,7 +1722,17 @@
         sendCATCommand(`${radioMode.cat};`);
         renderRigDisplay();
         showQsyAlert(`QSY a ${spotLabel || ''} ${(target / 1000000).toFixed(3)} MHz (${radioMode.name})`);
-      }, 60);
+
+        if (isDigital) {
+          switchGlobalModule('ft8');
+          if (activatorCall) {
+            setupQsoWithStation(activatorCall, grid || '');
+            if (Ft8State.autoTxOnSpot) {
+              armFt8Tx(true);
+            }
+          }
+        }
+      }, 80);
     }
 
     async function fetchSpots() {
@@ -1479,13 +1797,13 @@
             if (selectedMode === 'CW' && m.includes('CW')) {
               matchesMode = true; break;
             }
+            if (selectedMode === 'FT8' && m.includes('FT8')) {
+              matchesMode = true; break;
+            }
+            if (selectedMode === 'FT4' && m.includes('FT4')) {
+              matchesMode = true; break;
+            }
             if (selectedMode === 'DATA' && (m.includes('DATA') || m.includes('FT8') || m.includes('FT4') || m.includes('RTTY'))) {
-              matchesMode = true; break;
-            }
-            if (selectedMode === 'AM' && m.includes('AM')) {
-              matchesMode = true; break;
-            }
-            if (selectedMode === 'FM' && m.includes('FM')) {
               matchesMode = true; break;
             }
           }
@@ -1525,6 +1843,13 @@
             progBadgeClass = 'bg-blue-950 text-blue-400 border-blue-800';
           }
 
+          const isDigital = (spot.mode || '').toUpperCase().includes('FT8') ||
+                            (spot.mode || '').toUpperCase().includes('FT4') ||
+                            (spot.mode || '').toUpperCase().includes('DATA');
+
+          const btnText = isDigital ? 'QSY FT8' : 'QSY';
+          const btnClass = isDigital ? 'bg-cyan-500 hover:bg-cyan-400 text-black' : 'bg-amber-500 hover:bg-amber-400 text-black';
+
           card.innerHTML = `
             <div class="flex-1 min-w-0 pr-2">
               <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
@@ -1537,15 +1862,15 @@
               <div class="text-[9px] spot-comment-text truncate font-mono">${spot.comments || ''}</div>
             </div>
             <div class="text-right shrink-0 flex flex-col items-end gap-1">
-              <span class="font-lcd font-bold spot-freq-display text-xs sm:text-sm tracking-tight">${(freqHz / 1000000).toFixed(3)} <span class="text-[10px] text-amber-500 font-bold">${spot.mode || ''}</span></span>
-              <button class="px-2 py-0.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold font-mono text-[10px] tracking-wider shadow-sm transition">
-                QSY
+              <span class="font-lcd font-bold spot-freq-display text-xs sm:text-sm tracking-tight">${(freqHz / 1000000).toFixed(3)} <span class="text-[10px] ${isDigital ? 'text-cyan-400' : 'text-amber-500'} font-bold">${spot.mode || ''}</span></span>
+              <button class="px-2 py-0.5 rounded ${btnClass} font-bold font-mono text-[10px] tracking-wider shadow-sm transition">
+                ${btnText}
               </button>
             </div>
           `;
 
           card.addEventListener('click', () => {
-            performQSY(freqHz, spot.mode, `${spot.activator} (${spot.ref || spot.program})`);
+            performQSY(freqHz, spot.mode, `${spot.activator} (${spot.ref || spot.program})`, spot.activator, spot.ref);
           });
 
           fragment.appendChild(card);
@@ -1585,7 +1910,35 @@
       renderSpotsList();
     }
 
+    function switchGlobalModule(mod) {
+      const radioView = document.getElementById('module-main-radio');
+      const ft8View = document.getElementById('module-main-ft8');
+      const btnRadio = document.getElementById('nav-btn-radio');
+      const btnFt8 = document.getElementById('nav-btn-ft8');
+
+      if (!radioView || !ft8View) return;
+
+      if (mod === 'ft8') {
+        radioView.classList.add('hidden');
+        ft8View.classList.remove('hidden');
+        if (btnFt8) btnFt8.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1';
+        if (btnRadio) btnRadio.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold text-slate-300 flex items-center gap-1';
+        initFt8WebSocket();
+      } else {
+        ft8View.classList.add('hidden');
+        radioView.classList.remove('hidden');
+        if (btnRadio) btnRadio.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1';
+        if (btnFt8) btnFt8.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1';
+      }
+    }
+
     function switchMobileTab(tab) {
+      if (tab === 'ft8') {
+        switchGlobalModule('ft8');
+        return;
+      }
+
+      switchGlobalModule('radio');
       const rig = document.getElementById('panel-rig');
       const spots = document.getElementById('panel-spots');
       const btnR = document.getElementById('tab-btn-radio');
@@ -1604,6 +1957,613 @@
       } else if (tab === 'spots') {
         spots.classList.remove('hidden-mobile');
         if (btnS) btnS.className = 'flex-1 py-1.5 px-2 rounded font-bold text-center border border-amber-500/80 bg-amber-950/40 text-amber-300 flex items-center justify-center gap-1.5';
+      }
+    }
+
+    function initFt8WebSocket() {
+      if (Ft8State.ws && Ft8State.ws.readyState === WebSocket.OPEN) return;
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      Ft8State.ws = new WebSocket(`${protocol}//${window.location.host}/ws/ft8`);
+
+      Ft8State.ws.onopen = () => {
+        Ft8State.connected = true;
+        sendFt8Command({
+          action: 'set_station',
+          my_call: Ft8State.myCall,
+          my_grid: Ft8State.myGrid
+        });
+      };
+
+      Ft8State.ws.onmessage = (event) => {
+        try {
+          const data = jsonParseSafe(event.data);
+          if (!data) return;
+
+          if (data.event === 'decodes' && Array.isArray(data.data)) {
+            handleIncomingDecodes(data.data, data.slot);
+          } else if (data.event === 'tx_started') {
+            updateFt8TxUI(true, data.msg);
+            recordTxMessageInDecodes(data.msg, data.freq, data.slot);
+          } else if (data.event === 'tx_finished') {
+            updateFt8TxUI(false, data.msg);
+            handleTxFinishedWait();
+          } else if (data.event === 'tx_status') {
+            Ft8State.txArmed = data.state.tx_armed;
+            updateFt8TxStatusBadge();
+          }
+        } catch (e) {
+          console.warn('[FT8 WS] Error:', e);
+        }
+      };
+
+      Ft8State.ws.onclose = () => {
+        Ft8State.connected = false;
+        setTimeout(initFt8WebSocket, 3000);
+      };
+    }
+
+    function jsonParseSafe(str) {
+      try { return JSON.parse(str); } catch (e) { return null; }
+    }
+
+    function sendFt8Command(cmdObj) {
+      if (Ft8State.ws && Ft8State.ws.readyState === WebSocket.OPEN) {
+        Ft8State.ws.send(JSON.stringify(cmdObj));
+      }
+    }
+
+    function setFt8Mode(mode) {
+      Ft8State.mode = mode;
+      Ft8State.slotDuration = mode === 'FT4' ? 7.5 : 15.0;
+      document.getElementById('btn-mode-ft8').className = mode === 'FT8' ? 'px-2.5 py-1 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2.5 py-1 rounded theme-btn border font-bold text-xs';
+      document.getElementById('btn-mode-ft4').className = mode === 'FT4' ? 'px-2.5 py-1 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2.5 py-1 rounded theme-btn border font-bold text-xs';
+      sendFt8Command({ action: 'set_mode', mode: mode });
+    }
+
+    function tuneFt8Preset(freqHz, bandLabel) {
+      RigState.mode = 'DATA-U';
+      RigState.catModeCode = 'MD0C';
+      if (RigState.activeVfo === 'A') {
+        RigState.freqA = freqHz;
+        sendCATCommand(`FA${String(freqHz).padStart(9, '0')};`);
+      } else {
+        RigState.freqB = freqHz;
+        sendCATCommand(`FB${String(freqHz).padStart(9, '0')};`);
+      }
+      sendCATCommand('MD0C;');
+      renderRigDisplay();
+      showQsyAlert(`QSY FT8 ${bandLabel}: ${(freqHz / 1000000).toFixed(3)} MHz (DATA-U)`);
+    }
+
+    function updateStationConfig() {
+      Ft8State.myCall = (document.getElementById('ft8-my-call')?.value || 'LU1AA').toUpperCase().trim();
+      Ft8State.myGrid = (document.getElementById('ft8-my-grid')?.value || 'FF46').toUpperCase().trim();
+      Ft8State.txFreq = parseInt(document.getElementById('ft8-tx-freq')?.value || '1250', 10);
+      Ft8State.txSlot = document.getElementById('ft8-tx-slot-select')?.value || 'even';
+
+      localStorage.setItem('ft8_my_call', Ft8State.myCall);
+      localStorage.setItem('ft8_my_grid', Ft8State.myGrid);
+      localStorage.setItem('ft8_tx_freq', Ft8State.txFreq);
+
+      recalculateQsoMsgs();
+
+      sendFt8Command({
+        action: 'set_station',
+        my_call: Ft8State.myCall,
+        my_grid: Ft8State.myGrid
+      });
+    }
+
+    function recalculateQsoMsgs() {
+      const myCall = Ft8State.myCall;
+      const myGrid = Ft8State.myGrid;
+      const dxCall = (document.getElementById('qso-dx-call')?.value || Ft8State.dxCall || 'K1JT').toUpperCase().trim();
+      const dxGrid = (document.getElementById('qso-dx-grid')?.value || Ft8State.dxGrid || 'FN20').toUpperCase().trim();
+      const report = document.getElementById('qso-dx-report')?.value || Ft8State.dxReport || '-10';
+
+      Ft8State.dxCall = dxCall;
+      Ft8State.dxGrid = dxGrid;
+      Ft8State.dxReport = report;
+
+      const rptFormatted = (report.startsWith('+') || report.startsWith('-')) ? report : (parseInt(report, 10) >= 0 ? `+${report}` : report);
+
+      document.getElementById('tx-label-1').textContent = `CQ ${myCall} ${myGrid}`;
+      document.getElementById('tx-label-2').textContent = `${dxCall} ${myCall} ${myGrid}`;
+      document.getElementById('tx-label-3').textContent = `${dxCall} ${myCall} ${rptFormatted}`;
+      document.getElementById('tx-label-4').textContent = `${dxCall} ${myCall} R${rptFormatted}`;
+      document.getElementById('tx-label-5').textContent = `${dxCall} ${myCall} RR73`;
+      document.getElementById('tx-label-6').textContent = `${dxCall} ${myCall} 73`;
+
+      const targetBadge = document.getElementById('ft8-target-badge');
+      if (targetBadge) {
+        targetBadge.textContent = dxCall ? `DX: ${dxCall} (${dxGrid})` : 'DX: NINGUNO';
+      }
+    }
+
+    function selectTxMessageRow(rowNum) {
+      Ft8State.activeTxRow = rowNum;
+      for (let i = 1; i <= 6; i++) {
+        const row = document.getElementById(`tx-row-${i}`);
+        const rad = document.getElementById(`radio-tx-${i}`);
+        if (row && rad) {
+          if (i === rowNum) {
+            rad.checked = true;
+            row.className = 'p-1.5 rounded theme-card border border-amber-500 bg-amber-950/30 flex items-center justify-between cursor-pointer';
+          } else {
+            rad.checked = false;
+            row.className = 'p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition';
+          }
+        }
+      }
+      if (Ft8State.txArmed) {
+        armFt8Tx(true);
+      }
+    }
+
+    function setupQsoWithStation(call, grid, snrReceived, audioFreq, slotReceived) {
+      Ft8State.dxCall = call.toUpperCase().trim();
+      if (grid) Ft8State.dxGrid = grid.toUpperCase().trim();
+      if (snrReceived !== undefined) {
+        Ft8State.dxReport = String(snrReceived);
+      }
+
+      if (audioFreq && !isNaN(audioFreq)) {
+        Ft8State.txFreq = audioFreq;
+        const inFreq = document.getElementById('ft8-tx-freq');
+        if (inFreq) inFreq.value = audioFreq;
+      }
+
+      if (slotReceived) {
+        Ft8State.txSlot = (slotReceived === 'even') ? 'odd' : 'even';
+        const selSlot = document.getElementById('ft8-tx-slot-select');
+        if (selSlot) selSlot.value = Ft8State.txSlot;
+      }
+
+      document.getElementById('qso-dx-call').value = Ft8State.dxCall;
+      document.getElementById('qso-dx-grid').value = Ft8State.dxGrid;
+      document.getElementById('qso-dx-report').value = Ft8State.dxReport;
+
+      Ft8State.retryCount = 0;
+      updateFsmUI(`Respondiendo a ${Ft8State.dxCall} (Enviando Grid)`);
+      recalculateQsoMsgs();
+      selectTxMessageRow(2);
+    }
+
+    function toggleFt8TxArmed() {
+      armFt8Tx(!Ft8State.txArmed);
+    }
+
+    function armFt8Tx(enable) {
+      Ft8State.txArmed = enable;
+      const lbl = document.getElementById('lbl-arm-ft8-tx');
+      const btn = document.getElementById('btn-arm-ft8-tx');
+
+      if (enable) {
+        const msgEl = document.getElementById(`tx-label-${Ft8State.activeTxRow}`);
+        const msg = msgEl ? msgEl.textContent.trim() : `CQ ${Ft8State.myCall} ${Ft8State.myGrid}`;
+        sendFt8Command({
+          action: 'arm_tx',
+          msg: msg,
+          freq: Ft8State.txFreq,
+          slot: Ft8State.txSlot
+        });
+
+        if (lbl) lbl.textContent = 'TX ARMADO (EN ESPERA)';
+        if (btn) btn.className = 'py-2.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition animate-pulse';
+      } else {
+        sendFt8Command({ action: 'abort_tx' });
+        if (lbl) lbl.textContent = 'HABILITAR TX (PROX)';
+        if (btn) btn.className = 'py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition';
+      }
+      updateFt8TxStatusBadge();
+    }
+
+    function abortFt8Tx() {
+      armFt8Tx(false);
+      sendFt8Command({ action: 'abort_tx' });
+      Ft8State.retryCount = 0;
+      if (Ft8State.autoCq) {
+        Ft8State.autoCq = false;
+        const chk = document.getElementById('check-auto-cq-loop');
+        if (chk) chk.checked = false;
+      }
+      updateFsmUI('Transmisión detenida por el operador');
+    }
+
+    function toggleAutoCqMode(enabled) {
+      Ft8State.autoCq = enabled;
+      if (enabled) {
+        showQsyAlert('Auto-CQ activado: llamará CQ y atenderá a quien responda');
+        if (!Ft8State.dxCall || Ft8State.activeTxRow === 1) {
+          selectTxMessageRow(1);
+          armFt8Tx(true);
+        }
+      } else {
+        showQsyAlert('Auto-CQ desactivado');
+      }
+    }
+
+    function resumeAutoCq() {
+      Ft8State.dxCall = '';
+      Ft8State.dxGrid = '';
+      Ft8State.retryCount = 0;
+      const inCall = document.getElementById('qso-dx-call');
+      const inGrid = document.getElementById('qso-dx-grid');
+      if (inCall) inCall.value = '';
+      if (inGrid) inGrid.value = '';
+      recalculateQsoMsgs();
+      selectTxMessageRow(1);
+      updateFsmUI('QSO finalizado y registrado. Retomando Auto-CQ...');
+      armFt8Tx(true);
+    }
+
+    function updateFt8TxStatusBadge() {
+      const badge = document.getElementById('ft8-tx-status-badge');
+      if (!badge) return;
+      if (RigState.isTx) {
+        badge.textContent = 'TRANSMITIENDO (TX)';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white animate-pulse';
+      } else if (Ft8State.txArmed) {
+        badge.textContent = `ARMADO PARA ${Ft8State.txSlot.toUpperCase()}`;
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-black';
+      } else {
+        badge.textContent = 'TX LISTO (STANDBY)';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700';
+      }
+    }
+
+    function updateFt8TxUI(isTxNow, msg) {
+      RigState.isTx = isTxNow;
+      if (ledTx) ledTx.className = isTxNow ? 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
+      if (ledRx) ledRx.className = !isTxNow ? 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
+      updateFt8TxStatusBadge();
+    }
+
+    function updateFsmUI(statusText) {
+      const label = document.getElementById('fsm-status-label');
+      const counter = document.getElementById('fsm-retry-counter');
+      if (label) label.textContent = statusText;
+      if (counter) counter.textContent = `Intento: ${Ft8State.retryCount}/${Ft8State.maxRetries}`;
+    }
+
+    function recordTxMessageInDecodes(msg, freq, slot) {
+      const now = new Date();
+      const timeFmt = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}z`;
+      const txEntry = {
+        isTx: true,
+        time: timeFmt,
+        snr: 0,
+        dt: 0.0,
+        freq: freq || Ft8State.txFreq,
+        msg: msg || `TX ${Ft8State.myCall}`,
+        slot: slot || Ft8State.txSlot
+      };
+
+      Ft8State.decodes.unshift(txEntry);
+      if (Ft8State.decodes.length > 160) Ft8State.decodes.pop();
+      renderFt8Decodes();
+    }
+
+    function handleTxFinishedWait() {
+      if (!Ft8State.dxCall) {
+        if (Ft8State.autoCq && Ft8State.activeTxRow === 1) {
+          updateFsmUI('CQ transmitido. Esperando respuestas en RX (Auto-CQ activo)...');
+          armFt8Tx(true);
+        }
+        return;
+      }
+
+      const currentTx = Ft8State.activeTxRow;
+
+      // SI ACABAMOS DE TRANSMITIR EL 73 FINAL (Tx 6):
+      // El QSO está completado.
+      if (currentTx === 6) {
+        updateFsmUI(`¡QSO finalizado con éxito con ${Ft8State.dxCall}!`);
+        logCurrentQso();
+        showQsyAlert(`¡QSO completado con ${Ft8State.dxCall}! Guardado en log.`);
+        Ft8State.retryCount = 0;
+
+        if (Ft8State.autoCq) {
+          resumeAutoCq();
+        } else {
+          armFt8Tx(false);
+        }
+        return;
+      }
+
+      Ft8State.retryCount++;
+
+      if (Ft8State.retryCount >= Ft8State.maxRetries) {
+        updateFsmUI(`Sin respuesta de ${Ft8State.dxCall} tras ${Ft8State.maxRetries} intentos. Abortando.`);
+        if (Ft8State.autoCq) {
+          resumeAutoCq();
+        } else {
+          abortFt8Tx();
+        }
+        return;
+      }
+
+      updateFsmUI(`Tx ${currentTx} transmitido. Esperando respuesta en RX (Intento ${Ft8State.retryCount}/${Ft8State.maxRetries})...`);
+    }
+
+    function handleIncomingDecodes(decodes, slot) {
+      const myCall = Ft8State.myCall.toUpperCase();
+      const dxCall = Ft8State.dxCall.toUpperCase();
+
+      const now = new Date();
+      const timeFmt = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}z`;
+      const slotUpper = (slot || 'EVEN').toUpperCase();
+
+      const divider = {
+        isDivider: true,
+        time: timeFmt,
+        slot: slotUpper,
+        count: decodes.length
+      };
+
+      Ft8State.decodes.unshift(divider);
+
+      for (let i = decodes.length - 1; i >= 0; i--) {
+        const d = decodes[i];
+        Ft8State.decodes.unshift(d);
+        if (Ft8State.decodes.length > 160) Ft8State.decodes.pop();
+
+        // 1. DETECCIÓN DE RESPUESTA A NUESTRO CQ (O LLAMADA DIRIGIDA A NUESTRA ESTACIÓN):
+        const tokens = d.msg ? d.msg.trim().split(/\s+/) : [];
+        if (tokens.length >= 2 && tokens[0] === myCall && tokens[1] !== myCall) {
+          const caller = tokens[1];
+          if (!dxCall || Ft8State.activeTxRow === 1) {
+            console.log(`[Auto-CQ] ¡Estación ${caller} nos respondió!`);
+            const callerParam = tokens[2] || '';
+            setupQsoWithStation(caller, callerParam.length === 4 ? callerParam : '', d.snr, d.freq, slot);
+            if (callerParam.startsWith('-') || callerParam.startsWith('+')) {
+              Ft8State.mySentReport = callerParam;
+              selectTxMessageRow(4); // R-Report si ya nos envió reporte directo
+            } else {
+              selectTxMessageRow(3); // Enviar nuestro reporte de señal al corresponsal
+            }
+            updateFsmUI(`¡${caller} respondió nuestro CQ! Enviando reporte.`);
+            armFt8Tx(true);
+            continue;
+          }
+        }
+
+        // 2. LÓGICA DE AUTO-SECUENCIA ESTRICTA (QSO EN CURSO):
+        if (Ft8State.autoSeq && dxCall && d.msg.includes(myCall) && d.msg.includes(dxCall)) {
+          console.log(`[FSM RX] Respuesta recibida de ${dxCall}: "${d.msg}"`);
+          Ft8State.retryCount = 0;
+
+          // CASO 1: El DX nos envía RR73 o 73
+          if (d.msg.includes(' RR73') || d.msg.includes(' 73')) {
+            if (Ft8State.activeTxRow === 5 || Ft8State.activeTxRow === 6) {
+              updateFsmUI(`¡${dxCall} confirmó con 73! QSO finalizado por ambas partes.`);
+              logCurrentQso();
+              showQsyAlert(`¡QSO finalizado con ${dxCall}!`);
+              Ft8State.retryCount = 0;
+              if (Ft8State.autoCq) {
+                resumeAutoCq();
+              } else {
+                armFt8Tx(false);
+              }
+            } else {
+              updateFsmUI(`¡${dxCall} confirmó con RR73/73! Enviando 73 final.`);
+              selectTxMessageRow(6);
+              armFt8Tx(true);
+            }
+          }
+          // CASO 2: El DX confirma nuestro reporte con R+SNR (ej: "LU1AA K1JT R-05")
+          else if (d.msg.includes(' R-') || d.msg.includes(' R+')) {
+            updateFsmUI(`${dxCall} envió R-Report. Enviando RR73.`);
+            selectTxMessageRow(5);
+            armFt8Tx(true);
+          }
+          // CASO 3: El DX nos envía su reporte SNR directo (ej: "LU1AA K1JT -12")
+          else {
+            const rptToken = tokens[2] || '';
+            if (rptToken.startsWith('-') || rptToken.startsWith('+')) {
+              Ft8State.mySentReport = rptToken;
+              updateFsmUI(`Reporte recibido de ${dxCall}: ${rptToken} dB. Enviando R-Report.`);
+              selectTxMessageRow(4);
+              armFt8Tx(true);
+            }
+          }
+        }
+      }
+
+      renderFt8Decodes();
+    }
+
+    function renderFt8Decodes() {
+      const container = document.getElementById('ft8-decodes-list');
+      const badge = document.getElementById('ft8-decodes-badge');
+      const onlyCq = document.getElementById('check-only-cq')?.checked || false;
+      const myCall = Ft8State.myCall.toUpperCase();
+
+      if (!container) return;
+      if (badge) {
+        const decodesOnlyCount = Ft8State.decodes.filter(d => !d.isDivider && !d.isTx).length;
+        badge.textContent = `${decodesOnlyCount} decodes`;
+      }
+
+      let list = Ft8State.decodes;
+      if (onlyCq) {
+        list = list.filter(d => !d.isDivider && !d.isTx && (d.msg && d.msg.startsWith('CQ ')));
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-slate-500 text-xs">Sin decodificaciones en este ciclo.</div>';
+        return;
+      }
+
+      const fragment = document.createDocumentFragment();
+      list.forEach(d => {
+        // CASO 1: SEPARADOR DE CICLO UTC
+        if (d.isDivider) {
+          const divRow = document.createElement('div');
+          divRow.className = 'py-1 my-1 flex items-center justify-between text-[10px] font-bold text-slate-400 border-y border-slate-700/60 bg-slate-900/60 px-2 select-none font-mono rounded';
+          divRow.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full ${d.slot === 'EVEN' ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
+              <span class="text-slate-300">${d.time}</span>
+              <span class="${d.slot === 'EVEN' ? 'text-cyan-400' : 'text-amber-400'} font-bold">[${d.slot}]</span>
+            </div>
+            <span class="text-slate-400 text-[9px] font-semibold">${d.count} decodificado(s)</span>
+          `;
+          fragment.appendChild(divRow);
+          return;
+        }
+
+        // CASO 2: MENSAJE TRANSMITIDO POR NUESTRA ESTACIÓN (TX)
+        if (d.isTx) {
+          const txRow = document.createElement('div');
+          txRow.className = 'grid grid-cols-12 text-[11px] items-center p-1 rounded font-mono bg-amber-950/70 border border-amber-500/80 shadow-sm text-amber-300';
+          txRow.innerHTML = `
+            <span class="col-span-2 text-amber-400 font-bold text-[10px] flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+              ${d.time || ''}
+            </span>
+            <span class="col-span-1 text-center font-extrabold text-black bg-amber-400 px-1 rounded text-[9px]">TX</span>
+            <span class="col-span-2 text-center text-amber-400/90 text-[10px] font-bold">[${(d.slot || 'TX').toUpperCase()}]</span>
+            <span class="col-span-2 text-right font-bold text-amber-300 text-[10px]">${d.freq}Hz</span>
+            <span class="col-span-5 pl-3 truncate font-bold text-amber-200">▶ ${d.msg}</span>
+          `;
+          fragment.appendChild(txRow);
+          return;
+        }
+
+        // CASO 3: MENSAJE RECIBIDO (RX)
+        const row = document.createElement('div');
+        const isCq = d.msg && d.msg.startsWith('CQ ');
+        const isToMe = d.msg && d.msg.includes(myCall);
+
+        let rowStyle = 'hover:bg-slate-800/60 cursor-pointer rounded p-1 transition border-b border-slate-900/40';
+        let textStyle = 'text-slate-300';
+
+        if (isToMe) {
+          rowStyle = 'bg-red-950/60 border border-red-700/80 cursor-pointer rounded p-1 transition shadow-sm';
+          textStyle = 'text-red-300 font-bold';
+        } else if (isCq) {
+          rowStyle = 'bg-emerald-950/30 hover:bg-emerald-950/60 border-l-2 border-emerald-500 cursor-pointer rounded p-1 transition';
+          textStyle = 'text-emerald-400 font-semibold';
+        }
+
+        row.className = `grid grid-cols-12 text-[11px] items-center ${rowStyle}`;
+        row.innerHTML = `
+          <span class="col-span-2 text-slate-400 text-[10px]">${d.time || ''}</span>
+          <span class="col-span-1 text-center font-bold ${d.snr >= 0 ? 'text-amber-400' : 'text-slate-400'} text-[10px]">${d.snr > 0 ? '+' : ''}${d.snr}</span>
+          <span class="col-span-2 text-center text-slate-400 text-[10px]">${d.dt > 0 ? '+' : ''}${Number(d.dt).toFixed(1)}s</span>
+          <span class="col-span-2 text-right font-bold text-cyan-400 text-[10px]">${d.freq}Hz</span>
+          <span class="col-span-5 pl-3 truncate ${textStyle}">${d.msg}</span>
+        `;
+
+        row.addEventListener('click', () => {
+          const tokens = d.msg.split(/\s+/).filter(Boolean);
+          if (tokens[0] === 'CQ') {
+            const targetCall = tokens[1] === 'POTA' || tokens[1] === 'SOTA' || tokens[1].length === 2 ? tokens[2] : tokens[1];
+            const targetGrid = tokens[tokens.length - 1];
+            setupQsoWithStation(targetCall, targetGrid, d.snr, d.freq);
+          } else if (tokens.length >= 2) {
+            setupQsoWithStation(tokens[1], tokens[2] || '', d.snr, d.freq);
+          }
+
+          if (document.getElementById('check-auto-tx')?.checked) {
+            armFt8Tx(true);
+          }
+        });
+
+        fragment.appendChild(row);
+      });
+
+      container.innerHTML = '';
+      container.appendChild(fragment);
+    }
+
+    function clearFt8Decodes() {
+      Ft8State.decodes = [];
+      renderFt8Decodes();
+    }
+
+    function resetCurrentQso() {
+      document.getElementById('qso-dx-call').value = '';
+      document.getElementById('qso-dx-grid').value = '';
+      Ft8State.dxCall = '';
+      Ft8State.dxGrid = '';
+      Ft8State.retryCount = 0;
+      updateFsmUI('QSO reiniciado');
+      selectTxMessageRow(1);
+      recalculateQsoMsgs();
+      armFt8Tx(false);
+    }
+
+    function logCurrentQso() {
+      if (!Ft8State.dxCall) {
+        showQsyAlert('Selecciona una estación DX antes de guardar.');
+        return;
+      }
+      const qso = {
+        date: new Date().toISOString().slice(0, 10).replace(/-/g, ''),
+        time: new Date().toISOString().slice(11, 19).replace(/:/g, ''),
+        call: Ft8State.dxCall,
+        mode: Ft8State.mode,
+        freq: (RigState.freqA / 1000000).toFixed(6),
+        rstSent: Ft8State.dxReport,
+        rstRcvd: Ft8State.mySentReport,
+        grid: Ft8State.dxGrid
+      };
+
+      Ft8State.completedQSOs.push(qso);
+      localStorage.setItem('ft8_qso_log', JSON.stringify(Ft8State.completedQSOs));
+      showQsyAlert(`QSO guardado con ${qso.call} en log local`);
+    }
+
+    function exportAdifLog() {
+      if (!Ft8State.completedQSOs.length) {
+        showQsyAlert('No hay contactos en el log para exportar.');
+        return;
+      }
+      let adif = "FT-891 WebCAT ADIF Log Export\n<EOH>\n";
+      Ft8State.completedQSOs.forEach(q => {
+        adif += `<CALL:${q.call.length}>${q.call} `;
+        adif += `<QSO_DATE:${q.date.length}>${q.date} `;
+        adif += `<TIME_ON:${q.time.length}>${q.time} `;
+        adif += `<MODE:${q.mode.length}>${q.mode} `;
+        adif += `<FREQ:${q.freq.length}>${q.freq} `;
+        adif += `<RST_SENT:${q.rstSent.length}>${q.rstSent} `;
+        adif += `<RST_RCVD:${q.rstRcvd.length}>${q.rstRcvd} `;
+        if (q.grid) adif += `<GRIDSQUARE:${q.grid.length}>${q.grid} `;
+        adif += "<EOR>\n";
+      });
+
+      const blob = new Blob([adif], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `FT891_QSO_Log_${new Date().toISOString().slice(0, 10)}.adi`;
+      a.click();
+    }
+
+    function updateUtcClock() {
+      const now = new Date();
+      const utcHours = String(now.getUTCHours()).padStart(2, '0');
+      const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
+      const utcSecs = String(now.getUTCSeconds()).padStart(2, '0');
+      const clockEl = document.getElementById('ft8-utc-clock');
+      if (clockEl) clockEl.textContent = `${utcHours}:${utcMins}:${utcSecs}z`;
+
+      const totalSec = now.getUTCSeconds() + now.getUTCMilliseconds() / 1000.0;
+      const slotDuration = Ft8State.slotDuration;
+      const secInSlot = totalSec % slotDuration;
+      const slotIndex = Math.floor(totalSec / slotDuration);
+      const isEven = (slotIndex % 2 === 0);
+
+      const bar = document.getElementById('ft8-cycle-bar');
+      const lblSec = document.getElementById('ft8-cycle-seconds');
+      const lblSlot = document.getElementById('ft8-slot-indicator');
+
+      if (bar) bar.style.width = `${Math.min(100, (secInSlot / slotDuration) * 100)}%`;
+      if (lblSec) lblSec.textContent = `${secInSlot.toFixed(1)}s / ${slotDuration.toFixed(1)}s`;
+      if (lblSlot) {
+        lblSlot.textContent = isEven ? 'EVEN (:00 / :30)' : 'ODD (:15 / :45)';
+        lblSlot.className = isEven ? 'font-bold text-cyan-400' : 'font-bold text-amber-400';
       }
     }
 
@@ -1722,7 +2682,7 @@
         });
 
         window.addEventListener('mouseup', (e) => {
-          if (!RigState.pttLatchMode && RigState.isTx) {
+          if (!RigState.pttLatchMode && AudioEngine.isPttPressed) {
             setPTT(false);
           }
         });
@@ -1745,8 +2705,7 @@
 
       window.addEventListener('keyup', (e) => {
         if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
-          if (!RigState.pttLatchMode) {
-            e.preventDefault();
+          if (!RigState.pttLatchMode && AudioEngine.isPttPressed) {
             setPTT(false);
           }
         }
@@ -1972,13 +2931,19 @@
               sendCATCommand(`FB${String(hz).padStart(9, '0')};`);
             }
             renderRigDisplay();
+            modalFreq.classList.add('hidden');
           }
         }
-        if (modalFreq) modalFreq.classList.add('hidden');
+      });
+
+      inputFreq?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          document.getElementById('btn-apply-freq')?.click();
+        }
       });
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.onload = function() {
       const savedTheme = localStorage.getItem('ft891_theme');
       if (savedTheme === 'light') {
         document.documentElement.classList.remove('dark');
@@ -1986,27 +2951,20 @@
         if (themeIcon) themeIcon.textContent = '🌙';
       }
 
-      updatePowerUI(false);
+      setupEventListeners();
       renderRigDisplay();
-      updateMeterDisplay(RigState.sMeter);
-      updateDnrUI();
-      updateDnfUI();
-      updateNotchUI();
-      updateAttUI();
-      updateIpoUI();
+      updateMeterDisplay(0);
       updateWidthUI();
       updateShiftUI();
-      setupEventListeners();
+      updatePowerUI(false);
+      recalculateQsoMsgs();
+
+      connectDockerNetwork();
       fetchSpots();
+      setInterval(fetchSpots, 30000);
 
-      setTimeout(() => {
-        if (!RigState.connected) {
-          connectDockerNetwork();
-        }
-      }, 150);
-
-      setInterval(fetchSpots, 45000);
-    });
+      setInterval(updateUtcClock, 100);
+    };
   </script>
 </body>
 </html>
