@@ -170,8 +170,8 @@ Presiona la tecla `[F]` de forma prolongada para ingresar a la configuración de
 ### 1. Clonar el Repositorio
 
 ```
-git clone https://github.com/tu-usuario/ft891-webcat-station.git
-cd ft891-webcat-station
+git clone https://github.com/cd3lvk/891webcat.git
+cd 891webcat
 
 ```
 
@@ -180,12 +180,13 @@ cd ft891-webcat-station
 Asegúrate de contar con la siguiente organización en el directorio del proyecto:
 
 ```
-ft891-webcat-station/
+891webcat/
 ├── docker-compose.yml
 ├── Dockerfile
 ├── server.py
-├── FT891_WebCAT_Station.html
+├── index.html
 └── README.md
+└── LICENSE
 
 ```
 
@@ -201,7 +202,7 @@ docker compose up -d --build
 ### 4. Verificar Registros de Ejecución
 
 ```
-docker compose logs -f ft891_webcat
+docker compose logs -f 891webcat
 
 ```
 ## 🛠️ Variables de Entorno
