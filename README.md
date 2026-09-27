@@ -1,259 +1,258 @@
-# Yaesu FT-891 WebCAT Station & Remote Digital Station 📻⚡
+# Yaesu FT-891 WebCAT Station, CW Workstation & Remote Digital Pro 📻⚡📟
 
-Una plataforma web integral para control CAT bidireccional, streaming de audio dúplex de baja latencia (48 kHz) y **cliente nativo de modos digitales FT8 y FT4** para el transceptor **Yaesu FT-891**, optimizada para operar desde navegadores modernos en PC, tablets y smartphones (iOS / Android) mediante una interfaz **Digirig DR-891** sobre Linux y Docker.
+Plataforma web integral de alto rendimiento para el control CAT bidireccional, streaming de audio dúplex de baja latencia (48 kHz), **estación de telegrafía CW nativa (decodificador DSP Biquad y keyer por hardware/AFSK)** y **estación autónoma de modos digitales FT8 y FT4** para el transceptor **Yaesu FT-891**, optimizada para operar desde cualquier navegador moderno en PC, tablets o smartphones mediante una interfaz **Digirig DR-891** sobre Linux y Docker.
 
-## 🌟 Características Principales
+---
 
-### 1. Control CAT Bidireccional Completo
+## 📑 Tabla de Contenidos
 
-* **Control de Frecuencia y VFO:** Sintonización por pasos configurables (100 Hz, 1 kHz, 5 kHz, 10 kHz), mando rotatorio virtual (knob interactivo para ratón y pantalla táctil), salto rápido (`«` $\times 10$, `▶` $+1$, `‹` $-1$, `»` $\times 10$) y entrada numérica directa en kHz.
+1. [Novedades y Últimas Actualizaciones](#-novedades-y-últimas-actualizaciones)
+2. [Arquitectura del Sistema](#-arquitectura-del-sistema)
+3. [Módulo de Telegrafía CW (Morse)](#-módulo-de-telegrafía-cw-morse)
+   - [Doble Modo: CW-U Nativo (DAKY) vs. DATA-U (AFSK)](#doble-modo-cw-u-nativo-daky-vs-data-u-afsk)
+   - [Decodificador DSP Biquad en Tiempo Real](#decodificador-dsp-biquad-en-tiempo-real)
+   - [Keyer de Teclado, Macros y Paddle Virtual](#keyer-de-teclado-macros-y-paddle-virtual)
+4. [Módulo Digital FT8 & FT4](#-módulo-digital-ft8--ft4)
+   - [Decodificación Temprana (Early Decoding)](#decodificación-temprana-early-decoding)
+   - [Máquina de Estados de QSO (FSM) y Auto-CQ](#máquina-de-estados-de-qso-fsm-y-auto-cq)
+   - [Calibración de SNR según Estándar WSJT-X](#calibración-de-snr-según-estándar-wsjt-x)
+5. [Agregador de Spots y QSY Inteligente](#-agregador-de-spots-y-qsy-inteligente)
+6. [Consola Radio & Mandos CAT](#-consola-radio--mandos-cat)
+7. [Configuración Crítica en el Yaesu FT-891](#-configuración-crítica-en-el-yaesu-ft-891)
+8. [Despliegue con Docker y Docker Compose](#-despliegue-con-docker-y-docker-compose)
+9. [Licencia](#-licencia)
 
-* **Gestión de VFOs:** Intercambio rápido VFO-A ⇄ B (`SV;`), sincronización instantánea y seguimiento de split.
+---
 
-* **S-Meter Calibrado:** Escala dinámica precisa en unidades S y dBm (desde S-0 / $-127\text{ dBm}$ hasta S9+60 dB / $-13\text{ dBm}$).
+## 🌟 Novedades y Últimas Actualizaciones
 
-* **Lectura de Potencia y ROE / SWR:** Monitor en vivo de potencia de salida y medidor de ondas estacionarias con alerta visual inmediata ante desadaptaciones críticas ($\ge 2.5$).
+- **Decodificación FT8 Temprana (*Early Decoding*):** La captura y decodificación de audio de FT8 ahora se dispara a los **12.8 segundos** (y a los **5.0 s** en FT4) en lugar de esperar al final del slot (14.1 s / 15.0 s). Dado que la emisión en el aire finaliza a los 12.64 s, los decodes se entregan al navegador a los ~13.3 s, otorgando **más de 1.5 segundos de holgura** para preparar y armar el siguiente ciclo de transmisión.
+- **Resolución de Bloqueos en Secuencia FT8 (`Tx3`):** Se rediseñó la precedencia de la máquina de estados. Al recibir el reporte de retorno de un corresponsal activo (`-10` o `R-10`), el sistema transiciona directamente a `Tx5` (`RR73`), sincroniza la ranura opuesta (`even`/`odd`) y mantiene la estación transmitiendo sin detenerse.
+- **QSY Digital Inteligente para Spots:** Al pulsar sobre un spot de FT8 o FT4, el sistema:
+  1. Sintoniza el VFO en el dial estándar de la banda correspondiente (`14.074.000 Hz`, `7.074.000 Hz`, etc.).
+  2. Ajusta el offset de audio (`txFreq`) a la posición exacta anunciada por el spot.
+  3. Fija el modo en `DATA-U` y actualiza el selector de banda digital.
+  4. Aplica un bloqueo de sondeo serie (*CAT Polling Lock* de 850 ms) para evitar que las lecturas intermedias de `FA;` reviertan la frecuencia.
+  5. Activa el modo de escucha pasiva: no transmite a ciegas, sino que aguarda a decodificar el `CQ` del activador para responderle en el slot inverso.
+- **Transmisión de CW Nativo (`CW-U` / `CW-L`) por Hardware DAKY:** Conmutación sin latencia a través de las líneas físicas RTS/DTR en el pin 3 Mini-DIN (DAKY) y activación automática de Break-In (`BI1;`). Elimina el comando manual de MOX (`TX1;`) que bloqueaba el oscilador telegráfico interno del FT-891.
+- **Decodificador CW DSP Biquad IIR:** Sustitución del detector Goertzel básico por un filtro paso banda IIR de orden 2 con ancho de ~140 Hz, histéresis Schmitt y temporizador de vaciado automático de 25 ms para evitar caracteres retenidos.
 
-* **Filtros DSP de FI (Hardware del FT-891):**
+---
 
-  * **DNR (Digital Noise Reduction):** Encendido/apagado y ajuste de nivel 1 a 15 (`NR0;`, `RL0;`).
-
-  * **DNF (Digital Notch Filter):** Supresión automática de heterodinos (`BC0;`).
-
-  * **Manual Notch:** Filtro de muesca manual con ajuste continuo de 100 Hz a 3.200 Hz (`BP00;`, `BP01;`).
-
-  * **Ancho de FI (IF Width):** Presets de 500 Hz, 1.8 kHz, 2.4 kHz y 3.0 kHz (`SH0;`).
-
-  * **Etapa de Entrada RF:** Selector AMP1 / IPO (Intercept Point Optimization) y atenuador de 12 dB (`RA0;`).
-
-* **Detección Automática de Estado / Standby:** La interfaz detecta si la radio está apagada o encendida, mostrando el panel LCD en standby y energizándolo al responder los sondeos CAT.
-
-### 2. Cliente de Modos Digitales FT8 & FT4 Integrado 📟
-
-* **Demodulación y Modulación Nativa en Linux:** Motor en C `ft8_lib` compilado dentro del contenedor Docker (`decode_ft8` y `gen_ft8`), sin depender de programas de escritorio pesados como WSJT-X.
-
-* **Sincronización UTC Precisa:**
-
-  * Control de ventanas de 15 segundos (**FT8**) y 7.5 segundos (**FT4**) con reloj UTC en vivo y barra de progreso de slot.
-
-  * Determinación automática de ranura: **EVEN (:00 / :30)** y **ODD (:15 / :45)**.
-
-* **Cálculo de SNR Calibrado a Estándar WSJT-X (2.500 Hz):**
-
-  * Reportes de relación señal/ruido realistas (desde $-24\text{ dB}$ hasta $+15\text{ dB}$) con código de color dinámico y formateo obligatorio de dos dígitos con signo (`-16`, `-08`, `+02`).
-
-* **Máquina de Estados de QSO Automatizada (FSM):**
-
-  * Secuencia estándar completa:
-
-    * **Tx 1:** `CQ  `
-
-    * **Tx 2:** `  `
-
-    * **Tx 3:** `  `
-
-    * **Tx 4:** `  R`
-
-    * **Tx 5:** `  RR73`
-
-    * **Tx 6:** `  73`
-
-  * **Auto-Secuencia:** Avanza automáticamente de fase al recibir las respuestas del corresponsal.
-
-  * **Auto-CQ Continuo:** Al completar un QSO y enviar el `73` final, registra el contacto en el log, limpia los datos del corresponsal y vuelve a llamar CQ de forma ininterrumpida.
-
-  * **Protección contra bucles:** Detiene el transmisor y desactiva el ciclo al terminar el intercambio.
-
-* **Confirmación On-Air & Monitoreo de ALC:**
-
-  * Visualización simultánea del Dial, offset de audio en Hz y frecuencia de emisión en antena.
-
-  * Indicador de nivel de ALC en tiempo real para prevenir saturación e intermodulación en la banda.
-
-* **Historial de QSOs y Exportación ADIF:** Registro local de contactos completados con exportación a archivo estándar `.adi` compatible con LoTW, QRZ y Cloudlog.
-
-### 3. Motor de Audio Web Dúplex (48 kHz)
-
-* **Recepción (RX) con Ring Buffer y PLL Adaptativo:**
-
-  * Búfer circular elástico de memoria fija con bucle de enganche de fase (PLL) en JavaScript.
-
-  * Compensa el desfase de reloj (*clock drift*) entre el chip de audio USB del Digirig y la placa de sonido del navegador web (PC o móvil), eliminando saltos, clics y latencia acumulada.
-
-* **Transmisión de Fonía y Modulación Digital (TX):**
-
-  * **PTT por Hardware:** Conmutación mediante la línea **RTS** del puerto serie y comando CAT `TX2;` (`DATA PTT`), garantizando que el audio ingrese por la entrada trasera `DATA IN` (Mini-DIN 6) y no por el micrófono frontal.
-
-  * **Tono de Enclavamiento de 1.000 Hz:** Generado en el canal derecho estéreo para activar de forma sólida el detector de hardware del Digirig DR-891 sin tableteo de relés.
-
-  * **Control de PTT Flexible:** Soporta pulsador en pantalla (táctil o ratón), modo alternado (toggle ON/OFF) y acceso directo con la **barra espaciadora**.
-
-### 4. Agregador de Spots en Vivo & QSY Inteligente
-
-* **Fuentes Integradas:** Descarga en segundo plano spots de **POTA**, **LLOTA**, **SOTA** y **DX Cluster**.
-
-* **Filtros Multi-Criterio:** Filtrado instantáneo por programa, banda y modo (`SSB`, `CW`, `FT8`, `FT4`, `DATA`).
-
-* **QSY Inteligente a Modos Digitales:** Al hacer clic sobre cualquier spot digital:
-
-  1. El transceptor sintoniza la frecuencia de la banda y se conmuta a `DATA-U`.
-
-  2. La interfaz cambia automáticamente a la pestaña de **FT8/FT4**.
-
-  3. El indicativo y cuadrícula del activador quedan precargados en la secuencia de transmisión.
-
-## 🏗️ Arquitectura del Sistema
+## 🏗 Arquitectura del Sistema
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Navegador Web (Cliente)                  │
-│   • Interfaz Responsive (HTML5, TailwindCSS, CSS Variables) │
-│   • Web Audio API (48 kHz PLL Ring Buffer & Mic Capture)   │
-│   • FSM de FT8/FT4 (Ciclos UTC, auto-secuencia y log ADIF)  │
-└──────────────┬───────────────────────────────┬──────────────┘
-               │ WebSocket (/ws/cat)           │ WebSockets (/ws/audio/* & /ws/ft8)
-               ▼                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│            Servidor de Aplicación (FastAPI / Python)        │
-│   • Proxy CAT asíncrono serial (PySerial @ 38.400 bps 8N2)  │
-│   • Pipeline de audio ALSA estéreo dúplex (sounddevice)     │
-│   • Sincronizador de ciclos UTC de 15s y 7.5s               │
-│   • Motor nativo C: decode_ft8 (RX) y gen_ft8 (TX)          │
-│   • Worker de spots (POTA, LLOTA, SOTA, DX Cluster)         │
-└──────────────┬───────────────────────────────┬──────────────┘
-               │ Serial (/dev/ttyUSB0)         │ ALSA Audio PCM (Card "USB")
-               ▼                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 Interfaz Módem Digirig DR-891               │
-│   • UART CAT Bridge (Línea RTS para enclavamiento PTT)      │
-│   • C-Media Audio Codec (Pin 1 DATA IN, Pin 2 GND, Pin 5 AF)│
-│   • Detección de tono auxiliar en canal derecho             │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Cables CAT (Mini-DIN 8) & DATA (Mini-DIN 6)
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Transceptor Yaesu FT-891                  │
-└─────────────────────────────────────────────────────────────┘
-
+                        ┌───────────────────────────────────────────┐
+                        │          Navegador Web (Cliente)          │
+                        │  Tailwind CSS + HTML5 + Web Audio API    │
+                        └──────────┬────────────────────▲───────────┘
+                                   │                    │
+              HTTP / WebSocket JSON│                    │WebSocket PCM 48kHz
+             (/ws/cat, /ws/cw, etc)│                    │(Ring Buffer + PLL)
+                                   ▼                    │
+                        ┌───────────────────────────────┴───────────┐
+                        │      Servidor Python FastAPI + Uvicorn     │
+                        │       (Contenedor Docker en Linux)        │
+                        ├─────────────────────┬─────────────────────┤
+                        │   Worker UTC FT8    │ Worker Spots POTA/  │
+                        │ decode_ft8 / gen_ft8│ SOTA/LLOTA/Cluster  │
+                        └──────────┬──────────┴─────────▲───────────┘
+                                   │                    │
+                          /dev/ttyUSB0 (CAT)            │ ALSA Stream (48 kHz)
+                          /dev/ttyUSB1 (CW Key)         │ In/Out Estéreo
+                                   │                    │
+                        ┌──────────▼────────────────────┴───────────┐
+                        │       Interfaz Digirig DR-891 (USB)       │
+                        │   CP2105 (Dual COM) + Tarjeta C-Media     │
+                        └──────────┬────────────────────▲───────────┘
+               Mini-DIN 8 (CAT)    │                    │ Mini-DIN 6 (DATA)
+               Líneas RTS/DTR      │                    │ Audio In/Out + DAKY Pin 3
+                                   ▼                    │
+                        ┌───────────────────────────────┴───────────┐
+                        │       Transceptor Yaesu FT-891 (HF/50MHz) │
+                        └───────────────────────────────────────────┘
 ```
 
-## 🔌 Requisitos de Hardware y Conexión
+---
 
-1. **Transceptor:** Yaesu FT-891 (HF / 50 MHz).
+## ⚡ Módulo de Telegrafía CW (Morse)
 
-2. **Interfaz:** Digirig DR-891 (o Digirig Mobile con jumpers y cables para Yaesu).
+### Doble Modo: CW-U Nativo (DAKY) vs. DATA-U (AFSK)
 
-3. **Cableado:**
+El transceptor Yaesu FT-891 maneja la telegrafía a través de dos caminos circuitales completamente separados:
 
-   * **Cable de Datos/Audio:** Conector Mini-DIN de 6 pines conectado al puerto **RTTY/DATA** trasero del FT-891 y al jack de audio del Digirig.
+| Modo en Interfaz | Modo Transceptor | Canal de Modulación | Línea de Disparo | Relé de Transmisión |
+| :--- | :--- | :--- | :--- | :--- |
+| **CW-U (Nativo Radio)** | `CW-U` (`MD03;`) | Oscilador interno de RF de la radio | Pin 3 Mini-DIN 6 (**DAKY**) a masa mediante transistor Digirig + tono 1000 Hz en canal derecho | **Break-In (`BI1;`)** automático. Sin comandos de MOX (`TX1;`) |
+| **DATA-U (AFSK Audio)** | `DATA-U` (`MD0C;`) | Tono senoidal puro de 700 Hz por salida analógica *DATA IN* (Pin 1) | Línea PTT de datos CAT (`TX2;`) | Enclavamiento continuo por comando de datos CAT |
 
-   * **Cable CAT:** Conector Mini-DIN de 8 pines conectado al puerto **CAT/LINEAR** trasero del FT-891 y al jack serie del Digirig.
+- **Ventaja de `CW-U (DAKY)`:** Ancho de banda de emisión mínimo, manipulado directo por el modulador nativo del equipo y posibilidad de escuchar entre signos (Full/Semi Break-In).
+- **Ventaja de `DATA-U (AFSK)`:** Inmune a problemas de cableado físico de manipulación o configuraciones erróneas de llave en el menú del transceptor.
 
-   * **Cable USB:** Conexión desde el puerto USB del Digirig al equipo host (Raspberry Pi 4/5, mini PC o servidor Linux).
+### Decodificador DSP Biquad en Tiempo Real
 
-### Configuración Mandatoria en el Menú del FT-891
+El flujo de audio PCM recibido a 48 kHz pasa por un procesador digital en JavaScript:
+1. **Filtro Pasa-Banda Biquad IIR:** Calculado dinámicamente con factor $Q = 5.0$ y centrado en la frecuencia de Pitch seleccionada (500 a 800 Hz).
+2. **Detector de Envolvente y Suelo de Ruido Adaptativo:** Mide la energía en bloques de 240 muestras (5 ms) y calibra de forma continua el umbral de silencio respecto a las señales pico.
+3. **Disparador Schmitt con Histéresis:** Margen del $\pm 15\%$ para evitar que el ruido atmosférico genere falsos dits.
+4. **Temporizador de Vaciado (*Symbol Flush* a 25 ms):**
+   - Si la pausa supera $2.2 \times T_{\text{dit}}$, decodifica inmediatamente el símbolo Morse en la letra correspondiente.
+   - Si la pausa supera $5.5 \times T_{\text{dit}}$, inserta un espacio de separación entre palabras.
+5. **Seguimiento Automático de Cadencia (*Auto-WPM Tracking*):** Adapta la referencia temporal a la velocidad real de transmisión de la estación distante (8 a 45 WPM).
 
-Presiona la tecla `[F]` de forma prolongada para ingresar a la configuración del menú del transceptor:
+### Keyer de Teclado, Macros y Paddle Virtual
 
-| Parámetro | Valor Requerido | Función | 
- | ----- | ----- | ----- | 
-| **05-06 \[CAT RATE\]** | `38400bps` | Velocidad de comunicación serie CAT de alta tasa | 
-| **05-07 \[CAT TOT\]** | `100ms` | Tiempo límite de transmisión CAT | 
-| **05-08 \[CAT RTS\]** | `DISABLE` | Control de línea RTS | 
-| **16-01 \[SSB MIC SELECT\]** | `REAR` o `MIC` | Selección de entrada para SSB | 
-| **16-03 \[DATA IN SELECT\]** | `DATA` | Enruta la modulación digital por el puerto trasero Mini-DIN | 
-| **16-04 \[DATA PTT SELECT\]** | `DAKY` | Permite la activación de PTT por hardware mediante el pin de datos | 
-| **16-02 \[DATA GAIN\]** | `40` a `60` | Nivel de ganancia de audio digital (ajustar para evitar ALC excesivo) | 
+- **Manipulador de Texto Anticipado (*Type-Ahead*):** Escribe el mensaje completo y presiona `Enter`; el sistema generará los elementos con cadencia estándar PARIS y sidetone local de retorno suave mediante Web Audio API (rampas de 5 ms para prevenir clics acústicos).
+- **Parada de Emergencia:** Presiona `Escape` o el botón **DETENER (ESC)** para cortar la emisión instantáneamente.
+- **Botonera de Macros Rápidos:**
+  - `CQ CQ`: `CQ CQ DE [MYCALL] [MYCALL] K`
+  - `MI CALL`: `DE [MYCALL] K`
+  - `5NN TU`: `[DXCALL] 5NN TU`
+  - `73 GL`: `73 ES GL SK`
+  - `AGN?` / `QRZ?`
+- **Manipulador Manual Táctil / Ratón (*Paddle*):** Botón táctil ergonómico con enclavamiento sin retardo para emitir manualmente desde pantallas táctiles o ratón.
 
-## 🚀 Despliegue con Docker Compose
+---
 
-### 1. Clonar el Repositorio
+## 📟 Módulo Digital FT8 & FT4
 
+### Decodificación Temprana (Early Decoding)
+
+En la operación clásica de FT8, la transmisión ocupa 12.64 segundos dentro de la ranura de 15 segundos. El worker de `server.py` implementa sincronización temprana:
+- **Disparo de decodificación a los 12.8 s:** Al concluir la emisión, captura el bloque acumulado en el ring buffer de 12.000 Hz y ejecuta `decode_ft8`.
+- **Entrega de decodes a los ~13.3 s:** El navegador recibe las respuestas antes del segundo 13.5 s, permitiendo a la máquina de estados evaluar el mensaje y enviar la orden `arm_tx` con **más de 1.5 segundos de antelación** al inicio del siguiente ciclo.
+
+### Máquina de Estados de QSO (FSM) y Auto-CQ
+
+La máquina de estados finita gestiona el intercambio completo estándar:
+
+$$\text{Tx1 (CQ)} \longrightarrow \text{Tx2 (Grid)} \longrightarrow \text{Tx3 (Reporte)} \longrightarrow \text{Tx4 (R+Reporte)} \longrightarrow \text{Tx5 (RR73)} \longrightarrow \text{Tx6 (73)}$$
+
+1. **Prioridad 1 (QSO Activo):** Analiza expresiones regulares para tokens de reporte (`[+-]\d{2}`, `R[+-]\d{2}`) y confirmaciones (`RR73`, `73`). Si tu estación envió `Tx3` y recibe el reporte del corresponsal, **salta de inmediato a `Tx5` (`RR73`)**, sincroniza la paridad de la ranura contraria y deja la radio armada.
+2. **Prioridad 2 (Spot en Espera):** Al sintonizar un activador desde los spots, precarga sus datos pero mantiene el transmisor en espera. En cuanto el activador emite un `CQ`, responde de inmediato en `Tx2`.
+3. **Prioridad 3 (Respuesta a Nuestro CQ):** Detecta a un nuevo corresponsal que contesta a nuestra llamada, configura su indicativo/grid y avanza a `Tx3`.
+4. **Auto-CQ Continuo:** Al emitir `RR73` o `73` y concluir el QSO, registra el contacto en el log ADIF, reinicia el estado y vuelve a llamar `CQ` de forma automática.
+
+### Calibración de SNR según Estándar WSJT-X
+
+El sistema convierte las puntuaciones internas de detección de `ft8_lib` a la escala internacional WSJT-X referenciada a un ancho de banda de 2.500 Hz:
+
+$$\text{SNR}_{\text{WSJT-X}} = \text{SNR}_{\text{bin}} - 10 \log_{10}\left(\frac{2500}{6.25}\right) \approx \text{SNR}_{\text{bin}} - 26\text{ dB}$$
+
+Los reportes se visualizan en rangos realistas (de $-24\text{ dB}$ a $+15\text{ dB}$) con formato estricto de signo y dos dígitos (`-08`, `+03`, `-14`).
+
+---
+
+## 🎯 Agregador de Spots y QSY Inteligente
+
+El servidor sondea en segundo plano las APIs de **POTA**, **SOTA**, **LLOTA** y **DX Cluster**, unificando la lista en `/api/spots`.
+
+### Lógica de Sintonización Automática por Modo
+
+- **Si el spot es FT8 o FT4:**
+  - Sintoniza la frecuencia base de la banda en el VFO (`14.074.000 Hz`, `7.074.000 Hz`, etc.).
+  - Configura el modo en `DATA-U` (`MD0C;`).
+  - Asigna el delta de frecuencia como audio offset (`Ft8State.txFreq`).
+  - Actualiza el selector de banda digital y cambia la vista a la consola digital.
+  - Bloquea el sondeo CAT (`qsyLockUntil`) durante 850 ms para evitar que lecturas intermedias de `FA;` desfasadas restauren la frecuencia anterior.
+- **Si el spot es CW:**
+  - Sintoniza la frecuencia exacta de RF en el VFO.
+  - Configura el modo en `CW-U` (`MD03;`) y activa el Break-In (`BI1;`).
+  - Cambia la vista a la consola CW y precarga el indicativo en el manipulador.
+- **Si el spot es Fonía (SSB):**
+  - Sintoniza la frecuencia y conmuta a `LSB` (en bandas inferiores a 10 MHz) o `USB` (en bandas superiores a 10 MHz).
+
+---
+
+## 📻 Consola Radio & Mandos CAT
+
+- **Dial Rotatorio Virtual:** Knob interactivo con soporte de rueda de ratón, gestos táctiles e inercia.
+- **Selector de Paso de Sintonía:** Pasos rápidos de 100 Hz, 1 kHz, 5 kHz y 10 kHz, más entrada directa de frecuencia numérica en kHz.
+- **S-Meter Dinámico Calibrado:** Escala continua desde S-0 ($-127\text{ dBm}$) hasta S9+60 dB ($-13\text{ dBm}$).
+- **Lectura de Potencia RF y SWR:** Detección de ROE con alarma visual ante valores críticos ($\ge 2.5:1$).
+- **Filtros DSP de FI del FT-891:**
+  - `DNR` (Reducción Digital de Ruido): On/Off y nivel de 1 a 15 (`NR0;`, `RL0;`).
+  - `DNF` (Filtro Notch Automático): Supresión de heterodinos (`BC0;`).
+  - `NOTCH` (Filtro Notch Manual): Ajuste continuo de 100 Hz a 3.200 Hz (`BP00;`, `BP01;`).
+  - `WIDTH`: Ancho de banda de FI seleccionable (500 Hz, 1.8 kHz, 2.4 kHz, 3.0 kHz).
+  - `IPO` / `ATT`: Preamplificador AMP1, entrada directa IPO y atenuador de 12 dB.
+
+---
+
+## ⚙️ Configuración Crítica en el Yaesu FT-891
+
+Para que el transceptor responda a la manipulación por hardware y conmutación de audio con el Digirig DR-891, verifica los siguientes menús en el equipo:
+
+| Menú | Parámetro | Valor Requerido | Descripción |
+| :--- | :--- | :--- | :--- |
+| **05-06** | `CAT RATE` | **`38400bps`** | Velocidad de comunicación serie CAT. |
+| **05-07** | `CAT TOT` | `100ms` | Timeout de comandos CAT. |
+| **05-08** | `CAT RTS` | **`ENABLE`** | Habilita el control de flujo por hardware. |
+| **07-08** | `CW BK-IN TYPE` | **`SEMI`** o **`FULL`** | Permite que el transmisor emita al recibir pulsos de llave. |
+| **07-12** | `PC KEYING` | **`DAKY`** | Asigna la línea de manipulación de PC al Pin 3 del puerto Mini-DIN. |
+| **07-13** | `QSK DELAY TIME` | `25ms` - `30ms` | Retardo de recuperación de relé entre signos. |
+| **08-01** | `DATA MODE` | `OTHERS` | Configuración para modos digitales en banda base. |
+| **08-09** | `DATA IN SELECT` | **`REAR`** | Selecciona la entrada de audio del conector Mini-DIN trasero. |
+| **08-10** | `DATA PTT SELECT` | **`DAKY`** | Permite que la línea DAKY active la transmisión de datos. |
+| **08-12** | `DATA BFO` | `USB` | Mantiene la banda lateral superior en modos de datos. |
+| **Panel** | `BK-IN` (Botón F) | **`ON`** | **Obligatorio para CW-U.** Si está en `OFF`, solo sonará el sidetone interno y no saldrá RF. |
+
+---
+
+## 🐳 Despliegue con Docker y Docker Compose
+
+### 1. Requisitos de Hardware y Sistema
+- Transceptor Yaesu FT-891.
+- Interfaz Digirig DR-891 conectada con su cable Mini-DIN 8 (CAT) y Mini-DIN 6 (DATA).
+- Servidor Linux (PC, Raspberry Pi 4/5 o similar) con Docker y Docker Compose instalados.
+
+### 2. Archivo `docker-compose.yml`
+
+```yaml
+services:
+  yaesu-webcat:
+    build: .
+    container_name: yaesu-ft891-station
+    restart: unless-stopped
+    network_mode: host
+    privileged: true
+    devices:
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - "/dev/ttyUSB1:/dev/ttyUSB1"
+      - "/dev/snd:/dev/snd"
+    environment:
+      - SERIAL_PORT=/dev/ttyUSB0
+      - CW_KEY_PORT=/dev/ttyUSB1
+      - BAUD_RATE=38400
+      - HTTP_PORT=8000
+      - AUDIO_SAMPLE_RATE=48000
+      - AUDIO_CARD_KEYWORD=USB
+      - DEMO_FALLBACK=true
+    volumes:
+      - ./static:/app/static
 ```
-git clone https://github.com/cd3lvk/891webcat.git
-cd 891webcat
 
+### 3. Comandos de Puesta en Marcha
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/ft891-webcat-station.git
+cd ft891-webcat-station
+
+# Construir y levantar el contenedor en segundo plano
+docker compose down && docker compose up -d --build
+
+# Monitorear registros de ejecución (CAT, Audio y FT8)
+docker compose logs -f
 ```
 
-### 2. Estructura de Archivos
-
-Asegúrate de contar con la siguiente organización en el directorio del proyecto:
-
+Una vez levantado, ingresa desde cualquier navegador web en la red local:
 ```
-891webcat/
-├── docker-compose.yml
-├── Dockerfile
-├── server.py
-├── index.html
-└── README.md
-└── LICENSE
-
+http://<IP-DE-TU-SERVIDOR>:8000
 ```
 
-### 3. Iniciar el Servicio
+---
 
-Construye la imagen Docker (la cual compilará automáticamente `ft8_lib` de forma nativa) e inicia los contenedores:
+## 📄 Licencia
 
-```
-docker compose up -d --build
-
-```
-
-### 4. Verificar Registros de Ejecución
-
-```
-docker compose logs -f 891webcat
-
-```
-## 🛠️ Variables de Entorno
-
-Puedes personalizar el comportamiento del sistema mediante variables en `docker-compose.yml`:
-
-| Variable | Valor por Defecto | Descripción | 
- | ----- | ----- | ----- | 
-| `SERIAL_PORT` | `/dev/ttyUSB0` | Ruta del dispositivo serie conectado al CAT del Digirig | 
-| `BAUD_RATE` | `38400` | Velocidad de baudios serie (debe coincidir con el menú `05-06`) | 
-| `HTTP_PORT` | `8000` | Puerto HTTP interno del servidor FastAPI | 
-| `AUDIO_SAMPLE_RATE` | `48000` | Frecuencia de muestreo estándar de audio ALSA | 
-| `AUDIO_CARD_KEYWORD` | `USB` | Subcadena para identificar el chip de sonido C-Media del Digirig | 
-| `DEMO_FALLBACK` | `true` | Si es `true`, permite que la web abra en modo demo si la radio no responde | 
-
-## 📻 Guía Rápida de Operación
-
-### Operación en Fonía (SSB / AM / FM)
-
-1. Conéctate a la URL de tu estación vía HTTPS.
-
-2. Pulsa el botón **"Audio"** en la barra superior (se iluminará en verde con el icono 🔊).
-
-3. Selecciona la banda deseada (`40m`, `20m`, etc.) y el modo (`LSB` o `USB`).
-
-4. Para transmitir:
-
-   * **Modo Mantener:** Presiona y mantén presionado el botón central **TRANSMITIR (PTT)** o la **barra espaciadora** de tu teclado.
-
-   * **Modo Pulsar ON/OFF:** Pulsa el botón "MODO" debajo del PTT para alternar la transmisión con cada clic.
-
-5. El vúmetro de modulación mostrará el nivel de audio capturado por tu micrófono.
-
-### Operación en FT8 / FT4
-
-1. Dirígete a la pestaña **📟 FT8/FT4** (o pulsa sobre cualquier spot digital de la lista).
-
-2. Verifica que tu indicativo (**MI CALL**) y cuadrícula Maidenhead (**GRID**) estén configurados.
-
-3. Observa la barra de ciclo UTC. En cada final de periodo (:14/:29/:44/:59s), aparecerán los mensajes decodificados.
-
-4. **Para responder a una estación:** Haz clic sobre cualquier mensaje o llamado `CQ` de la lista. El sistema seleccionará `Tx 2`, calculará el turno opuesto (**EVEN** u **ODD**) y armará la transmisión para el segundo :00 o :15 correspondiente.
-
-5. **Para llamar CQ de forma continua:** Marca la casilla **Auto-CQ Continuo** y pulsa **HABILITAR TX**. El sistema emitirá CQ, responderá automáticamente si alguien atiende el llamado y reanudará el CQ al concluir el QSO.
-
-6. Al finalizar tus comunicados, haz clic en **Exportar ADIF** para descargar el log en formato compatible con tu libro de guardia preferido.
-
-## 📄 Licencia y Reconocimientos
-
-* Motor de codificación y decodificación FT8 basado en `ft8_lib` desarrollado por Karlis Goba (YL3JG).
-
-* Distribuido bajo la licencia [MIT](LICENSE).
-
-73 DE CA3LVK Nelson  y ¡buena radio en las bandas! 📡⚡
+Este proyecto está distribuido bajo la **Licencia MIT**. Consulta el archivo `LICENCIA_MIT.md` para más información sobre términos de uso, modificación, compatibilidad con `ft8_lib` y exención de responsabilidad ante equipos de radiofrecuencia.
