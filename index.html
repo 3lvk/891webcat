@@ -527,23 +527,42 @@
   <!-- VISTA 2: MÓDULO DIGITAL FT8 / FT4 -->
   <main id="module-main-ft8" class="hidden flex-1 p-2 sm:p-3 max-w-[1650px] w-full mx-auto flex flex-col gap-2.5 font-mono">
     
-    <!-- Barra Superior FT8: UTC, Modo, Ciclo y Telemetría On-Air -->
+    <!-- Barra Superior FT8: UTC, Modo, Selector de Banda y Telemetría On-Air -->
     <div class="theme-panel rounded-xl px-3 py-2 border shadow flex flex-wrap items-center justify-between gap-2.5 text-xs">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
-        <h2 class="font-lcd font-bold text-base text-cyan-400 mr-2">FT8 / FT4</h2>
+        <h2 class="font-lcd font-bold text-base text-cyan-400 mr-1">DIGITAL</h2>
 
         <div class="bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-amber-400 font-bold text-xs">
           UTC: <span id="ft8-utc-clock">00:00:00z</span>
         </div>
 
+        <!-- Selector de Modo con QSY automático a frecuencia estándar -->
         <div class="flex items-center gap-1">
-          <button id="btn-mode-ft8" onclick="setFt8Mode('FT8')" class="px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs">FT8</button>
-          <button id="btn-mode-ft4" onclick="setFt8Mode('FT4')" class="px-2 py-0.5 rounded theme-btn border font-bold text-xs">FT4</button>
+          <button id="btn-mode-ft8" onclick="setFt8Mode('FT8', true)" class="px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs" title="Modo FT8 y QSY a frecuencia estándar">FT8</button>
+          <button id="btn-mode-ft4" onclick="setFt8Mode('FT4', true)" class="px-2 py-0.5 rounded theme-btn border font-bold text-xs" title="Modo FT4 y QSY a frecuencia estándar">FT4</button>
+        </div>
+
+        <!-- Selector Rápido de Banda Digital sin volver a pantalla Radio -->
+        <div class="flex items-center gap-1 bg-black/60 px-1.5 py-0.5 rounded border border-slate-700 text-[10px]">
+          <span class="text-slate-400 font-bold">BANDA:</span>
+          <select id="ft8-band-select" onchange="changeFt8Band(this.value)" class="bg-transparent text-amber-400 font-bold focus:outline-none cursor-pointer">
+            <option value="160m" class="bg-slate-900 text-white">160m</option>
+            <option value="80m" class="bg-slate-900 text-white">80m</option>
+            <option value="60m" class="bg-slate-900 text-white">60m</option>
+            <option value="40m" class="bg-slate-900 text-white">40m</option>
+            <option value="30m" class="bg-slate-900 text-white">30m</option>
+            <option value="20m" class="bg-slate-900 text-white" selected>20m</option>
+            <option value="17m" class="bg-slate-900 text-white">17m</option>
+            <option value="15m" class="bg-slate-900 text-white">15m</option>
+            <option value="12m" class="bg-slate-900 text-white">12m</option>
+            <option value="10m" class="bg-slate-900 text-white">10m</option>
+            <option value="6m" class="bg-slate-900 text-white">6m</option>
+          </select>
         </div>
       </div>
 
-      <!-- Barra de Ciclo -->
+      <!-- Barra de Ciclo UTC -->
       <div class="flex items-center gap-2 flex-1 max-w-xs mx-2">
         <span id="ft8-slot-indicator" class="font-bold text-cyan-400 text-[10px] shrink-0">EVEN</span>
         <div class="w-full h-2 bg-slate-900 rounded border border-slate-700 overflow-hidden">
@@ -789,14 +808,42 @@
   </div>
 
   <script>
+    // Tablas de Frecuencias Estándar Internacionales para Modos Digitales (Hz)
+    const STANDARD_DIGITAL_FREQS = {
+      FT8: {
+        '160m': 1840000,
+        '80m':  3573000,
+        '60m':  5357000,
+        '40m':  7074000,
+        '30m':  10136000,
+        '20m':  14074000,
+        '17m':  18100000,
+        '15m':  21074000,
+        '12m':  24915000,
+        '10m':  28074000,
+        '6m':   50313000
+      },
+      FT4: {
+        '80m':  3575000,
+        '40m':  7047500,
+        '30m':  10140000,
+        '20m':  14080000,
+        '17m':  18104000,
+        '15m':  21140000,
+        '12m':  24919000,
+        '10m':  28180000,
+        '6m':   50318000
+      }
+    };
+
     const RigState = {
       connected: false,
       isPowerOn: false,
       activeVfo: 'A',
-      freqA: 14250000,
-      freqB: 7150000,
-      mode: 'USB',
-      catModeCode: 'MD02',
+      freqA: 14074000,
+      freqB: 7074000,
+      mode: 'DATA-U',
+      catModeCode: 'MD0C',
       step: 1000,
       rfPower: 100,
       squelch: 0,
@@ -862,7 +909,10 @@
       retryCount: 0,
       maxRetries: 5,
       decodes: [],
-      completedQSOs: JSON.parse(localStorage.getItem('ft8_qso_log') || '[]')
+      completedQSOs: JSON.parse(localStorage.getItem('ft8_qso_log') || '[]'),
+      // Soporte inteligente para Spots: no transmite a ciegas, espera a decodificar CQ
+      pendingSpotCall: null,
+      pendingSpotGrid: ''
     };
 
     function resampleAudio(input, fromRate, toRate) {
@@ -915,7 +965,7 @@
       if (f >= 24890000 && f <= 24990000) return '12m';
       if (f >= 28000000 && f <= 29700000) return '10m';
       if (f >= 50000000 && f <= 54000000) return '6m';
-      return 'GEN';
+      return '20m'; // Default sensato
     }
 
     function setGlobalPower(val) {
@@ -945,6 +995,7 @@
 
       const ft8Band = document.getElementById('ft8-disp-band');
       const ft8OnAir = document.getElementById('ft8-disp-onair-freq');
+      const selBand = document.getElementById('ft8-band-select');
 
       const txAudio = Ft8State.txFreq || 1250;
       const totalOnAirHz = activeFreq + txAudio;
@@ -952,6 +1003,9 @@
 
       if (ft8Band) ft8Band.textContent = band;
       if (ft8OnAir) ft8OnAir.textContent = `${onAirParts.mhz}.${onAirParts.khz} MHz`;
+      if (selBand && selBand.value !== band && selBand.querySelector(`option[value="${band}"]`)) {
+        selBand.value = band;
+      }
     }
 
     function updateAlcUI(rawVal) {
@@ -1447,7 +1501,7 @@
       if (qsyMsg) qsyMsg.textContent = msg;
       if (qsyAlert) {
         qsyAlert.classList.remove('hidden');
-        setTimeout(() => qsyAlert.classList.add('hidden'), 3000);
+        setTimeout(() => qsyAlert.classList.add('hidden'), 4000);
       }
     }
 
@@ -1462,6 +1516,11 @@
       return freqHz < 10000000 ? { name: 'LSB', cat: 'MD01' } : { name: 'USB', cat: 'MD02' };
     }
 
+    /**
+     * QSY Inteligente:
+     * - Si proviene de un spot digital, sintoniza la radio y precarga el llamado,
+     *   pero NO transmite de inmediato. Queda a la espera de decodificar su CQ.
+     */
     function performQSY(freqHz, modeStr, spotLabel, activatorCall, grid) {
       let target = Math.round(Number(freqHz));
       if (target < 1000000) target *= 1000;
@@ -1484,13 +1543,103 @@
         RigState.catModeCode = radioMode.cat;
         sendCATCommand(`${radioMode.cat};`);
         renderRigDisplay();
-        showQsyAlert(`QSY: ${(target / 1000000).toFixed(3)} MHz (${radioMode.name})`);
 
         if (isDigital) {
           switchGlobalModule('ft8');
-          if (activatorCall) setupQsoWithStation(activatorCall, grid || '');
+          if (activatorCall) {
+            armSpotAwaitingCQ(activatorCall, grid);
+          } else {
+            showQsyAlert(`QSY Digital: ${(target / 1000000).toFixed(3)} MHz (${radioMode.name})`);
+          }
+        } else {
+          showQsyAlert(`QSY: ${(target / 1000000).toFixed(3)} MHz (${radioMode.name})`);
         }
       }, 80);
+    }
+
+    /**
+     * Modo En Espera de CQ desde Spot:
+     * Carga el indicativo pero mantiene la transmisión apagada (armFt8Tx = false).
+     * El sistema responderá automáticamente solo si la estación es decodificada.
+     */
+    function armSpotAwaitingCQ(callsign, grid) {
+      const call = callsign.toUpperCase().trim();
+      const g = (grid || '').toUpperCase().trim();
+
+      Ft8State.pendingSpotCall = call;
+      Ft8State.pendingSpotGrid = g;
+      Ft8State.dxCall = call;
+      Ft8State.dxGrid = g;
+
+      // Asegurar que NO transmita a ciegas
+      armFt8Tx(false);
+
+      const targetBadge = document.getElementById('ft8-target-badge');
+      if (targetBadge) {
+        targetBadge.innerHTML = `<span class="text-amber-400 font-bold animate-pulse">🎯 ESPERANDO CQ DE: ${call}</span>`;
+      }
+
+      document.getElementById('qso-dx-call').value = call;
+      document.getElementById('qso-dx-grid').value = g;
+      recalculateQsoMsgs();
+      selectTxMessageRow(2);
+
+      showQsyAlert(`🎯 Spot: ${call} cargado. Esperando decodificar su CQ para responder.`);
+    }
+
+    /**
+     * Cambia de banda directamente en el módulo FT8/FT4 y sintoniza la frecuencia estándar.
+     */
+    function changeFt8Band(bandName) {
+      const mode = Ft8State.mode || 'FT8';
+      const freqTable = STANDARD_DIGITAL_FREQS[mode] || STANDARD_DIGITAL_FREQS.FT8;
+      const targetFreq = freqTable[bandName];
+
+      if (!targetFreq) {
+        showQsyAlert(`Modo ${mode} no estándar para ${bandName}`);
+        return;
+      }
+
+      // Sintonizar VFO y conmutar a DATA-U
+      if (RigState.activeVfo === 'A') {
+        RigState.freqA = targetFreq;
+        sendCATCommand(`FA${String(targetFreq).padStart(9, '0')};`);
+      } else {
+        RigState.freqB = targetFreq;
+        sendCATCommand(`FB${String(targetFreq).padStart(9, '0')};`);
+      }
+
+      RigState.mode = 'DATA-U';
+      RigState.catModeCode = 'MD0C';
+      sendCATCommand('MD0C;');
+
+      renderRigDisplay();
+      updateOnAirFrequencyDisplays();
+      showQsyAlert(`QSY ${mode}: ${bandName} ➔ ${(targetFreq / 1000000).toFixed(3)} MHz (DATA-U)`);
+    }
+
+    /**
+     * Al conmutar entre FT8 y FT4:
+     * Si doQsy es true, busca la banda actual y salta a la frecuencia estándar de ese modo.
+     */
+    function setFt8Mode(mode, doQsy = true) {
+      Ft8State.mode = mode;
+      Ft8State.slotDuration = (mode === 'FT4') ? 7.5 : 15.0;
+
+      const btnFt8 = document.getElementById('btn-mode-ft8');
+      const btnFt4 = document.getElementById('btn-mode-ft4');
+      if (btnFt8 && btnFt4) {
+        btnFt8.className = mode === 'FT8' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
+        btnFt4.className = mode === 'FT4' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
+      }
+
+      sendFt8Command({ action: 'set_mode', mode: mode });
+
+      if (doQsy) {
+        const activeFreq = RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB;
+        const currentBand = getBandNameFromHz(activeFreq);
+        changeFt8Band(currentBand);
+      }
     }
 
     async function fetchSpots() {
@@ -1584,7 +1733,7 @@
           <div class="text-right shrink-0">
             <div class="font-lcd font-bold text-xs">${(freqHz / 1000000).toFixed(3)} <span class="text-[9px] ${isDigital ? 'text-cyan-400' : 'text-amber-500'} font-bold">${spot.mode || ''}</span></div>
             <button class="px-1.5 py-0.5 rounded ${isDigital ? 'bg-cyan-500' : 'bg-amber-500'} text-black font-bold font-mono text-[9px] mt-0.5">
-              ${isDigital ? 'QSY FT8' : 'QSY'}
+              ${isDigital ? 'SINTONIZAR' : 'QSY'}
             </button>
           </div>
         `;
@@ -1674,14 +1823,6 @@
       }
     }
 
-    function setFt8Mode(mode) {
-      Ft8State.mode = mode;
-      Ft8State.slotDuration = (mode === 'FT4') ? 7.5 : 15.0;
-      document.getElementById('btn-mode-ft8').className = mode === 'FT8' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
-      document.getElementById('btn-mode-ft4').className = mode === 'FT4' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
-      sendFt8Command({ action: 'set_mode', mode: mode });
-    }
-
     function updateStationConfig() {
       Ft8State.myCall = (document.getElementById('ft8-my-call')?.value || 'LU1AA').toUpperCase().trim();
       Ft8State.myGrid = (document.getElementById('ft8-my-grid')?.value || 'FF46').toUpperCase().trim();
@@ -1722,7 +1863,9 @@
       document.getElementById('tx-label-6').textContent = `${dxCall} ${myCall} 73`;
 
       const targetBadge = document.getElementById('ft8-target-badge');
-      if (targetBadge) targetBadge.textContent = dxCall ? `DX: ${dxCall} (${dxGrid})` : 'DX: NINGUNO';
+      if (targetBadge && !Ft8State.pendingSpotCall) {
+        targetBadge.textContent = dxCall ? `DX: ${dxCall} (${dxGrid})` : 'DX: NINGUNO';
+      }
     }
 
     function selectTxMessageRow(rowNum) {
@@ -1789,6 +1932,7 @@
     function abortFt8Tx() {
       armFt8Tx(false);
       Ft8State.retryCount = 0;
+      Ft8State.pendingSpotCall = null;
     }
 
     function toggleAutoCqMode(enabled) {
@@ -1838,6 +1982,7 @@
     function handleIncomingDecodes(decodes, slot) {
       const myCall = Ft8State.myCall.toUpperCase();
       const dxCall = Ft8State.dxCall.toUpperCase();
+      const pendingCall = Ft8State.pendingSpotCall ? Ft8State.pendingSpotCall.toUpperCase() : null;
 
       for (let i = decodes.length - 1; i >= 0; i--) {
         const d = decodes[i];
@@ -1845,13 +1990,43 @@
         if (Ft8State.decodes.length > 120) Ft8State.decodes.pop();
 
         const tokens = d.msg ? d.msg.trim().split(/\s+/) : [];
+
+        // 1. COMPROBAR SI CORRESPONDE AL SPOT EN ESPERA (No transmite hasta decodificarlo)
+        if (pendingCall && tokens.includes(pendingCall)) {
+          const isFromTarget = (tokens[0] === 'CQ' && tokens.includes(pendingCall)) || (tokens[1] === pendingCall);
+          if (isFromTarget) {
+            const foundGrid = tokens[tokens.length - 1] || Ft8State.pendingSpotGrid;
+            Ft8State.pendingSpotCall = null; // Cumplido, limpiar espera
+
+            // Turno de respuesta inverso obligatorio (si llegó en even, respondemos en odd)
+            const replySlot = (slot === 'even') ? 'odd' : 'even';
+            Ft8State.txSlot = replySlot;
+            const selSlot = document.getElementById('ft8-tx-slot-select');
+            if (selSlot) selSlot.value = replySlot;
+
+            setupQsoWithStation(pendingCall, foundGrid, d.snr, d.freq);
+            selectTxMessageRow(2);
+            armFt8Tx(true);
+
+            showQsyAlert(`🎯 ¡Decodificado ${pendingCall} (${d.snr}dB)! Respondiendo en slot ${replySlot.toUpperCase()}...`);
+            continue;
+          }
+        }
+
+        // 2. RESPUESTA A NUESTRO LLAMADO (Si alguien nos contesta)
         if (tokens.length >= 2 && tokens[0] === myCall && tokens[1] !== myCall) {
+          const replySlot = (slot === 'even') ? 'odd' : 'even';
+          Ft8State.txSlot = replySlot;
+          const selSlot = document.getElementById('ft8-tx-slot-select');
+          if (selSlot) selSlot.value = replySlot;
+
           setupQsoWithStation(tokens[1], tokens[2] || '', d.snr, d.freq);
           selectTxMessageRow(3);
           armFt8Tx(true);
           continue;
         }
 
+        // 3. AVANCE DE AUTO-SECUENCIA DURANTE EL QSO EN CURSO
         if (Ft8State.autoSeq && dxCall && d.msg.includes(myCall) && d.msg.includes(dxCall)) {
           Ft8State.retryCount = 0;
           if (d.msg.includes(' RR73') || d.msg.includes(' 73')) {
@@ -1942,6 +2117,7 @@
       Ft8State.dxCall = '';
       Ft8State.dxGrid = '';
       Ft8State.retryCount = 0;
+      Ft8State.pendingSpotCall = null;
       selectTxMessageRow(1);
       recalculateQsoMsgs();
       armFt8Tx(false);
