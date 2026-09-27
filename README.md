@@ -204,79 +204,6 @@ docker compose up -d --build
 docker compose logs -f ft891_webcat
 
 ```
-
-## 🌐 Configuración de Proxy Inverso Nginx (HTTPS y WebSockets)
-
-Para acceder de forma segura a través de Internet y permitir el uso del micrófono del navegador en dispositivos móviles, se debe emplear un proxy inverso con certificado SSL (Let's Encrypt / Certbot).
-
-### Configuración con Solución al Bucle de Autenticación en Safari iOS
-
-En navegadores WebKit (iPhone / iPad), el uso de `auth_basic` (htaccess) en la raíz del dominio provoca solicitudes continuas de usuario y contraseña porque Safari no envía cabeceras de autorización en el handshake de WebSockets.
-
-La solución consiste en proteger la entrada web principal y deshabilitar explícitamente `auth_basic off;` en el bloque `/ws/`:
-
-```
-server {
-    listen 80;
-    server_name tu-dominio.com;
-    return 301 https://\(host\)request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name tu-dominio.com;
-
-    ssl_certificate /etc/letsencrypt/live/tu-dominio.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/tu-dominio.com/privkey.pem;
-
-    # Autenticación de acceso a la estación
-    auth_basic "Estación Yaesu FT-891";
-    auth_basic_user_file /etc/nginx/.htpasswd;
-
-    # 1. Aplicación Web y Archivos Estáticos
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # 2. WebSockets (CAT, Audio RX/TX y FT8)
-    # CRÍTICO: Desactivar auth_basic aquí para evitar el bucle infinito en Safari iOS
-    location /ws/ {
-        auth_basic off;
-
-        proxy_pass http://127.0.0.1:8000/ws/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-
-        # Tiempos de espera extendidos para conexiones persistentes
-        proxy_read_timeout 86400s;
-        proxy_send_timeout 86400s;
-    }
-
-    location = /favicon.ico {
-        auth_basic off;
-        proxy_pass http://127.0.0.1:8000/favicon.ico;
-    }
-}
-
-```
-
-Recarga la configuración tras aplicar el archivo:
-
-```
-sudo nginx -t && sudo systemctl reload nginx
-
-```
-
 ## 🛠️ Variables de Entorno
 
 Puedes personalizar el comportamiento del sistema mediante variables en `docker-compose.yml`:
@@ -328,4 +255,4 @@ Puedes personalizar el comportamiento del sistema mediante variables en `docker-
 
 * Distribuido bajo la licencia [MIT](LICENSE).
 
-73 de la estación y ¡buena radio en las bandas! 📡⚡
+73 DE CA3LVK Nelson  y ¡buena radio en las bandas! 📡⚡
