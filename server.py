@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 SERIAL_PORT = os.getenv("SERIAL_PORT", "/dev/ttyUSB0")
+CW_KEY_PORT = os.getenv("CW_KEY_PORT", "/dev/ttyUSB1")
 BAUD_RATE = int(os.getenv("BAUD_RATE", "38400"))
 HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 SAMPLE_RATE = int(os.getenv("AUDIO_SAMPLE_RATE", "48000"))
@@ -26,16 +27,16 @@ AUDIO_CARD_KEYWORD = os.getenv("AUDIO_CARD_KEYWORD", "USB").lower()
 DEMO_FALLBACK = os.getenv("DEMO_FALLBACK", "true").lower() == "true"
 
 def unmute_alsa_cards():
-    """Configura los volúmenes ALSA del Digirig a nivel óptimo para no saturar ALC."""
+    """Configura los volúmenes ALSA del Digirig a nivel óptimo para PTT por tono y audio limpio."""
     cmds = [
-        ["amixer", "sset", "Master", "55%", "unmute"],
-        ["amixer", "sset", "Speaker", "55%", "unmute"],
-        ["amixer", "sset", "PCM", "55%", "unmute"],
-        ["amixer", "sset", "Playback", "55%", "unmute"],
-        ["amixer", "-c", "1", "sset", "Speaker", "55%", "unmute"],
-        ["amixer", "-c", "1", "sset", "Playback", "55%", "unmute"],
-        ["amixer", "-c", "2", "sset", "Speaker", "55%", "unmute"],
-        ["amixer", "-c", "0", "sset", "Speaker", "55%", "unmute"],
+        ["amixer", "sset", "Master", "85%", "unmute"],
+        ["amixer", "sset", "Speaker", "85%", "unmute"],
+        ["amixer", "sset", "PCM", "85%", "unmute"],
+        ["amixer", "sset", "Playback", "85%", "unmute"],
+        ["amixer", "-c", "1", "sset", "Speaker", "85%", "unmute"],
+        ["amixer", "-c", "1", "sset", "Playback", "85%", "unmute"],
+        ["amixer", "-c", "2", "sset", "Speaker", "85%", "unmute"],
+        ["amixer", "-c", "0", "sset", "Speaker", "85%", "unmute"],
     ]
     for cmd in cmds:
         try:
@@ -48,7 +49,9 @@ unmute_alsa_cards()
 cat_clients = set()
 rx_client_queues = {}
 ft8_clients = set()
+cw_clients = set()
 ser = None
+cw_ser = None
 rx_stream = None
 tx_stream = None
 
@@ -57,7 +60,9 @@ tx_lock = threading.Lock()
 tx_audio_logged_time = 0
 tx_prebuffering = True
 tone_phase = 0.0
+cw_tone_phase = 0.0
 ft8_tx_active = False
+cw_tx_active = False
 voice_tx_active = False
 
 # Búfer circular de recepción FT8/FT4 (12000 Hz, 16 segundos)
@@ -67,7 +72,6 @@ ft8_rx_ring = np.zeros(FT8_BUFFER_SAMPLES, dtype=np.int16)
 ft8_rx_idx = 0
 ft8_rx_lock = threading.Lock()
 
-# Estado del motor FT8 / FT4 en el servidor
 ft8_engine_state = {
     "mode": "FT8",
     "slot_duration": 15.0,
@@ -80,62 +84,87 @@ ft8_engine_state = {
     "last_decoded": []
 }
 
+cw_engine_state = {
+    "wpm": 20,
+    "pitch": 700,
+    "mode": "CW-U",
+    "tx_active": False
+}
+
 def tx_audio_callback(outdata, frames, time_info, status):
     """
     Callback de modulación ALSA estéreo para Digirig DR-891:
-    Canal 0 (Left)  = Señal de audio digital modulada hacia pin DATA IN del FT-891.
-    Canal 1 (Right) = Tono de control de 1000 Hz para circuitos de PTT auxiliares.
+    Canal 0 (Left)  = Señal de modulación hacia pin DATA IN (Pin 1 Mini-DIN 6).
+    Canal 1 (Right) = Tono de control de 1000 Hz para circuitos PTT / DAKY del Digirig (Pin 3 Mini-DIN 6).
     """
-    global tx_pcm_buffer, tx_audio_logged_time, tx_prebuffering, tone_phase, ft8_tx_active
+    global tx_pcm_buffer, tx_audio_logged_time, tx_prebuffering, tone_phase, cw_tone_phase
+    global ft8_tx_active, cw_tx_active, voice_tx_active
     bytes_needed = frames * 2
 
-    with tx_lock:
-        buffer_len = len(tx_pcm_buffer)
+    mono = np.zeros(frames, dtype=np.int16)
 
-        if tx_prebuffering:
-            if buffer_len >= 9600:
-                tx_prebuffering = False
+    # 1. GESTIÓN DEL CANAL IZQUIERDO (Left: Pin 1 DATA IN)
+    if cw_tx_active and "DATA" in str(cw_engine_state.get("mode", "")).upper():
+        # Modo DATA-U AFSK: sintetizar tono senoidal puro en el canal de modulación
+        pitch = int(cw_engine_state.get("pitch", 700))
+        t_cw = (np.arange(frames) + cw_tone_phase) / actual_sample_rate
+        cw_tone_phase = (cw_tone_phase + frames) % actual_sample_rate
+        mono = (np.sin(2.0 * np.pi * pitch * t_cw) * 26000).astype(np.int16)
+    elif cw_tx_active:
+        # Modo CW-U NATIVO: Silencio en DATA IN.
+        # El oscilador del FT-891 genera la portadora RF nativa al derivar DAKY a masa.
+        cw_tone_phase = 0.0
+        mono.fill(0)
+    else:
+        # Modos normales (FT8, Fonía): extraer datos del búfer PCM
+        cw_tone_phase = 0.0
+        with tx_lock:
+            buffer_len = len(tx_pcm_buffer)
+
+            if tx_prebuffering:
+                if buffer_len >= 9600:
+                    tx_prebuffering = False
+                else:
+                    buffer_len = 0
+
+            if not tx_prebuffering and buffer_len >= bytes_needed:
+                chunk = tx_pcm_buffer[:bytes_needed]
+                del tx_pcm_buffer[:bytes_needed]
+                mono = np.frombuffer(chunk, dtype=np.int16)
+            elif not tx_prebuffering and buffer_len > 0:
+                chunk = bytes(tx_pcm_buffer)
+                tx_pcm_buffer.clear()
+                avail = np.frombuffer(chunk, dtype=np.int16)
+                mono[:len(avail)] = avail
+                if not ft8_tx_active:
+                    tx_prebuffering = True
             else:
-                outdata.fill(0)
-                return
+                if not ft8_tx_active:
+                    tx_prebuffering = True
 
-        if buffer_len >= bytes_needed:
-            chunk = tx_pcm_buffer[:bytes_needed]
-            del tx_pcm_buffer[:bytes_needed]
-            mono = np.frombuffer(chunk, dtype=np.int16)
-        elif buffer_len > 0:
-            chunk = bytes(tx_pcm_buffer)
-            tx_pcm_buffer.clear()
-            avail = np.frombuffer(chunk, dtype=np.int16)
-            mono = np.zeros(frames, dtype=np.int16)
-            mono[:len(avail)] = avail
-            if not ft8_tx_active:
-                tx_prebuffering = True
-        else:
-            outdata.fill(0)
-            if not ft8_tx_active:
-                tx_prebuffering = True
-            return
+    # 2. ASIGNACIÓN DEL CANAL IZQUIERDO
+    stereo = np.zeros((frames, 2), dtype=np.int16)
+    stereo[:, 0] = mono
 
-        stereo = np.zeros((frames, 2), dtype=np.int16)
-        stereo[:, 0] = mono
+    # 3. GESTIÓN DEL CANAL DERECHO (Right: Control PTT / DAKY del Digirig hacia Pin 3)
+    t = (np.arange(frames) + tone_phase) / actual_sample_rate
+    tone_phase = (tone_phase + frames) % actual_sample_rate
 
-        t = (np.arange(frames) + tone_phase) / actual_sample_rate
-        tone_phase = (tone_phase + frames) % actual_sample_rate
-        
-        # Mantener el tono de 1000 Hz activo de forma continua y sólida mientras dure el PTT
-        if ft8_tx_active or voice_tx_active:
-            stereo[:, 1] = (np.sin(2.0 * np.pi * 1000.0 * t) * 26000).astype(np.int16)
-        else:
-            stereo[:, 1] = 0
+    # El tono senoidal continuo de 1000 Hz acciona el circuito de optoacoplamiento del Digirig,
+    # derivando a masa el Pin 3 (DAKY / PTT) del conector Mini-DIN 6 del FT-891.
+    if ft8_tx_active or voice_tx_active or cw_tx_active:
+        stereo[:, 1] = (np.sin(2.0 * np.pi * 1000.0 * t) * 31500).astype(np.int16)
+    else:
+        stereo[:, 1] = 0
 
-        outdata[:] = stereo
+    outdata[:] = stereo
 
-        now = time.time()
-        if now - tx_audio_logged_time > 2.0:
-            tx_audio_logged_time = now
-            peak = int(np.max(np.abs(mono)))
-            print(f"[AUDIO TX -> Digirig] Pico={peak}/32767 | Buffer Jitter: {len(tx_pcm_buffer)} bytes")
+    now = time.time()
+    if now - tx_audio_logged_time > 2.0:
+        tx_audio_logged_time = now
+        peak = int(np.max(np.abs(mono)))
+        is_keying = ft8_tx_active or voice_tx_active or cw_tx_active
+        print(f"[AUDIO TX -> Digirig] Pico L={peak} | R_DAKY={'ON' if is_keying else 'OFF'} | CW_Active={cw_tx_active}")
 
 main_event_loop = None
 
@@ -152,11 +181,26 @@ try:
     )
     ser.rts = False
     ser.dtr = False
-    print(f"[CAT] Puerto serie abierto en {SERIAL_PORT} @ {BAUD_RATE} bps (8N2)")
+    print(f"[CAT] Puerto serie CAT abierto en {SERIAL_PORT} @ {BAUD_RATE} bps (8N2)")
 except Exception as e:
-    print(f"[CAT] Advertencia: No se pudo abrir {SERIAL_PORT}: {e}")
+    print(f"[CAT] Advertencia: No se pudo abrir puerto CAT {SERIAL_PORT}: {e}")
     if not DEMO_FALLBACK:
         sys.exit(1)
+
+if os.path.exists(CW_KEY_PORT) and CW_KEY_PORT != SERIAL_PORT:
+    try:
+        cw_ser = serial.Serial(
+            port=CW_KEY_PORT,
+            baudrate=BAUD_RATE,
+            timeout=0,
+            rtscts=False,
+            dsrdtr=False
+        )
+        cw_ser.rts = False
+        cw_ser.dtr = False
+        print(f"[CW HW] Puerto secundario abierto en {CW_KEY_PORT} para manipulación DTR/RTS")
+    except Exception as e:
+        print(f"[CW HW] Puerto secundario {CW_KEY_PORT} no disponible: {e}")
 
 input_device_id = None
 output_device_id = None
@@ -247,42 +291,68 @@ def send_cat_internal(cmd_str):
             print(f"[CAT INTERNAL] Error enviando '{cmd_str}': {e}")
 
 def set_hardware_ptt(active: bool):
-    """
-    Enclava o libera la línea PTT del FT-891 por hardware y CAT:
-    1. Línea física RTS del Digirig hacia el pin PTT (Pin 3 Mini-DIN 6).
-    2. Comando CAT TX2; (DATA PTT para conmutar a entrada trasera DATA IN).
-       Si se usa TX1;, el FT-891 conmuta al micrófono frontal y silencia el puerto trasero.
-    """
+    """Enclava o libera la línea PTT del FT-891 por hardware y CAT."""
     if ser and ser.is_open:
         try:
             ser.rts = active
         except Exception as e:
             print(f"[PTT HW] Error fijando RTS={active}: {e}")
 
+    if cw_ser and cw_ser.is_open:
+        try:
+            cw_ser.rts = active
+        except Exception:
+            pass
+
     if active:
         send_cat_internal("TX2;")
     else:
         send_cat_internal("TX0;")
 
-def calibrate_ft8_snr(raw_val: float) -> int:
+def set_hardware_cw_key(active: bool, mode: str = "CW-U"):
     """
-    Convierte el score bruto de detección (ft8_lib candidate.score o SNR en bin de 6.25 Hz)
-    al estándar internacional WSJT-X referenciado a 2500 Hz:
-    SNR_2500Hz = SNR_bin - 10*log10(2500 / 6.25) ≈ SNR_bin - 26 dB.
+    Manipulación de portadora CW:
+    1. En modo CW nativo (CW-U / CW-L):
+       - Activa cw_tx_active para que el canal derecho emita el tono de 1000 Hz que deriva a masa
+         el Pin 3 (DAKY) del Digirig.
+       - Conmuta las líneas RTS/DTR en ambos puertos COM físicos.
+       - Mantiene Break-In activo (BI1;).
+    2. En modo AFSK (DATA-U):
+       - Modula audio senoidal en DATA IN y conmuta PTT CAT TX2;.
+    """
+    global cw_tx_active
+    cw_tx_active = active
+    mode_upper = str(mode).upper()
+    is_pure_cw = ("CW" in mode_upper) and ("DATA" not in mode_upper)
 
-    - Si el valor ya es negativo (ej. un fork que ya entrega WSJT-X SNR), se conserva.
-    - Si el valor es positivo (> 0), se calibra con el desplazamiento de 26 dB
-      para reflejar señales reales entre -24 dB y +15 dB.
-    """
+    if ser and ser.is_open:
+        try:
+            ser.rts = active
+            ser.dtr = active
+        except Exception:
+            pass
+
+    if cw_ser and cw_ser.is_open:
+        try:
+            cw_ser.dtr = active
+            cw_ser.rts = active
+        except Exception:
+            pass
+
+    if is_pure_cw:
+        if active:
+            send_cat_internal("BI1;")
+    else:
+        send_cat_internal("TX2;" if active else "TX0;")
+
+def calibrate_ft8_snr(raw_val: float) -> int:
     val = int(round(raw_val))
     if val < 0:
         return max(-26, min(24, val))
-
     calibrated = val - 26
     return max(-26, min(24, calibrated))
 
 def run_decode_ft8_file(wav_path):
-    """Decodifica un bloque de audio WAV utilizando el binario decode_ft8."""
     candidates = ["/usr/local/bin/decode_ft8", "./decode_ft8", "decode_ft8"]
     bin_path = next((c for c in candidates if os.path.exists(c)), None)
     if not bin_path:
@@ -307,7 +377,6 @@ def run_decode_ft8_file(wav_path):
                     dt_str = meta[2]
                     freq_str = meta[3] if len(meta) > 3 else "1200"
 
-                    # Conversión y calibración a escala estándar WSJT-X (dB)
                     try:
                         raw_snr = float(snr_str)
                         snr_val = calibrate_ft8_snr(raw_snr)
@@ -337,11 +406,6 @@ def run_decode_ft8_file(wav_path):
         return []
 
 def synthesize_ft8_audio(message, audio_freq, out_wav_path):
-    """
-    Genera el archivo de modulación de audio.
-    Usa primero gen_ft8 de ft8_lib si está disponible; de lo contrario utiliza
-    el sintetizador GFSK directo en 12 kHz.
-    """
     candidates = ["/usr/local/bin/gen_ft8", "./gen_ft8", "gen_ft8"]
     bin_path = next((c for c in candidates if os.path.exists(c)), None)
 
@@ -357,7 +421,6 @@ def synthesize_ft8_audio(message, audio_freq, out_wav_path):
         except Exception as e:
             print(f"[FT8 GEN] Falló binario gen_ft8, recurriendo a sintetizador interno: {e}")
 
-    # Sintetizador interno de contingencia (tono continuo con rampa en la frecuencia indicada)
     try:
         sample_rate = 12000
         duration = 12.64
@@ -381,7 +444,6 @@ def synthesize_ft8_audio(message, audio_freq, out_wav_path):
         return False
 
 def broadcast_ft8_event(event_dict):
-    """Difunde eventos de estado FT8 hacia todos los clientes WebSocket."""
     if not ft8_clients or not main_event_loop or main_event_loop.is_closed():
         return
     payload = json.dumps(event_dict)
@@ -394,11 +456,6 @@ def broadcast_ft8_event(event_dict):
     main_event_loop.call_soon_threadsafe(dispatch)
 
 def ft8_cycle_worker():
-    """
-    Worker en segundo plano sincronizado con la ranura UTC exacta:
-    - Inicio de slot (:00, :15, :30, :45): Transmite si la estación está armada para el slot actual.
-    - Final de slot (:14, :29, :44, :59): Extrae los 15s de audio y decodifica la banda.
-    """
     global tx_pcm_buffer, tx_prebuffering, ft8_tx_active
     print("[FT8 WORKER] Hilo de sincronización UTC activo.")
     last_tx_slot = -1
@@ -412,7 +469,7 @@ def ft8_cycle_worker():
         sec_in_slot = sec % slot_dur
         is_even = (slot_idx % 2 == 0)
 
-        # 1. DISPARADOR DE TRANSMISIÓN (entre 0.0s y 0.75s del inicio de la ranura)
+        # 1. Disparador de Transmisión
         if sec_in_slot < 0.75 and slot_idx != last_tx_slot:
             last_tx_slot = slot_idx
             armed = ft8_engine_state["tx_armed"]
@@ -448,15 +505,12 @@ def ft8_cycle_worker():
                             n_frames = wf.getnframes()
                             raw_12k = wf.readframes(n_frames)
                             samples_12k = np.frombuffer(raw_12k, dtype=np.int16)
-                            # Remuestreo 12 kHz -> 48 kHz (interpolación 4x)
                             samples_48k = np.repeat(samples_12k, 4)
-                            # Nivel nominal para 50W-100W sin distorsión
                             scaled_48k = (samples_48k * 0.85).astype(np.int16)
 
                         tx_duration = len(samples_48k) / actual_sample_rate
                         ft8_tx_active = True
 
-                        # Enclavar PTT hardware y conmutar a DATA IN
                         set_hardware_ptt(True)
 
                         with tx_lock:
@@ -464,9 +518,7 @@ def ft8_cycle_worker():
                             tx_pcm_buffer.extend(scaled_48k.tobytes())
                             tx_prebuffering = False
 
-                        # Tiempo exacto de reproducción de la trama de modulación
                         time.sleep(tx_duration)
-                        # Breve margen de 120ms para que la tarjeta de sonido drene la cola DAC
                         time.sleep(0.12)
                     except Exception as ex:
                         print(f"[FT8 TX] Error en transmisión: {ex}")
@@ -490,7 +542,7 @@ def ft8_cycle_worker():
                 else:
                     print(f"[FT8 TX] No se pudo generar la señal para '{msg_to_send}'")
 
-        # 2. DISPARADOR DE RECEPCIÓN Y DECODIFICACIÓN (al segundo 14.1s en FT8 o 6.8s en FT4)
+        # 2. Disparador de Recepción y Decodificación
         decode_trigger = slot_dur - 0.9
         if sec_in_slot >= decode_trigger and sec_in_slot < decode_trigger + 0.45 and slot_idx != last_rx_slot:
             last_rx_slot = slot_idx
@@ -559,16 +611,17 @@ async def lifespan(app: FastAPI):
 
     if output_device_id is not None:
         try:
+            # blocksize=480 (10ms a 48kHz) garantiza respuesta de manipulación CW instantánea
             tx_stream = sd.OutputStream(
                 device=output_device_id,
                 channels=2,
                 samplerate=actual_sample_rate,
                 dtype='int16',
-                blocksize=1920,
+                blocksize=480,
                 callback=tx_audio_callback
             )
             tx_stream.start()
-            print(f"[AUDIO TX] Modulación estéreo iniciada en #{output_device_id} @ {actual_sample_rate} Hz")
+            print(f"[AUDIO TX] Modulación estéreo iniciada en #{output_device_id} @ {actual_sample_rate} Hz (blocksize=480)")
         except Exception as e:
             print(f"[AUDIO TX] Error iniciando OutputStream: {e}")
 
@@ -588,13 +641,12 @@ async def lifespan(app: FastAPI):
         except Exception:
             pass
 
-app = FastAPI(title="Yaesu FT-891 WebCAT & FT8 Station Server", lifespan=lifespan)
+app = FastAPI(title="Yaesu FT-891 WebCAT, Digital & CW Station Server", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
 cached_spots_data = {"spots": []}
 
 def background_spots_worker():
-    """Descarga spots en segundo plano cada 45 segundos (POTA, LLOTA, SOTA y DX Cluster)."""
     global cached_spots_data
     while True:
         combined = []
@@ -780,7 +832,7 @@ async def get_index():
 
 @app.websocket("/ws/cat")
 async def websocket_cat_endpoint(websocket: WebSocket):
-    global ft8_tx_active, voice_tx_active
+    global ft8_tx_active, voice_tx_active, cw_tx_active
     await websocket.accept()
     cat_clients.add(websocket)
     try:
@@ -802,11 +854,21 @@ async def websocket_cat_endpoint(websocket: WebSocket):
                         ser.rts = True
                     except Exception:
                         pass
+                if cw_ser and cw_ser.is_open:
+                    try:
+                        cw_ser.rts = True
+                    except Exception:
+                        pass
             elif cmd.startswith("TX0"):
                 voice_tx_active = False
-                if ser and ser.is_open and not ft8_tx_active:
+                if ser and ser.is_open and not (ft8_tx_active or cw_tx_active):
                     try:
                         ser.rts = False
+                    except Exception:
+                        pass
+                if cw_ser and cw_ser.is_open and not (ft8_tx_active or cw_tx_active):
+                    try:
+                        cw_ser.rts = False
                     except Exception:
                         pass
 
@@ -820,9 +882,14 @@ async def websocket_cat_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         cat_clients.discard(websocket)
         voice_tx_active = False
-        if ser and ser.is_open and not ft8_tx_active:
+        if ser and ser.is_open and not (ft8_tx_active or cw_tx_active):
             try:
                 ser.rts = False
+            except Exception:
+                pass
+        if cw_ser and cw_ser.is_open and not (ft8_tx_active or cw_tx_active):
+            try:
+                cw_ser.rts = False
             except Exception:
                 pass
             with tx_lock:
@@ -831,7 +898,6 @@ async def websocket_cat_endpoint(websocket: WebSocket):
 
 @app.websocket("/ws/audio/rx")
 async def websocket_audio_rx_endpoint(websocket: WebSocket):
-    """Envía el stream de audio capturado desde el Digirig (48 kHz) hacia el navegador."""
     await websocket.accept()
     q = asyncio.Queue(maxsize=30)
     client_id = id(websocket)
@@ -849,13 +915,11 @@ async def websocket_audio_rx_endpoint(websocket: WebSocket):
 
 @app.websocket("/ws/audio/tx")
 async def websocket_audio_tx_endpoint(websocket: WebSocket):
-    """Recibe paquetes PCM del micrófono del navegador y los encola en el buffer de salida."""
-    global ft8_tx_active
+    global ft8_tx_active, cw_tx_active
     await websocket.accept()
     try:
         while True:
             data = await websocket.receive_bytes()
-            # Si FT8 está transmitiendo, descartar el micrófono para evitar sobreescribir la trama
             if ft8_tx_active:
                 continue
             with tx_lock:
@@ -870,9 +934,52 @@ async def websocket_audio_tx_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"[AUDIO TX WS Error] {e}")
 
+@app.websocket("/ws/cw")
+async def websocket_cw_endpoint(websocket: WebSocket):
+    global cw_tx_active
+    await websocket.accept()
+    cw_clients.add(websocket)
+    try:
+        # Asegurar Break-In activo en el transceptor FT-891
+        send_cat_internal("BI1;")
+        await websocket.send_text(json.dumps({
+            "event": "state",
+            "state": cw_engine_state
+        }))
+        while True:
+            raw = await websocket.receive_text()
+            try:
+                cmd = json.loads(raw)
+                action = cmd.get("action")
+                mode = cmd.get("mode", cw_engine_state.get("mode", "CW-U"))
+                cw_engine_state["mode"] = mode
+
+                if action == "key_down":
+                    set_hardware_cw_key(True, mode)
+                elif action == "key_up":
+                    set_hardware_cw_key(False, mode)
+                elif action == "enable_breakin":
+                    send_cat_internal("BI1;")
+                elif action == "set_speed":
+                    wpm = max(5, min(60, int(cmd.get("wpm", 20))))
+                    cw_engine_state["wpm"] = wpm
+                    send_cat_internal(f"KS{str(wpm).zfill(3)};")
+                elif action == "set_pitch":
+                    pitch = max(300, min(1050, int(cmd.get("pitch", 700))))
+                    cw_engine_state["pitch"] = pitch
+                    send_cat_internal(f"KP{str(pitch).zfill(4)};")
+                elif action == "send_ky_text":
+                    text = cmd.get("text", "").upper()[:24]
+                    if text:
+                        send_cat_internal(f"KY {text};")
+            except Exception as e:
+                print(f"[WS CW] Error en comando: {e}")
+    except WebSocketDisconnect:
+        cw_clients.discard(websocket)
+        set_hardware_cw_key(False, "CW-U")
+
 @app.websocket("/ws/ft8")
 async def websocket_ft8_endpoint(websocket: WebSocket):
-    """Endpoint WebSocket para telemetría, decodes y control de ciclos FT8/FT4."""
     global ft8_tx_active
     await websocket.accept()
     ft8_clients.add(websocket)
