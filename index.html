@@ -25,27 +25,27 @@
 
   <style>
     :root {
-      --app-bg: #090d14;
+      --app-bg: #0b0f17;
       --app-panel: #111827;
-      --app-card: #1b2434;
-      --app-border: #2d3b52;
+      --app-card: #182234;
+      --app-border: #2a384f;
       --app-text: #e2e8f0;
       --app-text-muted: #94a3b8;
-      --btn-bg: #1b2434;
-      --btn-border: #374151;
+      --btn-bg: #182234;
+      --btn-border: #334155;
       --btn-text: #f1f5f9;
-      --btn-hover: #243046;
+      --btn-hover: #223046;
     }
 
     html:not(.dark) {
-      --app-bg: #e2e8f0;
+      --app-bg: #f1f5f9;
       --app-panel: #ffffff;
       --app-card: #f8fafc;
-      --app-border: #94a3b8;
+      --app-border: #cbd5e1;
       --app-text: #0f172a;
-      --app-text-muted: #334155;
+      --app-text-muted: #475569;
       --btn-bg: #ffffff;
-      --btn-border: #94a3b8;
+      --btn-border: #cbd5e1;
       --btn-text: #0f172a;
       --btn-hover: #e2e8f0;
     }
@@ -77,20 +77,20 @@
     }
 
     .lcd-amber {
-      background: linear-gradient(180deg, #1c1303 0%, #291903 50%, #150d02 100%);
+      background: linear-gradient(180deg, #181103 0%, #241603 50%, #120b02 100%);
       border-color: #b45309;
-      box-shadow: inset 0 0 25px rgba(245, 158, 11, 0.2), 0 0 15px rgba(245, 158, 11, 0.1);
-      transition: all 0.3s ease;
+      box-shadow: inset 0 0 20px rgba(245, 158, 11, 0.15), 0 0 10px rgba(245, 158, 11, 0.08);
+      transition: all 0.25s ease;
     }
 
     .glow-amber {
-      text-shadow: 0 0 14px rgba(251, 191, 36, 0.7), 0 0 28px rgba(245, 158, 11, 0.4);
+      text-shadow: 0 0 12px rgba(251, 191, 36, 0.65), 0 0 24px rgba(245, 158, 11, 0.35);
     }
 
     .lcd-powered-off {
       background: #080a0e !important;
       border-color: #1e293b !important;
-      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9) !important;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9) !important;
     }
 
     .lcd-powered-off * {
@@ -112,44 +112,13 @@
       touch-action: none !important;
       user-select: none !important;
       -webkit-user-select: none !important;
-      -webkit-touch-callout: none !important;
     }
 
-    html:not(.dark) .text-slate-400,
-    html:not(.dark) .text-slate-300,
-    html:not(.dark) .text-slate-500 {
-      color: #334155 !important;
-    }
-
-    html:not(.dark) .text-slate-200 {
-      color: #0f172a !important;
-    }
-
-    html:not(.dark) .spot-callsign {
-      color: #b45309 !important;
-      font-weight: 800 !important;
-    }
-
-    html:not(.dark) .spot-park-title {
-      color: #0f172a !important;
-      font-weight: 600 !important;
-    }
-
-    html:not(.dark) .spot-freq-display {
-      color: #0f172a !important;
-      font-weight: 700 !important;
-    }
-
-    html:not(.dark) .spot-comment-text,
-    html:not(.dark) .spot-time-text {
-      color: #475569 !important;
-    }
-
-    html:not(.dark) .btn-active-theme {
+    .btn-active-theme {
       background-color: #d97706 !important;
       border-color: #b45309 !important;
       color: #ffffff !important;
-      font-weight: 800 !important;
+      font-weight: 700 !important;
     }
 
     @media (max-width: 1023px) {
@@ -160,257 +129,206 @@
   </style>
 </head>
 
-<body class="min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-black pb-10 lg:pb-0">
+<body class="min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-black pb-8 lg:pb-0">
 
-  <header class="theme-panel border-b px-3 py-2 sm:px-4 sm:py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sticky top-0 z-30 shadow-md">
-    <div class="flex items-center justify-between w-full sm:w-auto">
-      <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center font-lcd font-bold text-black text-lg shadow-md shadow-amber-900/30 shrink-0">
-          891
-        </div>
-        <div>
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <h1 class="font-lcd font-bold tracking-wider text-sm sm:text-base uppercase">FT-891 Web CAT</h1>
-            <span class="px-1.5 py-0.2 text-[9px] font-mono font-bold rounded bg-amber-950/80 text-amber-400 border border-amber-800/80">v3.7 FT8/FT4</span>
-          </div>
-          <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono">Digirig DR-891 @ Linux</p>
-        </div>
+  <!-- CABECERA PRINCIPAL LIMPIA Y COMPACTA -->
+  <header class="theme-panel border-b px-3 py-2 flex items-center justify-between sticky top-0 z-30 shadow-md">
+    <!-- Izquierda: Identificador y Estado de Conexión -->
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded bg-amber-500 flex items-center justify-center font-lcd font-bold text-black text-sm shadow shrink-0">
+        891
       </div>
-
-      <span id="conn-badge" class="px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase font-bold rounded bg-red-950 text-red-400 border border-red-800/60 flex items-center gap-1.5 shrink-0">
-        <span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse"></span> Desconectado
+      <span class="font-lcd font-bold tracking-wider text-sm uppercase">FT-891</span>
+      <span id="conn-badge" class="px-1.5 py-0.5 text-[9px] font-mono uppercase font-bold rounded bg-red-950 text-red-400 border border-red-800 flex items-center gap-1 shrink-0">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Offline
       </span>
     </div>
 
-    <!-- Navegación y Accesos Rápidos de Módulos -->
-    <div class="flex items-center justify-between sm:justify-end gap-1.5 text-xs w-full sm:w-auto font-mono flex-wrap">
-      <button id="nav-btn-radio" onclick="switchGlobalModule('radio')" class="px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1">
-        <span>📻</span> Control Radio
-      </button>
+    <!-- Derecha: Navegación de Escritorio y Acciones Primarias -->
+    <div class="flex items-center gap-1.5 text-xs font-mono">
+      <!-- Módulos (Solo en pantallas grandes; en móvil se usa la barra de pestañas dedicada) -->
+      <div class="hidden lg:flex items-center gap-1">
+        <button id="nav-btn-radio" onclick="switchGlobalModule('radio')" class="px-2.5 py-1 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1">
+          <span>📻</span> Radio
+        </button>
+        <button id="nav-btn-ft8" onclick="switchGlobalModule('ft8')" class="px-2.5 py-1 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1">
+          <span>📟</span> FT8/FT4
+        </button>
+        <div class="h-4 w-[1px] bg-slate-700 mx-1"></div>
+      </div>
 
-      <button id="nav-btn-ft8" onclick="switchGlobalModule('ft8')" class="px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1">
-        <span>📟</span> FT8 / FT4
-      </button>
-
-      <button id="btn-power" class="bg-red-950 hover:bg-red-900 text-red-400 border border-red-800 font-semibold px-2.5 py-1.5 rounded transition flex items-center justify-center gap-1.5 shadow-sm active:scale-95 text-[11px]" title="Encender / Standby FT-891">
-        <span id="power-indicator" class="w-2 h-2 rounded-full bg-red-600"></span>
+      <!-- Encendido / Standby -->
+      <button id="btn-power" class="bg-red-950 hover:bg-red-900 text-red-400 border border-red-800 font-semibold px-2 py-1 rounded text-[10px] flex items-center gap-1 transition" title="Encender / Standby">
+        <span id="power-indicator" class="w-1.5 h-1.5 rounded-full bg-red-600"></span>
         <span id="power-btn-label">STANDBY</span>
       </button>
 
-      <button id="btn-audio-engine" class="theme-card hover:bg-emerald-950 text-emerald-400 px-2.5 py-1.5 rounded border border-emerald-700/60 font-mono text-[11px] flex items-center justify-center gap-1.5 transition active:scale-95" title="Iniciar motor de audio Web RX/TX">
-        <span id="audio-engine-dot" class="w-2 h-2 rounded-full bg-slate-500"></span>
-        <span id="audio-engine-label">Audio Web</span>
+      <!-- Botón Único de Audio RX/TX (Inicia y Conmuta Mute) -->
+      <button id="btn-audio-toggle" class="theme-card text-slate-400 px-2 py-1 rounded border border-slate-700 text-[10px] flex items-center gap-1 transition" title="Audio Web (Clic para Iniciar / Silenciar)">
+        <span id="audio-icon">🔇</span>
+        <span id="audio-label">Audio</span>
       </button>
 
-      <button id="btn-theme-toggle" class="theme-card hover:border-amber-400 px-2.5 py-1.5 rounded border transition text-xs" title="Cambiar tema Claro / Oscuro">
+      <!-- Modo Claro / Oscuro -->
+      <button id="btn-theme-toggle" class="theme-card px-2 py-1 rounded border text-xs" title="Cambiar Tema">
         <span id="theme-icon">☀️</span>
-      </button>
-
-      <button id="btn-audio-mute" class="theme-card hover:border-amber-400 text-slate-300 px-2 py-1.5 rounded border transition text-xs" title="Silenciar audio">
-        <span id="audio-icon">🔊</span>
       </button>
     </div>
   </header>
 
-  <nav class="lg:hidden theme-panel border-b px-2 py-1.5 sticky top-[57px] sm:top-[61px] z-20 flex gap-1 font-mono text-xs">
-    <button id="tab-btn-radio" onclick="switchMobileTab('radio')" class="flex-1 py-1.5 px-2 rounded font-bold text-center border border-amber-500/80 bg-amber-950/40 text-amber-300 flex items-center justify-center gap-1.5">
-      <span>📻</span> Radio
+  <!-- PESTAÑAS MÓVILES (SOLO EN PANTALLAS PEQUEÑAS) -->
+  <nav class="lg:hidden theme-panel border-b px-2 py-1.5 sticky top-[45px] z-20 flex gap-1 font-mono text-xs">
+    <button id="tab-btn-radio" onclick="switchMobileTab('radio')" class="flex-1 py-1.5 rounded font-bold text-center border border-amber-500 bg-amber-950/40 text-amber-300">
+      📻 Radio
     </button>
-    <button id="tab-btn-ft8" onclick="switchMobileTab('ft8')" class="flex-1 py-1.5 px-2 rounded font-medium text-center border border-slate-700 theme-card text-cyan-400 flex items-center justify-center gap-1.5">
-      <span>📟</span> FT8/FT4
+    <button id="tab-btn-ft8" onclick="switchMobileTab('ft8')" class="flex-1 py-1.5 rounded font-medium text-center border border-slate-700 theme-card text-cyan-400">
+      📟 FT8/FT4
     </button>
-    <button id="tab-btn-spots" onclick="switchMobileTab('spots')" class="flex-1 py-1.5 px-2 rounded font-medium text-center border border-slate-700 theme-card text-slate-400 flex items-center justify-center gap-1.5">
-      <span>🎯</span> Spots <span id="spots-count-badge" class="px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-400 text-[10px] border border-cyan-800 font-bold ml-0.5">0</span>
+    <button id="tab-btn-spots" onclick="switchMobileTab('spots')" class="flex-1 py-1.5 rounded font-medium text-center border border-slate-700 theme-card text-slate-400">
+      🎯 Spots (<span id="spots-count-badge">0</span>)
     </button>
   </nav>
 
-  <main id="module-main-radio" class="flex-1 p-2.5 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 max-w-[1700px] w-full mx-auto">
+  <!-- VISTA 1: CONTROL DE RADIO & SPOTS -->
+  <main id="module-main-radio" class="flex-1 p-2 sm:p-3 grid grid-cols-1 lg:grid-cols-12 gap-3 max-w-[1650px] w-full mx-auto">
     
-    <!-- Columna Izquierda: Panel de Control del Radio FT-891 -->
-    <div class="lg:col-span-7 flex flex-col gap-3 sm:gap-4">
+    <!-- COLUMNA IZQUIERDA: TRANSCEPTOR -->
+    <div class="lg:col-span-7 flex flex-col gap-2.5">
       <section id="panel-rig" class="mobile-tab-content">
-        <div class="theme-panel rounded-xl p-3 sm:p-4 border shadow-xl relative overflow-hidden space-y-3 sm:space-y-3.5">
+        <div class="theme-panel rounded-xl p-3 border shadow space-y-2.5">
           
-          <!-- Barra superior de estados de recepción y transmisión -->
-          <div class="flex items-center justify-between pb-2 border-b border-slate-700/60 text-xs font-mono flex-wrap gap-2">
-            <div class="flex items-center gap-3 sm:gap-4">
+          <!-- Barra de Estado CAT & VFO Swap -->
+          <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 text-xs font-mono">
+            <div class="flex items-center gap-3">
               <div class="flex items-center gap-1.5">
-                <span id="led-rx" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
-                <span class="font-bold text-[10px] sm:text-[11px]">RX BUSY</span>
+                <span id="led-rx" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></span>
+                <span class="font-bold text-[10px]">RX</span>
               </div>
               <div class="flex items-center gap-1.5">
-                <span id="led-tx" class="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
-                <span class="text-slate-400 font-bold text-[10px] sm:text-[11px]">TX PTT</span>
+                <span id="led-tx" class="w-2 h-2 rounded-full bg-slate-700"></span>
+                <span class="text-slate-400 font-bold text-[10px]">TX</span>
               </div>
-              <div class="flex items-center gap-1 text-slate-400 text-[10px] sm:text-[11px]">
-                <span>TUNER:</span>
-                <span id="led-tuner" class="text-slate-500 font-bold">OFF</span>
-              </div>
+              <span id="disp-swr-tag" class="px-1.5 py-0.2 rounded border text-[9px] font-bold text-emerald-400 border-emerald-800 bg-emerald-950/60">SWR 1.0</span>
             </div>
-            <div class="flex items-center gap-1.5 ml-auto">
-              <button id="btn-vfo-swap" class="px-2 py-0.5 rounded theme-btn border text-amber-500 font-bold text-[11px] sm:text-xs hover:border-amber-400 active:scale-95 transition">
-                VFO-A ⇄ B
+
+            <div class="flex items-center gap-1">
+              <button id="btn-vfo-swap" class="px-2 py-0.5 rounded theme-btn border text-amber-500 font-bold text-[10px] hover:border-amber-400">
+                A ⇄ B
+              </button>
+              <button id="btn-quick-sync" class="px-2 py-0.5 rounded theme-btn border text-cyan-400 font-bold text-[10px]">
+                SYNC
               </button>
             </div>
           </div>
 
-          <div id="main-lcd-display" class="my-1 sm:my-2 p-3 sm:p-4 rounded-lg lcd-amber lcd-powered-off border flex flex-col justify-between relative select-none">
-            <div class="flex justify-between items-center text-xs font-lcd text-amber-500/80 mb-1">
-              <div class="flex gap-2 sm:gap-3 items-center flex-wrap">
-                <span id="disp-active-vfo" class="bg-amber-500 text-black px-1.5 py-0.2 rounded text-[10px] sm:text-[11px] font-bold">VFO-A</span>
-                <span id="disp-mode-tag" class="text-amber-400 font-bold tracking-widest text-xs sm:text-sm">USB</span>
-                <span id="disp-filter" class="text-amber-500/70 text-[10px] sm:text-xs">WIDTH: 2.4k</span>
-                <span id="disp-clar" class="hidden sm:inline text-amber-500/60 text-xs">CLAR: OFF</span>
+          <!-- LCD VFO PRINCIPAL -->
+          <div id="main-lcd-display" class="p-3 rounded-lg lcd-amber lcd-powered-off border flex flex-col justify-between select-none">
+            <div class="flex justify-between items-center text-xs font-lcd text-amber-500/80 mb-0.5">
+              <div class="flex gap-2 items-center">
+                <span id="disp-active-vfo" class="bg-amber-500 text-black px-1 py-0.2 rounded text-[10px] font-bold">VFO-A</span>
+                <span id="disp-mode-tag" class="text-amber-400 font-bold text-xs">USB</span>
+                <span id="disp-filter" class="text-amber-500/70 text-[10px]">WIDTH: 2.4k</span>
               </div>
-              <div class="flex items-center gap-2 text-amber-500/80 text-[10px] sm:text-[11px] font-mono">
-                <span id="disp-rit" class="hidden xs:inline">SHIFT: 0.00 kHz</span>
-                <span id="disp-swr-tag" class="px-1.5 py-0.2 rounded border text-[10px] font-mono font-bold text-emerald-400 border-emerald-800 bg-emerald-950/60 shadow-sm" title="ROE / SWR en antena">SWR 1.0</span>
+              <div class="flex items-center gap-2 text-[10px] font-mono text-amber-500/80">
+                <span id="disp-rit">SHIFT: 0 Hz</span>
                 <span id="disp-pwr-tag" class="font-bold">100W</span>
               </div>
             </div>
 
-            <!-- Frecuencia Principal y Sub-VFO -->
-            <div class="flex items-baseline justify-between my-0.5 sm:my-1">
-              <div class="flex items-baseline font-lcd font-bold text-amber-400 tracking-tight glow-amber">
-                <span id="freq-mhz" class="text-3xl sm:text-6xl md:text-7xl">14.250</span>
-                <span id="freq-khz" class="text-xl sm:text-4xl md:text-5xl text-amber-300 ml-1">.00</span>
-                <span class="text-[10px] sm:text-sm text-amber-500/60 font-mono ml-1 sm:ml-2">MHz</span>
+            <div class="flex items-baseline justify-between my-0.5">
+              <div class="flex items-baseline font-lcd font-bold text-amber-400 glow-amber">
+                <span id="freq-mhz" class="text-4xl sm:text-6xl">14.250</span>
+                <span id="freq-khz" class="text-2xl sm:text-4xl text-amber-300 ml-1">.00</span>
+                <span class="text-[10px] text-amber-500/60 font-mono ml-1">MHz</span>
               </div>
-              <div class="text-right">
-                <div class="text-[9px] sm:text-[10px] font-mono text-amber-600/80">VFO-B SUB</div>
-                <div id="disp-vfo-b" class="text-xs sm:text-sm font-lcd text-amber-500/70 font-semibold">07.150.00</div>
+              <div class="text-right font-mono">
+                <span class="text-[9px] text-amber-600 block leading-tight">SUB VFO-B</span>
+                <span id="disp-vfo-b" class="text-xs font-lcd text-amber-500/70">07.150.00</span>
               </div>
             </div>
 
-            <!-- Indicador S-Meter Dinámico -->
-            <div class="mt-1.5 sm:mt-2 pt-1.5 sm:pt-2 border-t border-amber-900/60 font-mono">
-              <div class="flex justify-between items-center text-[9px] sm:text-[10px] text-amber-500/80 mb-1">
-                <span class="tracking-wider uppercase font-semibold text-amber-600 truncate mr-2">SEÑAL RX (S-METER / dBm)</span>
-                <span id="smeter-val" class="font-bold text-amber-300 bg-amber-950/60 px-1.5 sm:px-2 py-0.5 rounded border border-amber-800/60 shrink-0 text-[10px]">S-0 (-127 dBm)</span>
+            <!-- S-Meter -->
+            <div class="mt-1 pt-1 border-t border-amber-900/60 font-mono">
+              <div class="flex justify-between text-[9px] text-amber-500/80 mb-0.5">
+                <span>SEÑAL RX</span>
+                <span id="smeter-val" class="font-bold text-amber-300">S-0 (-127 dBm)</span>
               </div>
-
-              <div class="relative w-full h-3.5 sm:h-4 text-[8px] sm:text-[9px] text-amber-500/70 select-none">
-                <span class="absolute left-0 font-bold text-amber-400">S</span>
-                <span class="absolute left-[7%] -translate-x-1/2">1</span>
-                <span class="absolute left-[20%] -translate-x-1/2">3</span>
-                <span class="absolute left-[33%] -translate-x-1/2">5</span>
-                <span class="absolute left-[50%] -translate-x-1/2">7</span>
-                <span class="absolute left-[70%] -translate-x-1/2 font-bold text-amber-300">9</span>
-                <span class="absolute left-[80%] -translate-x-1/2 text-red-400 font-semibold">+20</span>
-                <span class="absolute left-[90%] -translate-x-1/2 text-red-400 font-semibold">+40</span>
-                <span class="absolute right-0 text-red-400 font-bold">+60</span>
-              </div>
-
-              <div class="w-full h-2.5 sm:h-3 bg-black/70 rounded-sm overflow-hidden p-0.5 border border-amber-950 flex gap-0.5" id="meter-segments"></div>
+              <div class="w-full h-2 bg-black/70 rounded-sm overflow-hidden p-0.5 border border-amber-950 flex gap-0.5" id="meter-segments"></div>
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-2 sm:gap-3 items-center">
-            <div class="md:col-span-5 theme-card p-2 sm:p-2.5 rounded-lg border">
-              <div class="text-[10px] sm:text-[11px] font-mono text-slate-400 mb-1 flex justify-between">
-                <span>PASO BASE:</span>
+          <!-- SINTONIZADOR & DIAL CONSOLIDADO -->
+          <div class="theme-card p-2 rounded-lg border grid grid-cols-1 sm:grid-cols-12 gap-2 items-center font-mono">
+            <!-- Paso Base y Entrada Directa -->
+            <div class="sm:col-span-4 flex items-center justify-between sm:flex-col sm:items-start gap-1">
+              <div class="text-[10px] text-slate-400 flex items-center gap-1">
+                <span>PASO:</span>
                 <span id="current-step-label" class="text-amber-500 font-bold">1 kHz</span>
               </div>
-              <div class="grid grid-cols-4 gap-1 text-[11px] font-mono font-semibold">
-                <button class="step-btn py-1 rounded theme-btn border" data-step="10">10Hz</button>
-                <button class="step-btn py-1 rounded theme-btn border" data-step="100">100Hz</button>
-                <button class="step-btn py-1 rounded theme-btn border btn-active-theme" data-step="1000">1kHz</button>
-                <button class="step-btn py-1 rounded theme-btn border" data-step="5000">5kHz</button>
-                <button class="step-btn py-1 rounded theme-btn border" data-step="10000">10kHz</button>
-                <button class="step-btn py-1 rounded theme-btn border" data-step="100000">100k</button>
-                <button class="step-btn py-1 rounded theme-btn border" data-step="1000000">1MHz</button>
-                <button id="btn-direct-freq" class="py-1 rounded bg-amber-600/30 border border-amber-500/50 hover:bg-amber-600 hover:text-black text-amber-500 font-bold">Direct</button>
+              <div class="flex items-center gap-1 flex-wrap">
+                <button class="step-btn px-1.5 py-0.5 rounded theme-btn border text-[10px]" data-step="100">100Hz</button>
+                <button class="step-btn px-1.5 py-0.5 rounded theme-btn border btn-active-theme text-[10px]" data-step="1000">1k</button>
+                <button class="step-btn px-1.5 py-0.5 rounded theme-btn border text-[10px]" data-step="5000">5k</button>
+                <button class="step-btn px-1.5 py-0.5 rounded theme-btn border text-[10px]" data-step="10000">10k</button>
+                <button id="btn-direct-freq" class="px-1.5 py-0.5 rounded bg-amber-600/30 border border-amber-500/50 text-amber-400 font-bold text-[10px]">DIR</button>
               </div>
             </div>
 
-            <!-- Dial VFO con saltos numéricos y rueda táctil -->
-            <div class="md:col-span-7 flex items-center justify-between gap-1.5 sm:gap-2 theme-card p-2 sm:p-2.5 rounded-lg border">
-              <div class="flex items-center gap-1 flex-1 justify-end">
-                <button id="btn-tune-down-10" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Bajar 10 pasos">
-                  <span class="text-xs sm:text-sm font-bold text-slate-400 leading-none">«</span>
-                  <span class="text-[9px] sm:text-[10px] font-mono font-bold text-amber-500 leading-tight">10</span>
-                </button>
-                <button id="btn-tune-down-5" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Bajar 5 pasos">
-                  <span class="text-xs sm:text-sm font-bold text-slate-400 leading-none">‹</span>
-                  <span class="text-[9px] sm:text-[10px] font-mono font-bold text-amber-500 leading-tight">5</span>
-                </button>
-                <button id="btn-tune-down-1" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border text-amber-500 flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Bajar 1 paso">
-                  <span class="text-xs sm:text-sm font-bold leading-none">◀</span>
-                  <span class="text-[9px] sm:text-[10px] font-mono font-bold leading-tight">1</span>
-                </button>
+            <!-- Controles de Sintonía con Knob Central -->
+            <div class="sm:col-span-8 flex items-center justify-center gap-2">
+              <button id="btn-tune-down-10" class="px-2.5 py-2 rounded theme-btn border text-slate-300 font-bold text-xs" title="Bajar rápido x10">«</button>
+              <button id="btn-tune-down-1" class="px-3 py-2 rounded theme-btn border text-amber-500 font-bold text-xs" title="Bajar 1 paso">◀</button>
+
+              <div id="vfo-knob" class="w-14 h-14 rounded-full bg-gradient-to-tr from-slate-900 to-slate-700 border-2 border-slate-500 shadow-inner flex items-center justify-center cursor-ns-resize select-none relative shrink-0" title="Girar con rueda o dedo">
+                <div class="w-3.5 h-3.5 rounded-full bg-amber-500 shadow-[0_0_8px_#ff9800]"></div>
+                <div class="absolute top-1 w-1 h-2 bg-slate-300 rounded-sm"></div>
               </div>
 
-              <div id="vfo-knob" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 border-2 border-slate-500 shadow-inner flex items-center justify-center cursor-ns-resize select-none relative shrink-0 mx-2 sm:mx-3" title="Arrastra, rueda o desliza con el dedo">
-                <div class="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-amber-500 shadow-[0_0_10px_#ff9800]"></div>
-                <div class="absolute top-1.5 w-1.5 h-2.5 bg-slate-300 rounded-sm"></div>
-              </div>
-
-              <div class="flex items-center gap-1 flex-1 justify-start">
-                <button id="btn-tune-up-1" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border text-amber-500 flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Subir 1 paso">
-                  <span class="text-xs sm:text-sm font-bold leading-none">▶</span>
-                  <span class="text-[9px] sm:text-[10px] font-mono font-bold leading-tight">1</span>
-                </button>
-                <button id="btn-tune-up-5" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Subir 5 pasos">
-                  <span class="text-xs sm:text-sm font-bold text-slate-400 leading-none">›</span>
-                  <span class="text-[9px] sm:text-[10px] font-mono font-bold text-amber-500 leading-tight">5</span>
-                </button>
-                <button id="btn-tune-up-10" class="flex-1 max-w-[48px] py-1.5 sm:py-2 rounded-lg theme-btn border flex flex-col items-center justify-center active:scale-95 transition shadow-sm" title="Subir 10 pasos">
-                  <span class="text-xs sm:text-sm font-bold text-slate-400 leading-none">»</span>
-                  <span class="text-[9px] sm:text-[10px] font-mono font-bold text-amber-500 leading-tight">10</span>
-                </button>
-              </div>
+              <button id="btn-tune-up-1" class="px-3 py-2 rounded theme-btn border text-amber-500 font-bold text-xs" title="Subir 1 paso">▶</button>
+              <button id="btn-tune-up-10" class="px-2.5 py-2 rounded theme-btn border text-slate-300 font-bold text-xs" title="Subir rápido x10">»</button>
             </div>
           </div>
 
-          <div class="mt-2 sm:mt-3">
-            <button id="btn-touch-ptt" class="w-full min-h-[62px] py-4 px-4 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold rounded-xl border border-red-400 shadow-lg flex items-center justify-center gap-2.5 select-none active:scale-[0.98] transition font-mono">
-              <span class="text-xl sm:text-2xl">🎙️</span>
-              <span id="touch-ptt-text" class="tracking-wider text-xs sm:text-base font-extrabold">TRANSMITIR (PTT)</span>
+          <!-- BOTÓN PTT TRANSMISIÓN -->
+          <div>
+            <button id="btn-touch-ptt" class="w-full py-3 px-3 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold rounded-xl border border-red-400 shadow flex items-center justify-center gap-2 select-none active:scale-[0.99] font-mono text-sm">
+              <span>🎙️</span>
+              <span id="touch-ptt-text" class="tracking-wider font-extrabold">TRANSMITIR (PTT)</span>
             </button>
 
-            <div class="flex justify-between items-center text-[10px] sm:text-[11px] text-slate-400 px-1 mt-1.5 font-mono">
+            <div class="flex justify-between items-center text-[10px] text-slate-400 px-1 mt-1 font-mono">
+              <button id="btn-toggle-ptt-mode" class="px-2 py-0.5 rounded theme-btn border font-bold text-amber-500">
+                MODO: MANTENER
+              </button>
               <div class="flex items-center gap-2">
-                <span>Modo PTT:</span>
-                <button id="btn-toggle-ptt-mode" class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold text-amber-500">
-                  MANTENER
-                </button>
-              </div>
-              <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1 font-mono theme-card px-2 py-0.5 rounded border">
-                  <span class="font-bold">SWR:</span>
-                  <span id="live-swr-val" class="text-emerald-500 font-bold">1.0</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <span>VU:</span>
-                  <div class="w-16 sm:w-20 h-2 bg-black rounded border border-slate-700 overflow-hidden flex">
-                    <div id="mic-vu-bar" class="h-full bg-emerald-500 w-0 transition-all duration-75"></div>
-                  </div>
+                <span>VU:</span>
+                <div class="w-16 h-1.5 bg-black rounded border border-slate-700 overflow-hidden flex">
+                  <div id="mic-vu-bar" class="h-full bg-emerald-500 w-0"></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class="pt-2 border-t border-slate-700/60 grid grid-cols-1 md:grid-cols-2 gap-2.5 sm:gap-3">
+          <!-- SELECTOR DE MODOS & BANDAS CONSOLIDADO -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-700/60 font-mono text-xs">
             <div>
-              <div class="text-[10px] sm:text-[11px] font-mono text-slate-400 mb-1 uppercase font-bold">Modo de Operación:</div>
-              <div class="grid grid-cols-4 gap-1 text-[11px] font-mono font-semibold">
+              <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">Modo:</span>
+              <div class="grid grid-cols-4 gap-1 text-[10px] font-bold">
                 <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD01" data-mode="LSB">LSB</button>
                 <button class="mode-btn py-1 rounded theme-btn border btn-active-theme" data-cat="MD02" data-mode="USB">USB</button>
                 <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD03" data-mode="CW-U">CW-U</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD07" data-mode="CW-L">CW-L</button>
+                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD0C" data-mode="DATA-U">DATA-U</button>
                 <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD05" data-mode="AM">AM</button>
                 <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD04" data-mode="FM">FM</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD0C" data-mode="DATA-U">DATA-U</button>
+                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD07" data-mode="CW-L">CW-L</button>
                 <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD08" data-mode="DATA-L">DATA-L</button>
               </div>
             </div>
 
             <div>
-              <div class="text-[10px] sm:text-[11px] font-mono text-slate-400 mb-1 uppercase font-bold">Salto Rápido de Banda:</div>
-              <div class="grid grid-cols-6 gap-1 text-[10px] sm:text-[11px] font-mono font-bold">
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="1840000" data-mode="LSB">160m</button>
+              <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">Banda:</span>
+              <div class="grid grid-cols-6 gap-1 text-[10px] font-bold">
                 <button class="band-btn py-1 rounded theme-btn border" data-freq="3573000" data-mode="LSB">80m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="5357000" data-mode="USB">60m</button>
                 <button class="band-btn py-1 rounded theme-btn border" data-freq="7150000" data-mode="LSB">40m</button>
                 <button class="band-btn py-1 rounded theme-btn border" data-freq="10136000" data-mode="USB">30m</button>
                 <button class="band-btn py-1 rounded theme-btn border btn-active-theme" data-freq="14250000" data-mode="USB">20m</button>
@@ -419,139 +337,109 @@
                 <button class="band-btn py-1 rounded theme-btn border" data-freq="24915000" data-mode="USB">12m</button>
                 <button class="band-btn py-1 rounded theme-btn border" data-freq="28400000" data-mode="USB">10m</button>
                 <button class="band-btn py-1 rounded theme-btn border" data-freq="50125000" data-mode="USB">6m</button>
-                <button id="btn-quick-sync" class="py-1 rounded bg-cyan-950/40 border border-cyan-700 text-cyan-400 font-bold hover:bg-cyan-900/60" title="Leer estado completo">SYNC</button>
+                <button class="band-btn py-1 rounded theme-btn border" data-freq="5357000" data-mode="USB">60m</button>
+                <button class="band-btn py-1 rounded theme-btn border" data-freq="1840000" data-mode="LSB">160m</button>
               </div>
             </div>
           </div>
 
-          <div class="pt-2 border-t border-slate-700/60 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 font-mono text-xs">
-            <div class="theme-card p-2 rounded-lg border">
-              <div class="flex justify-between text-[11px] text-slate-400 mb-1 font-bold">
-                <span>🔊 ESCUCHA RX:</span>
-                <span id="val-rx-vol" class="text-cyan-500 font-bold">75%</span>
+          <!-- NIVELES: VOLUMEN RX, MIC TX, POTENCIA Y SQL -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-700/60 font-mono text-[10px]">
+            <div class="theme-card p-1.5 rounded border">
+              <div class="flex justify-between text-slate-400 mb-0.5">
+                <span>RX VOL:</span>
+                <span id="val-rx-vol" class="text-cyan-400 font-bold">75%</span>
               </div>
-              <input type="range" id="slider-rx-vol" min="0" max="100" value="75" class="w-full accent-cyan-500 bg-slate-700 rounded h-1.5 cursor-pointer">
+              <input type="range" id="slider-rx-vol" min="0" max="100" value="75" class="w-full accent-cyan-500 h-1">
             </div>
 
-            <div class="theme-card p-2 rounded-lg border">
-              <div class="flex justify-between text-[11px] text-slate-400 mb-1 font-bold">
-                <span>🎙️ MIC TX GAIN:</span>
-                <span id="val-mic-gain" class="text-amber-500 font-bold">100%</span>
+            <div class="theme-card p-1.5 rounded border">
+              <div class="flex justify-between text-slate-400 mb-0.5">
+                <span>MIC GAIN:</span>
+                <span id="val-mic-gain" class="text-amber-400 font-bold">100%</span>
               </div>
-              <input type="range" id="slider-mic-gain" min="10" max="200" value="100" class="w-full accent-amber-500 bg-slate-700 rounded h-1.5 cursor-pointer">
+              <input type="range" id="slider-mic-gain" min="10" max="200" value="100" class="w-full accent-amber-500 h-1">
             </div>
 
-            <div class="theme-card p-2 rounded-lg border">
-              <div class="flex justify-between text-slate-400 mb-1 text-[11px] font-bold">
-                <span>POTENCIA RF:</span>
-                <span id="val-pwr" class="text-amber-500 font-bold">100W</span>
+            <div class="theme-card p-1.5 rounded border">
+              <div class="flex justify-between text-slate-400 mb-0.5">
+                <span>POTENCIA:</span>
+                <span id="val-pwr" class="text-amber-400 font-bold">100W</span>
               </div>
-              <input type="range" id="slider-pwr" min="5" max="100" value="100" step="5" class="w-full accent-amber-500 bg-slate-700 rounded h-1.5 cursor-pointer">
+              <input type="range" id="slider-pwr" min="5" max="100" value="100" step="5" class="w-full accent-amber-500 h-1">
             </div>
 
-            <div class="theme-card p-2 rounded-lg border">
-              <div class="flex justify-between text-slate-400 mb-1 text-[11px] font-bold">
-                <span>SQL / RF GAIN:</span>
-                <span id="val-sql" class="text-amber-500 font-bold">0</span>
+            <div class="theme-card p-1.5 rounded border">
+              <div class="flex justify-between text-slate-400 mb-0.5">
+                <span>SQUELCH:</span>
+                <span id="val-sql" class="text-amber-400 font-bold">0</span>
               </div>
-              <input type="range" id="slider-sql" min="0" max="255" value="0" class="w-full accent-amber-500 bg-slate-700 rounded h-1.5 cursor-pointer">
+              <input type="range" id="slider-sql" min="0" max="255" value="0" class="w-full accent-amber-500 h-1">
             </div>
           </div>
 
-          <div class="pt-2 border-t border-slate-700/60">
-            <div class="flex items-center justify-between pb-1.5 text-xs font-mono">
-              <span class="font-bold flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                FILTROS DSP FI (HARDWARE FT-891)
-              </span>
-            </div>
-
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 font-mono text-xs">
-              <div class="theme-card p-2 rounded-lg border flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-[11px]">DNR (Ruido)</span>
-                  <button id="btn-toggle-dnr" class="px-2 py-0.5 rounded text-[10px] font-bold theme-btn border hover:border-amber-400 transition">OFF</button>
-                </div>
-                <div>
-                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5 font-semibold">
-                    <span>NIVEL:</span>
-                    <span id="val-dnr-level" class="text-amber-500 font-bold">1</span>
-                  </div>
-                  <input type="range" id="slider-dnr-level" min="1" max="15" value="1" class="w-full accent-amber-500 bg-slate-700 rounded h-1 cursor-pointer">
-                </div>
-              </div>
-
-              <div class="theme-card p-2 rounded-lg border flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-[11px]">DNF (Auto)</span>
-                  <button id="btn-toggle-dnf" class="px-2 py-0.5 rounded text-[10px] font-bold theme-btn border hover:border-cyan-400 transition">OFF</button>
-                </div>
-                <p class="text-[10px] text-slate-400 mt-1">Cancela portadoras.</p>
-              </div>
-
-              <div class="theme-card p-2 rounded-lg border flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-[11px]">NOTCH Man</span>
-                  <button id="btn-toggle-notch" class="px-2 py-0.5 rounded text-[10px] font-bold theme-btn border hover:border-amber-400 transition">OFF</button>
-                </div>
-                <div>
-                  <div class="flex justify-between text-[10px] text-slate-400 mb-0.5 font-semibold">
-                    <span>FREQ:</span>
-                    <span id="val-notch-freq" class="text-amber-500 font-bold">1500Hz</span>
-                  </div>
-                  <input type="range" id="slider-notch-freq" min="100" max="3200" step="50" value="1500" class="w-full accent-amber-500 bg-slate-700 rounded h-1 cursor-pointer">
-                </div>
-              </div>
-
-              <div class="theme-card p-2 rounded-lg border flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-[11px]">IPO / PRE</span>
-                </div>
-                <div class="grid grid-cols-2 gap-1 text-[10px] font-bold">
-                  <button id="btn-ipo-norm" class="py-1 rounded theme-btn border btn-active-theme">AMP1</button>
-                  <button id="btn-ipo-on" class="py-1 rounded theme-btn border">IPO</button>
-                </div>
-              </div>
-
-              <div class="theme-card p-2 rounded-lg border flex flex-col justify-between">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="font-bold text-[11px]">ATT (12dB)</span>
-                  <button id="btn-toggle-att" class="px-2 py-0.5 rounded text-[10px] font-bold theme-btn border hover:border-amber-400 transition">OFF</button>
-                </div>
-                <p class="text-[10px] text-slate-400 mt-1">Atenuador RF.</p>
-              </div>
-            </div>
-
-            <!-- Ajuste de Ancho de FI (WIDTH) y Desplazamiento (SHIFT) -->
-            <div class="mt-2.5 theme-card p-2.5 sm:p-3 rounded-lg border grid grid-cols-1 md:grid-cols-12 gap-3 items-center font-mono text-xs">
-              <div class="md:col-span-7 space-y-1.5">
+          <!-- RACK DSP COMPACTO Y CONSOLIDADO -->
+          <div class="pt-1.5 border-t border-slate-700/60 font-mono text-[10px]">
+            <span class="font-bold text-slate-400 uppercase text-[9px] block mb-1">Filtros DSP FI Transceptor:</span>
+            
+            <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+              <!-- DNR -->
+              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px]">ANCHO FI (WIDTH):</span>
-                  <span id="label-width-val" class="text-cyan-500 font-bold theme-card px-2 py-0.5 rounded border text-[11px]">2.40 kHz</span>
+                  <span class="font-bold">DNR</span>
+                  <button id="btn-toggle-dnr" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]">OFF</button>
                 </div>
-                <div class="grid grid-cols-6 gap-1 text-[10px] sm:text-[11px] font-bold">
-                  <button class="btn-width-preset py-1 rounded theme-btn border" data-width="200">200Hz</button>
-                  <button class="btn-width-preset py-1 rounded theme-btn border" data-width="500">500Hz</button>
-                  <button class="btn-width-preset py-1 rounded theme-btn border" data-width="1800">1.8k</button>
-                  <button class="btn-width-preset py-1 rounded theme-btn border btn-active-theme" data-width="2400">2.4k</button>
-                  <button class="btn-width-preset py-1 rounded theme-btn border" data-width="3000">3.0k</button>
-                  <button class="btn-width-preset py-1 rounded theme-btn border" data-width="4000">4.0k</button>
+                <div class="flex items-center gap-1 mt-1">
+                  <span class="text-slate-400 text-[9px]">N:</span>
+                  <input type="range" id="slider-dnr-level" min="1" max="15" value="1" class="w-full accent-amber-500 h-1">
+                  <span id="val-dnr-level" class="text-amber-400 font-bold">1</span>
                 </div>
-                <input type="range" id="slider-width" min="100" max="4000" step="50" value="2400" class="w-full accent-cyan-500 bg-slate-700 rounded h-1.5 cursor-pointer">
               </div>
 
-              <div class="md:col-span-5 space-y-1.5 border-t md:border-t-0 md:border-l border-slate-700/60 pt-2 md:pt-0 md:pl-3">
+              <!-- DNF -->
+              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
+                <span class="font-bold">DNF (Auto)</span>
+                <button id="btn-toggle-dnf" class="px-1.5 py-0.5 rounded theme-btn border text-[9px]">OFF</button>
+              </div>
+
+              <!-- NOTCH -->
+              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
                 <div class="flex items-center justify-between">
-                  <span class="font-bold text-[11px]">DESPLAZAMIENTO (SHIFT):</span>
-                  <button id="btn-reset-shift" class="text-[10px] text-amber-500 font-bold hover:underline">Reset 0</button>
+                  <span class="font-bold">NOTCH</span>
+                  <button id="btn-toggle-notch" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]">OFF</button>
                 </div>
-                <div class="flex items-center gap-2">
-                  <span class="text-[10px] text-slate-400">-1.2k</span>
-                  <input type="range" id="slider-shift" min="-1200" max="1200" step="20" value="0" class="w-full accent-amber-500 bg-slate-700 rounded h-1.5 cursor-pointer">
-                  <span class="text-[10px] text-slate-400">+1.2k</span>
+                <div class="flex items-center justify-between text-slate-400 text-[9px] mt-1">
+                  <span id="val-notch-freq">1500Hz</span>
+                  <input type="range" id="slider-notch-freq" min="100" max="3200" step="50" value="1500" class="w-12 accent-amber-500 h-1">
                 </div>
-                <div class="text-center">
-                  <span id="label-shift-val" class="text-amber-500 font-bold text-[11px]">0 Hz (Centrado)</span>
+              </div>
+
+              <!-- IPO / AMP1 -->
+              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
+                <span class="font-bold">PRE/IPO</span>
+                <div class="flex gap-0.5">
+                  <button id="btn-ipo-norm" class="px-1 py-0.5 rounded theme-btn border btn-active-theme text-[9px]">A1</button>
+                  <button id="btn-ipo-on" class="px-1 py-0.5 rounded theme-btn border text-[9px]">IPO</button>
+                </div>
+              </div>
+
+              <!-- ATT -->
+              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
+                <span class="font-bold">ATT 12dB</span>
+                <button id="btn-toggle-att" class="px-1.5 py-0.5 rounded theme-btn border text-[9px]">OFF</button>
+              </div>
+
+              <!-- WIDTH & SHIFT -->
+              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold">FI WIDTH</span>
+                  <span id="label-width-val" class="text-cyan-400 font-bold">2.4k</span>
+                </div>
+                <div class="flex items-center gap-0.5 mt-0.5">
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="500">.5k</button>
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="1800">1.8k</button>
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border btn-active-theme text-[8px]" data-width="2400">2.4k</button>
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="3000">3.0k</button>
                 </div>
               </div>
             </div>
@@ -561,130 +449,147 @@
       </section>
     </div>
 
+    <!-- COLUMNA DERECHA: SPOTS EN VIVO -->
     <div class="lg:col-span-5 flex flex-col">
-      <section id="panel-spots" class="theme-panel rounded-xl p-3 sm:p-3.5 border shadow-xl flex-1 flex flex-col mobile-tab-content hidden-mobile">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60">
-          <div>
-            <h2 class="text-xs sm:text-sm font-bold font-lcd tracking-wide uppercase flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
-              SPOTS & DX CLUSTER EN VIVO
-            </h2>
-            <p class="text-[10px] sm:text-[11px] font-mono text-slate-400">POTA, LLOTA, SOTA y DX con QSY automático a FT8/SSB/CW</p>
-          </div>
-          <button id="btn-refresh-spots" class="theme-btn hover:border-cyan-400 text-cyan-500 p-1.5 rounded border text-xs transition" title="Refrescar Spots">
-            <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+      <section id="panel-spots" class="theme-panel rounded-xl p-3 border shadow flex-1 flex flex-col mobile-tab-content hidden-mobile">
+        
+        <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 font-mono text-xs">
+          <span class="font-lcd font-bold text-cyan-400 tracking-wider flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            SPOTS & DX CLUSTER
+          </span>
+          <button id="btn-refresh-spots" class="theme-btn text-cyan-400 px-2 py-0.5 rounded border text-[10px]" title="Refrescar">
+            Actualizar ↻
           </button>
         </div>
 
-        <div class="space-y-1.5 my-2 text-xs font-mono">
-          <div>
-            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Programas:</span>
-            <div id="filter-programs-group" class="flex flex-wrap gap-1 mt-0.5">
-              <button class="filter-prog-chip px-2 py-0.5 rounded text-[10px] font-bold border btn-active-theme" data-prog="ALL">TODOS</button>
-              <button class="filter-prog-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-prog="POTA">POTA</button>
-              <button class="filter-prog-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-prog="LLOTA">LLOTA</button>
-              <button class="filter-prog-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-prog="SOTA">SOTA</button>
-              <button class="filter-prog-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-prog="DX">DX CLUSTER</button>
-            </div>
+        <!-- FILTROS COMPACTOS EN UNA SOLA LÍNEA -->
+        <div class="py-1.5 flex flex-wrap gap-1.5 items-center font-mono text-[10px]">
+          <!-- Programa Dropdown -->
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Prog:</span>
+            <select id="sel-filter-prog" onchange="applyDropdownFilter()" class="theme-btn border rounded px-1.5 py-0.5 text-[10px] font-bold">
+              <option value="ALL">TODOS</option>
+              <option value="POTA">POTA</option>
+              <option value="LLOTA">LLOTA</option>
+              <option value="SOTA">SOTA</option>
+              <option value="DX">DX CLUSTER</option>
+            </select>
           </div>
 
-          <div>
-            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Bandas:</span>
-            <div id="filter-bands-group" class="flex flex-wrap gap-1 mt-0.5">
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold border btn-active-theme" data-band="ALL">TODAS</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="80m">80m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="60m">60m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="40m">40m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="30m">30m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="20m">20m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="17m">17m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="15m">15m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="12m">12m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="10m">10m</button>
-              <button class="filter-band-chip px-1.5 py-0.5 rounded text-[10px] font-bold theme-btn border" data-band="6m">6m</button>
-            </div>
+          <!-- Banda Dropdown -->
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Banda:</span>
+            <select id="sel-filter-band" onchange="applyDropdownFilter()" class="theme-btn border rounded px-1.5 py-0.5 text-[10px] font-bold">
+              <option value="ALL">TODAS</option>
+              <option value="80m">80m</option>
+              <option value="40m">40m</option>
+              <option value="30m">30m</option>
+              <option value="20m">20m</option>
+              <option value="17m">17m</option>
+              <option value="15m">15m</option>
+              <option value="12m">12m</option>
+              <option value="10m">10m</option>
+              <option value="6m">6m</option>
+            </select>
           </div>
 
-          <div>
-            <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Modos:</span>
-            <div id="filter-modes-group" class="flex flex-wrap gap-1 mt-0.5">
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold border btn-active-theme" data-mode="ALL">TODOS</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="SSB">SSB</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="CW">CW</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border text-cyan-400" data-mode="FT8">FT8</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border text-amber-400" data-mode="FT4">FT4</button>
-              <button class="filter-mode-chip px-2 py-0.5 rounded text-[10px] font-bold theme-btn border" data-mode="DATA">DATA</button>
-            </div>
+          <!-- Modo Dropdown -->
+          <div class="flex items-center gap-1">
+            <span class="text-slate-400">Modo:</span>
+            <select id="sel-filter-mode" onchange="applyDropdownFilter()" class="theme-btn border rounded px-1.5 py-0.5 text-[10px] font-bold">
+              <option value="ALL">TODOS</option>
+              <option value="SSB">SSB</option>
+              <option value="CW">CW</option>
+              <option value="FT8">FT8</option>
+              <option value="FT4">FT4</option>
+              <option value="DATA">DATA</option>
+            </select>
+          </div>
+
+          <!-- Búsqueda Rápida -->
+          <div class="flex-1 min-w-[120px]">
+            <input type="text" id="search-spots" placeholder="Buscar indicativo..." class="w-full theme-btn border text-[10px] rounded px-2 py-0.5 focus:outline-none">
           </div>
         </div>
 
-        <div class="relative mb-2">
-          <input type="text" id="search-spots" placeholder="Buscar indicativo, ref o DX..." class="w-full theme-btn border text-xs rounded px-2.5 py-1.5 focus:outline-none font-mono">
-        </div>
+        <div id="spots-list" class="flex-1 overflow-y-auto space-y-1.5 pr-1 min-h-[380px] max-h-[680px]"></div>
 
-        <div id="spots-list" class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[380px] max-h-[720px]"></div>
-
-        <div id="qsy-alert" class="hidden mt-2 p-2 rounded bg-amber-950/90 border border-amber-500 text-amber-300 text-xs font-mono flex items-center justify-between animate-pulse">
-          <span id="qsy-msg">QSY exitoso</span>
-          <span class="text-[10px] text-amber-400 font-bold">FT-891 CAT OK</span>
+        <div id="qsy-alert" class="hidden mt-2 p-1.5 rounded bg-amber-950/90 border border-amber-500 text-amber-300 text-xs font-mono flex items-center justify-between">
+          <span id="qsy-msg">QSY OK</span>
+          <span class="text-[9px] text-amber-400 font-bold">FT-891 CAT</span>
         </div>
       </section>
     </div>
 
   </main>
 
-  <main id="module-main-ft8" class="hidden flex-1 p-2.5 sm:p-4 max-w-[1700px] w-full mx-auto flex flex-col gap-3 font-mono">
+  <!-- VISTA 2: MÓDULO DIGITAL FT8 / FT4 -->
+  <main id="module-main-ft8" class="hidden flex-1 p-2 sm:p-3 max-w-[1650px] w-full mx-auto flex flex-col gap-2.5 font-mono">
     
-    <div class="theme-panel rounded-xl p-3 border shadow-xl flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-      <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
-        <div class="flex items-center gap-2">
-          <span class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
-          <h2 class="font-lcd font-bold text-base sm:text-lg tracking-wider text-cyan-400">MÓDULO FT8 / FT4</h2>
-        </div>
+    <!-- Barra Superior FT8: UTC, Modo, Ciclo y Telemetría On-Air -->
+    <div class="theme-panel rounded-xl px-3 py-2 border shadow flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></span>
+        <h2 class="font-lcd font-bold text-base text-cyan-400 mr-2">FT8 / FT4</h2>
 
-        <div class="flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded border border-slate-700">
-          <span class="text-slate-400 text-[10px]">UTC:</span>
-          <span id="ft8-utc-clock" class="font-bold text-amber-400 text-sm">00:00:00z</span>
+        <div class="bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-amber-400 font-bold text-xs">
+          UTC: <span id="ft8-utc-clock">00:00:00z</span>
         </div>
 
         <div class="flex items-center gap-1">
-          <button id="btn-mode-ft8" onclick="setFt8Mode('FT8')" class="px-2.5 py-1 rounded theme-btn border font-bold btn-active-theme text-xs">FT8 (15s)</button>
-          <button id="btn-mode-ft4" onclick="setFt8Mode('FT4')" class="px-2.5 py-1 rounded theme-btn border font-bold text-xs">FT4 (7.5s)</button>
+          <button id="btn-mode-ft8" onclick="setFt8Mode('FT8')" class="px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs">FT8</button>
+          <button id="btn-mode-ft4" onclick="setFt8Mode('FT4')" class="px-2 py-0.5 rounded theme-btn border font-bold text-xs">FT4</button>
         </div>
       </div>
 
-      <!-- Barra de Progreso del Ciclo UTC -->
-      <div class="flex-1 w-full md:max-w-md mx-2">
-        <div class="flex justify-between text-[10px] text-slate-400 mb-0.5">
-          <span>CICLO: <span id="ft8-slot-indicator" class="font-bold text-cyan-400">EVEN (:00 / :30)</span></span>
-          <span id="ft8-cycle-seconds" class="font-bold text-amber-400">0.0s / 15.0s</span>
+      <!-- Barra de Ciclo -->
+      <div class="flex items-center gap-2 flex-1 max-w-xs mx-2">
+        <span id="ft8-slot-indicator" class="font-bold text-cyan-400 text-[10px] shrink-0">EVEN</span>
+        <div class="w-full h-2 bg-slate-900 rounded border border-slate-700 overflow-hidden">
+          <div id="ft8-cycle-bar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 w-0"></div>
         </div>
-        <div class="w-full h-2.5 bg-slate-900 rounded border border-slate-700 overflow-hidden relative">
-          <div id="ft8-cycle-bar" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 w-0 transition-all duration-100"></div>
-        </div>
+        <span id="ft8-cycle-seconds" class="font-bold text-amber-400 text-[10px] shrink-0">0s</span>
       </div>
 
-      <!-- Frecuencias Predefinidas FT8 -->
-      <div class="flex items-center gap-1 flex-wrap justify-end">
-        <span class="text-[10px] text-slate-400 mr-1">QSY FT8:</span>
-        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(7074000, '40m')">40m</button>
-        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(10136000, '30m')">30m</button>
-        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold btn-active-theme" onclick="tuneFt8Preset(14074000, '20m')">20m</button>
-        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(21074000, '15m')">15m</button>
-        <button class="px-2 py-0.5 rounded theme-btn border text-[10px] font-bold" onclick="tuneFt8Preset(28074000, '10m')">10m</button>
+      <!-- Confirmación Frecuencia en Aire + ALC + Potencia -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="bg-black/60 px-2 py-1 rounded border border-amber-600/70 text-[11px]">
+          <span class="text-amber-500 font-bold mr-1">AIRE:</span>
+          <span id="ft8-disp-band" class="px-1 rounded bg-amber-950 text-amber-300 font-bold text-[9px] mr-1">20m</span>
+          <span id="ft8-disp-onair-freq" class="font-lcd font-bold text-cyan-300">14.075.25 MHz</span>
+        </div>
+
+        <!-- Potencia Rápida -->
+        <div class="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
+          <span class="text-slate-400">PWR:</span>
+          <button onclick="setGlobalPower(10)" class="pwr-chip px-1 rounded theme-btn border">10W</button>
+          <button onclick="setGlobalPower(50)" class="pwr-chip px-1 rounded theme-btn border">50W</button>
+          <button onclick="setGlobalPower(100)" class="pwr-chip px-1 rounded theme-btn border btn-active-theme">100W</button>
+        </div>
+
+        <!-- ALC Status -->
+        <div class="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
+          <span class="text-slate-400">ALC:</span>
+          <div class="w-12 h-1.5 bg-slate-900 rounded overflow-hidden flex">
+            <div id="ft8-alc-bar" class="h-full bg-emerald-500 w-0"></div>
+          </div>
+          <span id="ft8-alc-badge" class="font-bold text-emerald-400 text-[9px]">OK</span>
+        </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 flex-1">
+    <!-- CUERPO PRINCIPAL FT8: DECODES & QSO FSM -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-2.5 flex-1">
       
-      <!-- Columna Izquierda: Mensajes Decodificados de la Banda -->
-      <div class="lg:col-span-7 theme-panel rounded-xl p-3 border shadow-xl flex flex-col">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-700/60 text-xs">
+      <!-- Columna Izquierda: Decodificaciones de la Banda -->
+      <div class="lg:col-span-7 theme-panel rounded-xl p-3 border shadow flex flex-col">
+        <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 text-xs">
           <div class="flex items-center gap-2">
-            <span class="font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-              <span>📡</span> ACTIVIDAD EN BANDA (DECODES)
+            <span class="font-bold text-cyan-400 flex items-center gap-1">
+              <span>📡</span> DECODES
             </span>
-            <span id="ft8-decodes-badge" class="px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-300 text-[10px] border border-cyan-800">0 decodes</span>
+            <span id="ft8-decodes-badge" class="px-1.5 py-0.2 rounded-full bg-cyan-950 text-cyan-300 text-[9px] border border-cyan-800">0</span>
           </div>
 
           <div class="flex items-center gap-2 text-[10px]">
@@ -692,178 +597,167 @@
               <input type="checkbox" id="check-only-cq" onchange="renderFt8Decodes()" class="accent-cyan-500 rounded">
               <span>Solo CQ</span>
             </label>
-            <button onclick="clearFt8Decodes()" class="px-2 py-0.5 rounded theme-btn border hover:text-red-400">Limpiar</button>
+            <button onclick="clearFt8Decodes()" class="px-1.5 py-0.2 rounded theme-btn border text-slate-400 hover:text-red-400">Limpiar</button>
           </div>
         </div>
 
-        <div class="grid grid-cols-12 text-[10px] text-slate-400 py-1.5 border-b border-slate-800 font-bold px-1 select-none">
+        <div class="grid grid-cols-12 text-[9px] text-slate-400 py-1 border-b border-slate-800 font-bold px-1 select-none">
           <span class="col-span-2">UTC</span>
           <span class="col-span-1 text-center">dB</span>
           <span class="col-span-2 text-center">DT</span>
           <span class="col-span-2 text-right">FREQ</span>
-          <span class="col-span-5 pl-3">MENSAJE FT8</span>
+          <span class="col-span-5 pl-2">MENSAJE FT8</span>
         </div>
 
-        <div id="ft8-decodes-list" class="flex-1 overflow-y-auto space-y-0.5 pr-1 min-h-[360px] max-h-[640px] text-xs font-mono">
-          <div class="p-6 text-center text-slate-500 text-xs">Esperando fin de ciclo para decodificar señales en la banda...</div>
+        <div id="ft8-decodes-list" class="flex-1 overflow-y-auto space-y-0.5 pr-1 min-h-[360px] max-h-[640px] text-xs">
+          <div class="p-6 text-center text-slate-500 text-xs">Esperando decodificaciones del ciclo...</div>
         </div>
       </div>
 
       <!-- Columna Derecha: Automatización y Secuencia de QSO -->
-      <div class="lg:col-span-5 flex flex-col gap-3">
+      <div class="lg:col-span-5 flex flex-col gap-2">
         
-        <!-- Tarjeta de Control de Estación y Configuración -->
-        <div class="theme-panel rounded-xl p-3 border shadow-xl text-xs space-y-2.5">
-          <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 font-bold">
-            <span class="text-amber-400 uppercase tracking-wider">CONFIGURACIÓN ESTACIÓN</span>
-            <span id="ft8-tx-status-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">TX LISTO</span>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <!-- Configuración de Estación Compacta -->
+        <div class="theme-panel rounded-xl p-2.5 border shadow text-xs space-y-1.5">
+          <div class="grid grid-cols-4 gap-1.5">
             <div>
-              <span class="text-[9px] text-slate-400 font-bold">MI INDICATIVO:</span>
-              <input type="text" id="ft8-my-call" value="LU1AA" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-2 py-1 text-center font-bold text-amber-400 uppercase">
+              <span class="text-[8px] text-slate-400 font-bold block">MI CALL:</span>
+              <input type="text" id="ft8-my-call" value="LU1AA" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1 py-0.5 text-center font-bold text-amber-400 uppercase text-xs">
             </div>
             <div>
-              <span class="text-[9px] text-slate-400 font-bold">MI GRID (4):</span>
-              <input type="text" id="ft8-my-grid" value="FF46" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-2 py-1 text-center font-bold text-amber-400 uppercase">
+              <span class="text-[8px] text-slate-400 font-bold block">GRID:</span>
+              <input type="text" id="ft8-my-grid" value="FF46" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1 py-0.5 text-center font-bold text-amber-400 uppercase text-xs">
             </div>
             <div>
-              <span class="text-[9px] text-slate-400 font-bold">AUDIO TX (Hz):</span>
-              <input type="number" id="ft8-tx-freq" value="1250" step="10" min="200" max="3000" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-2 py-1 text-center font-bold text-cyan-400">
+              <span class="text-[8px] text-slate-400 font-bold block">AUDIO (Hz):</span>
+              <input type="number" id="ft8-tx-freq" value="1250" step="10" min="200" max="3000" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1 py-0.5 text-center font-bold text-cyan-400 text-xs">
             </div>
             <div>
-              <span class="text-[9px] text-slate-400 font-bold">CICLO TX:</span>
-              <select id="ft8-tx-slot-select" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1.5 py-1 text-center font-bold text-xs">
-                <option value="even">EVEN (:00/:30)</option>
-                <option value="odd">ODD (:15/:45)</option>
+              <span class="text-[8px] text-slate-400 font-bold block">CICLO TX:</span>
+              <select id="ft8-tx-slot-select" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1 py-0.5 text-center font-bold text-xs">
+                <option value="even">EVEN (:00)</option>
+                <option value="odd">ODD (:15)</option>
               </select>
             </div>
           </div>
 
-          <div class="flex items-center justify-between pt-1 border-t border-slate-800 text-[11px] flex-wrap gap-2">
-            <label class="flex items-center gap-1.5 cursor-pointer font-bold text-emerald-400" title="Avanza solo cuando la otra estación responde con su reporte">
+          <div class="flex items-center justify-between text-[10px] pt-1 border-t border-slate-800">
+            <label class="flex items-center gap-1 cursor-pointer text-emerald-400 font-bold">
               <input type="checkbox" id="check-auto-seq" checked class="accent-emerald-500 rounded">
-              <span>Auto-Secuencia (FSM)</span>
+              <span>Auto-Secuencia</span>
             </label>
-
-            <label class="flex items-center gap-1.5 cursor-pointer font-bold text-amber-400" title="Llama CQ continuamente, atiende al corresponsal que responda y retoma el CQ al finalizar el QSO">
+            <label class="flex items-center gap-1 cursor-pointer text-amber-400 font-bold">
               <input type="checkbox" id="check-auto-cq-loop" onchange="toggleAutoCqMode(this.checked)" class="accent-amber-500 rounded">
               <span>Auto-CQ Continuo</span>
             </label>
-
-            <label class="flex items-center gap-1.5 cursor-pointer font-bold text-cyan-400">
+            <label class="flex items-center gap-1 cursor-pointer text-cyan-400 font-bold">
               <input type="checkbox" id="check-auto-tx" class="accent-cyan-500 rounded">
-              <span>Auto-Armar TX</span>
+              <span>Auto-Armar</span>
             </label>
           </div>
         </div>
 
-        <!-- Tarjeta de Secuencia de QSO Actual -->
-        <div class="theme-panel rounded-xl p-3 border shadow-xl text-xs space-y-2 flex-1 flex flex-col justify-between">
+        <!-- Secuencia de QSO Actual -->
+        <div class="theme-panel rounded-xl p-2.5 border shadow text-xs flex-1 flex flex-col justify-between space-y-1.5">
           <div>
-            <div class="flex items-center justify-between pb-1.5 border-b border-slate-700/60 font-bold">
-              <div class="flex items-center gap-2">
-                <span class="text-cyan-400 uppercase tracking-wider">SECUENCIA DE QSO</span>
-                <span id="ft8-target-badge" class="px-2 py-0.2 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800">DX: NINGUNO</span>
-              </div>
-              <button onclick="resetCurrentQso()" class="text-[10px] text-slate-400 hover:text-white">Reiniciar</button>
+            <div class="flex items-center justify-between pb-1 border-b border-slate-700/60 font-bold text-[11px]">
+              <span id="ft8-target-badge" class="text-cyan-400">DX: NINGUNO</span>
+              <button onclick="resetCurrentQso()" class="text-[10px] text-slate-400 hover:text-white">Limpiar ✕</button>
             </div>
 
-            <!-- Panel de estado del intercambio actual -->
-            <div id="qso-fsm-feedback" class="my-1.5 p-1.5 rounded bg-slate-900 border border-slate-700 text-[10px] text-slate-300 flex items-center justify-between">
-              <span>ESTADO QSO: <strong id="fsm-status-label" class="text-amber-400">En espera de corresponsal</strong></span>
-              <span id="fsm-retry-counter" class="text-slate-400 font-bold">Intento: 0/5</span>
-            </div>
-
-            <!-- Datos del DX Seleccionado -->
-            <div class="grid grid-cols-3 gap-2 my-2">
+            <!-- Datos Corresponsal -->
+            <div class="grid grid-cols-3 gap-1.5 my-1.5">
               <div>
-                <span class="text-[9px] text-slate-400 font-bold">ESTACIÓN DX:</span>
-                <input type="text" id="qso-dx-call" placeholder="K1JT" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-2 py-1 font-bold text-cyan-400 uppercase">
+                <span class="text-[8px] text-slate-400 font-bold block">DX CALL:</span>
+                <input type="text" id="qso-dx-call" placeholder="K1JT" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-1.5 py-0.5 font-bold text-cyan-400 uppercase text-xs">
               </div>
               <div>
-                <span class="text-[9px] text-slate-400 font-bold">GRID DX:</span>
-                <input type="text" id="qso-dx-grid" placeholder="FN20" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-2 py-1 font-bold text-cyan-400 uppercase">
+                <span class="text-[8px] text-slate-400 font-bold block">GRID:</span>
+                <input type="text" id="qso-dx-grid" placeholder="FN20" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-1.5 py-0.5 font-bold text-cyan-400 uppercase text-xs">
               </div>
               <div>
-                <span class="text-[9px] text-slate-400 font-bold">REPORTE SNR:</span>
-                <input type="text" id="qso-dx-report" value="-10" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-2 py-1 font-bold text-amber-400">
+                <span class="text-[8px] text-slate-400 font-bold block">SNR:</span>
+                <input type="text" id="qso-dx-report" value="-10" onchange="recalculateQsoMsgs()" class="w-full theme-btn border rounded px-1.5 py-0.5 font-bold text-amber-400 text-xs">
               </div>
             </div>
 
-            <!-- Mensajes Tx 1 a Tx 6 -->
-            <div class="space-y-1.5 mt-2 select-none">
-              <div id="tx-row-1" onclick="selectTxMessageRow(1)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 1</span>
-                  <span id="tx-label-1" class="font-bold text-xs">CQ LU1AA FF46</span>
+            <!-- Filas Tx 1 a Tx 6 Compactas -->
+            <div class="space-y-1 select-none">
+              <div id="tx-row-1" onclick="selectTxMessageRow(1)" class="p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1 py-0.2 rounded text-[8px] font-bold bg-slate-800 text-slate-300">Tx1</span>
+                  <span id="tx-label-1" class="font-bold text-[11px]">CQ LU1AA FF46</span>
                 </div>
                 <input type="radio" name="tx-msg-sel" id="radio-tx-1" checked class="accent-amber-500">
               </div>
 
-              <div id="tx-row-2" onclick="selectTxMessageRow(2)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 2</span>
-                  <span id="tx-label-2" class="font-bold text-xs">DXCALL LU1AA FF46</span>
+              <div id="tx-row-2" onclick="selectTxMessageRow(2)" class="p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1 py-0.2 rounded text-[8px] font-bold bg-slate-800 text-slate-300">Tx2</span>
+                  <span id="tx-label-2" class="font-bold text-[11px]">DXCALL LU1AA FF46</span>
                 </div>
                 <input type="radio" name="tx-msg-sel" id="radio-tx-2" class="accent-amber-500">
               </div>
 
-              <div id="tx-row-3" onclick="selectTxMessageRow(3)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 3</span>
-                  <span id="tx-label-3" class="font-bold text-xs">DXCALL LU1AA -10</span>
+              <div id="tx-row-3" onclick="selectTxMessageRow(3)" class="p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1 py-0.2 rounded text-[8px] font-bold bg-slate-800 text-slate-300">Tx3</span>
+                  <span id="tx-label-3" class="font-bold text-[11px]">DXCALL LU1AA -10</span>
                 </div>
                 <input type="radio" name="tx-msg-sel" id="radio-tx-3" class="accent-amber-500">
               </div>
 
-              <div id="tx-row-4" onclick="selectTxMessageRow(4)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 4</span>
-                  <span id="tx-label-4" class="font-bold text-xs">DXCALL LU1AA R-10</span>
+              <div id="tx-row-4" onclick="selectTxMessageRow(4)" class="p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1 py-0.2 rounded text-[8px] font-bold bg-slate-800 text-slate-300">Tx4</span>
+                  <span id="tx-label-4" class="font-bold text-[11px]">DXCALL LU1AA R-10</span>
                 </div>
                 <input type="radio" name="tx-msg-sel" id="radio-tx-4" class="accent-amber-500">
               </div>
 
-              <div id="tx-row-5" onclick="selectTxMessageRow(5)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 5</span>
-                  <span id="tx-label-5" class="font-bold text-xs">DXCALL LU1AA RR73</span>
+              <div id="tx-row-5" onclick="selectTxMessageRow(5)" class="p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1 py-0.2 rounded text-[8px] font-bold bg-slate-800 text-slate-300">Tx5</span>
+                  <span id="tx-label-5" class="font-bold text-[11px]">DXCALL LU1AA RR73</span>
                 </div>
                 <input type="radio" name="tx-msg-sel" id="radio-tx-5" class="accent-amber-500">
               </div>
 
-              <div id="tx-row-6" onclick="selectTxMessageRow(6)" class="p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition">
-                <div class="flex items-center gap-2">
-                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-800 text-slate-300">Tx 6</span>
-                  <span id="tx-label-6" class="font-bold text-xs">DXCALL LU1AA 73</span>
+              <div id="tx-row-6" onclick="selectTxMessageRow(6)" class="p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400">
+                <div class="flex items-center gap-1.5">
+                  <span class="px-1 py-0.2 rounded text-[8px] font-bold bg-slate-800 text-slate-300">Tx6</span>
+                  <span id="tx-label-6" class="font-bold text-[11px]">DXCALL LU1AA 73</span>
                 </div>
                 <input type="radio" name="tx-msg-sel" id="radio-tx-6" class="accent-amber-500">
               </div>
             </div>
           </div>
 
-          <!-- Botones de Acción de Transmisión FT8 -->
-          <div class="pt-2 border-t border-slate-800 flex flex-col gap-2">
-            <div class="grid grid-cols-2 gap-2">
-              <button id="btn-arm-ft8-tx" onclick="toggleFt8TxArmed()" class="py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition">
+          <!-- Acciones de Transmisión -->
+          <div class="pt-1.5 border-t border-slate-800 space-y-1">
+            <div id="qso-fsm-feedback" class="p-1 rounded bg-black/50 border border-slate-800 text-[9px] text-slate-300 flex justify-between">
+              <span>ESTADO: <strong id="fsm-status-label" class="text-amber-400">Listo</strong></span>
+              <span id="fsm-retry-counter" class="text-slate-400 font-bold">0/5</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-1.5">
+              <button id="btn-arm-ft8-tx" onclick="toggleFt8TxArmed()" class="py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1">
                 <span>⚡</span>
-                <span id="lbl-arm-ft8-tx">HABILITAR TX (PROX)</span>
+                <span id="lbl-arm-ft8-tx">HABILITAR TX</span>
               </button>
 
-              <button onclick="abortFt8Tx()" class="py-2.5 px-3 rounded-lg bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 font-bold tracking-wider flex items-center justify-center gap-2 active:scale-95 transition">
+              <button onclick="abortFt8Tx()" class="py-2 rounded bg-red-950 hover:bg-red-900 border border-red-800 text-red-300 font-bold text-xs flex items-center justify-center gap-1">
                 <span>⏹️</span>
-                <span>DETENER TX (HALT)</span>
+                <span>DETENER (HALT)</span>
               </button>
             </div>
 
-            <div class="flex items-center justify-between text-[11px] pt-1">
-              <button onclick="logCurrentQso()" class="px-3 py-1 rounded bg-amber-500 hover:bg-amber-400 text-black font-bold flex items-center gap-1 shadow-sm">
-                <span>📝</span> Guardar QSO en Log
+            <div class="flex justify-between items-center text-[10px] pt-0.5">
+              <button onclick="logCurrentQso()" class="px-2 py-0.5 rounded bg-amber-500 text-black font-bold">
+                📝 Guardar QSO
               </button>
-              <button onclick="exportAdifLog()" class="px-2.5 py-1 rounded theme-btn border text-slate-300 hover:text-white flex items-center gap-1">
-                <span>💾</span> Exportar ADIF
+              <button onclick="exportAdifLog()" class="px-2 py-0.5 rounded theme-btn border text-slate-300">
+                💾 Exportar ADIF
               </button>
             </div>
           </div>
@@ -876,20 +770,20 @@
 
   </main>
 
-  <!-- Modal de Entrada Directa de Frecuencia -->
+  <!-- MODAL ENTRADA DIRECTA DE FRECUENCIA -->
   <div id="modal-freq" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="theme-panel border rounded-xl max-w-sm w-full p-4 text-xs font-mono shadow-2xl">
-      <div class="flex justify-between items-center pb-2 border-b border-slate-700/60">
-        <h3 class="font-lcd font-bold text-amber-500 text-base">ENTRADA DIRECTA FRECUENCIA</h3>
+    <div class="theme-panel border rounded-xl max-w-xs w-full p-3.5 text-xs font-mono shadow-2xl">
+      <div class="flex justify-between items-center pb-1.5 border-b border-slate-700/60">
+        <h3 class="font-lcd font-bold text-amber-500 text-sm">ENTRADA FRECUENCIA</h3>
         <button id="btn-close-freq" class="text-slate-400 hover:text-white">✕</button>
       </div>
-      <div class="my-3">
-        <input type="number" id="input-direct-khz" step="0.1" placeholder="Ej: 14250.0 o 7150" class="w-full theme-card border text-center text-xl font-lcd text-amber-500 rounded p-2 focus:outline-none">
-        <div class="text-[10px] text-slate-500 text-center mt-1">Introduce valor en kilohercios (kHz)</div>
+      <div class="my-2.5">
+        <input type="number" id="input-direct-khz" step="0.1" placeholder="Ej: 14250.0" class="w-full theme-card border text-center text-lg font-lcd text-amber-500 rounded p-1.5 focus:outline-none">
+        <div class="text-[9px] text-slate-400 text-center mt-1">Introduce kHz</div>
       </div>
-      <div class="grid grid-cols-2 gap-2">
-        <button id="btn-cancel-freq" class="theme-btn py-1.5 rounded border">Cancelar</button>
-        <button id="btn-apply-freq" class="bg-amber-500 hover:bg-amber-400 text-black font-bold py-1.5 rounded">Sintonizar</button>
+      <div class="grid grid-cols-2 gap-1.5">
+        <button id="btn-cancel-freq" class="theme-btn py-1 rounded border">Cancelar</button>
+        <button id="btn-apply-freq" class="bg-amber-500 hover:bg-amber-400 text-black font-bold py-1 rounded">Sintonizar</button>
       </div>
     </div>
   </div>
@@ -908,9 +802,7 @@
       squelch: 0,
       sMeter: 0,
       swr: 1.0,
-      swrLockoutUntil: 0,
-      txStartTime: 0,
-      swrHighCount: 0,
+      alc: 0,
       isTx: false,
       pttLatchMode: false,
       audioMuted: false,
@@ -992,25 +884,10 @@
     let allSpots = [];
 
     const ActiveFilters = {
-      programs: new Set(['ALL']),
-      bands: new Set(['ALL']),
-      modes: new Set(['ALL'])
+      program: 'ALL',
+      band: 'ALL',
+      mode: 'ALL'
     };
-
-    const connBadge = document.getElementById('conn-badge');
-    const btnPower = document.getElementById('btn-power');
-    const powerIndicator = document.getElementById('power-indicator');
-    const powerBtnLabel = document.getElementById('power-btn-label');
-    const ledRx = document.getElementById('led-rx');
-    const ledTx = document.getElementById('led-tx');
-    const dispPwrTag = document.getElementById('disp-pwr-tag');
-    const freqMhzEl = document.getElementById('freq-mhz');
-    const freqKhzEl = document.getElementById('freq-khz');
-    const dispActiveVfo = document.getElementById('disp-active-vfo');
-    const dispModeTag = document.getElementById('disp-mode-tag');
-    const dispVfoB = document.getElementById('disp-vfo-b');
-    const qsyAlert = document.getElementById('qsy-alert');
-    const qsyMsg = document.getElementById('qsy-msg');
 
     function formatFreqParts(freqHz) {
       const f = Math.max(0, Math.floor(Number(freqHz) || 0));
@@ -1025,57 +902,122 @@
       };
     }
 
+    function getBandNameFromHz(freqHz) {
+      const f = Number(freqHz) || 0;
+      if (f >= 1800000 && f <= 2000000) return '160m';
+      if (f >= 3500000 && f <= 4000000) return '80m';
+      if (f >= 5300000 && f <= 5410000) return '60m';
+      if (f >= 7000000 && f <= 7300000) return '40m';
+      if (f >= 10100000 && f <= 10150000) return '30m';
+      if (f >= 14000000 && f <= 14350000) return '20m';
+      if (f >= 18068000 && f <= 18168000) return '17m';
+      if (f >= 21000000 && f <= 21450000) return '15m';
+      if (f >= 24890000 && f <= 24990000) return '12m';
+      if (f >= 28000000 && f <= 29700000) return '10m';
+      if (f >= 50000000 && f <= 54000000) return '6m';
+      return 'GEN';
+    }
+
+    function setGlobalPower(val) {
+      const pwr = Math.min(100, Math.max(5, parseInt(val, 10) || 100));
+      RigState.rfPower = pwr;
+
+      const slider = document.getElementById('slider-pwr');
+      const valPwr = document.getElementById('val-pwr');
+      const dispPwr = document.getElementById('disp-pwr-tag');
+      if (slider) slider.value = pwr;
+      if (valPwr) valPwr.textContent = `${pwr}W`;
+      if (dispPwr) dispPwr.textContent = `${pwr}W`;
+
+      document.querySelectorAll('.pwr-chip').forEach(btn => {
+        const btnVal = parseInt(btn.textContent, 10);
+        btn.className = (btnVal === pwr)
+          ? 'pwr-chip px-1 rounded theme-btn border btn-active-theme'
+          : 'pwr-chip px-1 rounded theme-btn border';
+      });
+
+      sendCATCommand(`PC${String(pwr).padStart(3, '0')};`);
+    }
+
+    function updateOnAirFrequencyDisplays() {
+      const activeFreq = RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB;
+      const band = getBandNameFromHz(activeFreq);
+
+      const ft8Band = document.getElementById('ft8-disp-band');
+      const ft8OnAir = document.getElementById('ft8-disp-onair-freq');
+
+      const txAudio = Ft8State.txFreq || 1250;
+      const totalOnAirHz = activeFreq + txAudio;
+      const onAirParts = formatFreqParts(totalOnAirHz);
+
+      if (ft8Band) ft8Band.textContent = band;
+      if (ft8OnAir) ft8OnAir.textContent = `${onAirParts.mhz}.${onAirParts.khz} MHz`;
+    }
+
+    function updateAlcUI(rawVal) {
+      const v = Math.min(255, Math.max(0, parseInt(rawVal, 10) || 0));
+      RigState.alc = v;
+      const pct = Math.round((v / 255) * 100);
+
+      let colorClass = 'bg-emerald-500';
+      let textColor = 'text-emerald-400';
+      let statusText = 'OK';
+
+      if (pct > 70) {
+        colorClass = 'bg-red-500';
+        textColor = 'text-red-400 font-bold';
+        statusText = 'ALTO';
+      } else if (pct > 40) {
+        colorClass = 'bg-amber-400';
+        textColor = 'text-amber-400 font-bold';
+        statusText = 'LIM';
+      }
+
+      const ft8Bar = document.getElementById('ft8-alc-bar');
+      const ft8Badge = document.getElementById('ft8-alc-badge');
+      if (ft8Bar) {
+        ft8Bar.style.width = `${pct}%`;
+        ft8Bar.className = `h-full ${colorClass}`;
+      }
+      if (ft8Badge) {
+        ft8Badge.textContent = statusText;
+        ft8Badge.className = `font-bold text-[9px] ${textColor}`;
+      }
+    }
+
     function updateActiveBandUI(freqHz) {
       const f = Number(freqHz) || 0;
-      let targetBand = '';
-      if (f >= 1800000 && f <= 2000000) targetBand = '160m';
-      else if (f >= 3500000 && f <= 4000000) targetBand = '80m';
-      else if (f >= 5300000 && f <= 5410000) targetBand = '60m';
-      else if (f >= 7000000 && f <= 7300000) targetBand = '40m';
-      else if (f >= 10100000 && f <= 10150000) targetBand = '30m';
-      else if (f >= 14000000 && f <= 14350000) targetBand = '20m';
-      else if (f >= 18068000 && f <= 18168000) targetBand = '17m';
-      else if (f >= 21000000 && f <= 21450000) targetBand = '15m';
-      else if (f >= 24890000 && f <= 24990000) targetBand = '12m';
-      else if (f >= 28000000 && f <= 29700000) targetBand = '10m';
-      else if (f >= 50000000 && f <= 54000000) targetBand = '6m';
-
+      const targetBand = getBandNameFromHz(f);
       document.querySelectorAll('.band-btn').forEach(b => {
-        const text = b.textContent.trim();
-        if (targetBand && text === targetBand) {
-          b.className = 'band-btn py-1 rounded theme-btn border btn-active-theme';
-        } else {
-          b.className = 'band-btn py-1 rounded theme-btn border hover:border-amber-400';
-        }
+        b.className = (b.textContent.trim() === targetBand)
+          ? 'band-btn py-1 rounded theme-btn border btn-active-theme'
+          : 'band-btn py-1 rounded theme-btn border';
       });
     }
 
     function updateActiveModeUI(modeName) {
       document.querySelectorAll('.mode-btn').forEach(b => {
-        if (b.dataset.mode === modeName) {
-          b.className = 'mode-btn py-1 rounded theme-btn border btn-active-theme';
-        } else {
-          b.className = 'mode-btn py-1 rounded theme-btn border hover:border-cyan-400';
-        }
+        b.className = (b.dataset.mode === modeName)
+          ? 'mode-btn py-1 rounded theme-btn border btn-active-theme'
+          : 'mode-btn py-1 rounded theme-btn border';
       });
     }
 
     function updatePowerUI(isOn) {
       RigState.isPowerOn = isOn;
+      const powerIndicator = document.getElementById('power-indicator');
+      const powerBtnLabel = document.getElementById('power-btn-label');
       if (powerIndicator) {
-        powerIndicator.className = isOn ? 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'w-2 h-2 rounded-full bg-red-600';
+        powerIndicator.className = isOn ? 'w-1.5 h-1.5 rounded-full bg-emerald-400' : 'w-1.5 h-1.5 rounded-full bg-red-600';
       }
       if (powerBtnLabel) {
-        powerBtnLabel.textContent = isOn ? 'POWER ON' : 'STANDBY';
+        powerBtnLabel.textContent = isOn ? 'ON' : 'STANDBY';
       }
 
       const lcdDisplay = document.getElementById('main-lcd-display');
       if (lcdDisplay) {
-        if (isOn) {
-          lcdDisplay.classList.remove('lcd-powered-off');
-        } else {
-          lcdDisplay.classList.add('lcd-powered-off');
-        }
+        if (isOn) lcdDisplay.classList.remove('lcd-powered-off');
+        else lcdDisplay.classList.add('lcd-powered-off');
       }
     }
 
@@ -1086,16 +1028,21 @@
       const mainParts = formatFreqParts(activeFreq);
       const subParts = formatFreqParts(subFreq);
 
+      const freqMhzEl = document.getElementById('freq-mhz');
+      const freqKhzEl = document.getElementById('freq-khz');
+      const dispActiveVfo = document.getElementById('disp-active-vfo');
+      const dispModeTag = document.getElementById('disp-mode-tag');
+      const dispVfoB = document.getElementById('disp-vfo-b');
+
       if (freqMhzEl) freqMhzEl.textContent = `${mainParts.mhz}.${mainParts.khz}`;
       if (freqKhzEl) freqKhzEl.textContent = mainParts.hzDec;
-
       if (dispActiveVfo) dispActiveVfo.textContent = `VFO-${RigState.activeVfo}`;
       if (dispModeTag) dispModeTag.textContent = RigState.mode;
       if (dispVfoB) dispVfoB.textContent = `${subParts.mhz.padStart(2, '0')}.${subParts.khz}.${subParts.hzDec.replace('.', '')}`;
-      if (dispPwrTag) dispPwrTag.textContent = `${RigState.rfPower}W`;
 
       updateActiveBandUI(activeFreq);
       updateActiveModeUI(RigState.mode);
+      updateOnAirFrequencyDisplays();
     }
 
     function updateMeterDisplay(rawVal) {
@@ -1108,47 +1055,29 @@
       let dbm = -127;
       let activeSegments = 0;
 
-      if (v <= 12) {
-        sUnit = 'S-0'; dbm = -127; activeSegments = Math.round((v / 12) * 2);
-      } else if (v <= 27) {
-        sUnit = 'S-1'; dbm = -121; activeSegments = 2 + Math.round(((v - 12) / 15) * 2);
-      } else if (v <= 40) {
-        sUnit = 'S-2'; dbm = -115; activeSegments = 4 + Math.round(((v - 27) / 13) * 2);
-      } else if (v <= 55) {
-        sUnit = 'S-3'; dbm = -109; activeSegments = 6 + Math.round(((v - 40) / 15) * 3);
-      } else if (v <= 65) {
-        sUnit = 'S-4'; dbm = -103; activeSegments = 9 + Math.round(((v - 55) / 10) * 2);
-      } else if (v <= 80) {
-        sUnit = 'S-5'; dbm = -97; activeSegments = 11 + Math.round(((v - 65) / 15) * 2);
-      } else if (v <= 95) {
-        sUnit = 'S-6'; dbm = -91; activeSegments = 13 + Math.round(((v - 80) / 15) * 2);
-      } else if (v <= 112) {
-        sUnit = 'S-7'; dbm = -85; activeSegments = 15 + Math.round(((v - 95) / 17) * 3);
-      } else if (v <= 130) {
-        sUnit = 'S-8'; dbm = -79; activeSegments = 18 + Math.round(((v - 112) / 18) * 3);
-      } else if (v <= 172) {
-        sUnit = 'S-9'; dbm = -73; activeSegments = 21 + Math.round(((v - 130) / 42) * 3);
-      } else if (v <= 190) {
-        sUnit = 'S9+20'; dbm = -53; activeSegments = 24 + Math.round(((v - 172) / 18) * 2);
-      } else if (v <= 220) {
-        sUnit = 'S9+40'; dbm = -33; activeSegments = 26 + Math.round(((v - 190) / 30) * 2);
-      } else {
-        sUnit = 'S9+60'; dbm = -13; activeSegments = 28 + Math.round(((v - 220) / 35) * 2);
-      }
+      if (v <= 12) { sUnit = 'S-0'; dbm = -127; activeSegments = Math.round((v / 12) * 2); }
+      else if (v <= 27) { sUnit = 'S-1'; dbm = -121; activeSegments = 2 + Math.round(((v - 12) / 15) * 2); }
+      else if (v <= 40) { sUnit = 'S-2'; dbm = -115; activeSegments = 4 + Math.round(((v - 27) / 13) * 2); }
+      else if (v <= 55) { sUnit = 'S-3'; dbm = -109; activeSegments = 6 + Math.round(((v - 40) / 15) * 3); }
+      else if (v <= 65) { sUnit = 'S-4'; dbm = -103; activeSegments = 9 + Math.round(((v - 55) / 10) * 2); }
+      else if (v <= 80) { sUnit = 'S-5'; dbm = -97; activeSegments = 11 + Math.round(((v - 65) / 15) * 2); }
+      else if (v <= 95) { sUnit = 'S-6'; dbm = -91; activeSegments = 13 + Math.round(((v - 80) / 15) * 2); }
+      else if (v <= 112) { sUnit = 'S-7'; dbm = -85; activeSegments = 15 + Math.round(((v - 95) / 17) * 3); }
+      else if (v <= 130) { sUnit = 'S-8'; dbm = -79; activeSegments = 18 + Math.round(((v - 112) / 18) * 3); }
+      else if (v <= 172) { sUnit = 'S-9'; dbm = -73; activeSegments = 21 + Math.round(((v - 130) / 42) * 3); }
+      else if (v <= 190) { sUnit = 'S9+20'; dbm = -53; activeSegments = 24 + Math.round(((v - 172) / 18) * 2); }
+      else if (v <= 220) { sUnit = 'S9+40'; dbm = -33; activeSegments = 26 + Math.round(((v - 190) / 30) * 2); }
+      else { sUnit = 'S9+60'; dbm = -13; activeSegments = 28 + Math.round(((v - 220) / 35) * 2); }
 
-      activeSegments = Math.min(30, Math.max(0, activeSegments));
-
-      if (valLabel) {
-        valLabel.textContent = `${sUnit} (${dbm} dBm)`;
-      }
+      activeSegments = Math.min(28, Math.max(0, activeSegments));
+      if (valLabel) valLabel.textContent = `${sUnit} (${dbm} dBm)`;
 
       const isPoweredOn = RigState.isPowerOn;
       let html = '';
-      for (let i = 0; i < 30; i++) {
-        let activeColor = i < 21 ? 'bg-amber-400' : 'bg-red-500';
+      for (let i = 0; i < 28; i++) {
+        let activeColor = i < 20 ? 'bg-amber-400' : 'bg-red-500';
         let isLit = isPoweredOn && (i < activeSegments);
-        let bg = isLit ? activeColor : 'bg-slate-900/60';
-        html += `<div class="flex-1 h-full rounded-[1px] transition-colors duration-75 ${bg}"></div>`;
+        html += `<div class="flex-1 h-full rounded-[1px] ${isLit ? activeColor : 'bg-slate-900/60'}"></div>`;
       }
       container.innerHTML = html;
     }
@@ -1159,106 +1088,18 @@
       if (raw <= 45) return +(1.2 + ((raw - 15) / 30) * 0.3).toFixed(1);
       if (raw <= 95) return +(1.5 + ((raw - 45) / 50) * 0.5).toFixed(1);
       if (raw <= 150) return +(2.0 + ((raw - 95) / 55) * 0.7).toFixed(1);
-      if (raw <= 200) return +(2.7 + ((raw - 150) / 50) * 0.8).toFixed(1);
-      return +(3.5 + ((raw - 200) / 55) * 1.5).toFixed(1);
+      return +(2.7 + ((raw - 150) / 50) * 0.8).toFixed(1);
     }
 
     function updateSwrUI(swrVal) {
       RigState.swr = swrVal;
       const tag = document.getElementById('disp-swr-tag');
-      const live = document.getElementById('live-swr-val');
-      const text = `SWR ${swrVal.toFixed(1)}`;
-
-      let colorClass = 'text-emerald-500';
-      if (swrVal >= 1.7 && swrVal < 2.5) colorClass = 'text-amber-500';
-      else if (swrVal >= 2.5) colorClass = 'text-red-500 font-extrabold animate-pulse';
-
       if (tag) {
-        tag.textContent = text;
-        tag.className = `px-1.5 py-0.2 rounded border text-[10px] font-mono font-bold ${colorClass} bg-slate-900/60 border-slate-700`;
+        tag.textContent = `SWR ${swrVal.toFixed(1)}`;
+        tag.className = (swrVal >= 2.5)
+          ? 'px-1.5 py-0.2 rounded border text-[9px] font-bold text-red-500 bg-red-950/60 animate-pulse'
+          : 'px-1.5 py-0.2 rounded border text-[9px] font-bold text-emerald-400 bg-emerald-950/60';
       }
-      if (live) {
-        live.textContent = swrVal.toFixed(1);
-        live.className = `${colorClass} font-bold`;
-      }
-
-      const timeInTx = Date.now() - RigState.txStartTime;
-      if (swrVal >= 2.5 && RigState.isTx && timeInTx > 1000) {
-        RigState.swrHighCount++;
-        if (RigState.swrHighCount >= 3) {
-          setPTT(false);
-          RigState.swrLockoutUntil = Date.now() + 3500;
-          showQsyAlert(`⚠️ PROTECCIÓN: SWR ${swrVal.toFixed(1)} ALTO! TX CANCELADO.`);
-        }
-      } else {
-        RigState.swrHighCount = 0;
-      }
-    }
-
-    function updateDnrUI() {
-      const btn = document.getElementById('btn-toggle-dnr');
-      const val = document.getElementById('val-dnr-level');
-      if (btn) btn.className = RigState.dnr ? 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border btn-active-theme' : 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border';
-      if (btn) btn.textContent = RigState.dnr ? 'ON' : 'OFF';
-      if (val) val.textContent = RigState.dnrLevel;
-    }
-
-    function updateDnfUI() {
-      const btn = document.getElementById('btn-toggle-dnf');
-      if (btn) btn.className = RigState.dnf ? 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border btn-active-theme' : 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border';
-      if (btn) btn.textContent = RigState.dnf ? 'ON' : 'OFF';
-    }
-
-    function updateNotchUI() {
-      const btn = document.getElementById('btn-toggle-notch');
-      const val = document.getElementById('val-notch-freq');
-      if (btn) btn.className = RigState.manualNotch ? 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border btn-active-theme' : 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border';
-      if (btn) btn.textContent = RigState.manualNotch ? 'ON' : 'OFF';
-      if (val) val.textContent = `${RigState.notchFreq}Hz`;
-    }
-
-    function updateAttUI() {
-      const btn = document.getElementById('btn-toggle-att');
-      if (btn) btn.className = RigState.att ? 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border btn-active-theme' : 'px-2 py-0.5 rounded text-[10px] font-bold theme-btn border';
-      if (btn) btn.textContent = RigState.att ? 'ON' : 'OFF';
-    }
-
-    function updateIpoUI() {
-      const bNorm = document.getElementById('btn-ipo-norm');
-      const bIpo = document.getElementById('btn-ipo-on');
-      if (bNorm && bIpo) {
-        if (RigState.ipo) {
-          bIpo.className = 'py-1 rounded theme-btn border btn-active-theme';
-          bNorm.className = 'py-1 rounded theme-btn border';
-        } else {
-          bNorm.className = 'py-1 rounded theme-btn border btn-active-theme';
-          bIpo.className = 'py-1 rounded theme-btn border';
-        }
-      }
-    }
-
-    function updateWidthUI() {
-      const lbl = document.getElementById('label-width-val');
-      const dFilter = document.getElementById('disp-filter');
-      const valKHz = (RigState.ifWidth / 1000).toFixed(2);
-      if (lbl) lbl.textContent = `${valKHz} kHz`;
-      if (dFilter) dFilter.textContent = `WIDTH: ${valKHz}k`;
-
-      document.querySelectorAll('.btn-width-preset').forEach(btn => {
-        if (parseInt(btn.dataset.width, 10) === RigState.ifWidth) {
-          btn.className = 'btn-width-preset py-1 rounded theme-btn border btn-active-theme';
-        } else {
-          btn.className = 'btn-width-preset py-1 rounded theme-btn border';
-        }
-      });
-    }
-
-    function updateShiftUI() {
-      const lbl = document.getElementById('label-shift-val');
-      const dRit = document.getElementById('disp-rit');
-      const s = RigState.ifShift;
-      if (lbl) lbl.textContent = s === 0 ? '0 Hz (Centrado)' : `${s > 0 ? '+' : ''}${s} Hz`;
-      if (dRit) dRit.textContent = `SHIFT: ${(s / 1000).toFixed(2)} kHz`;
     }
 
     function sendCATCommand(cmd) {
@@ -1272,19 +1113,19 @@
     function connectDockerNetwork() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const catUrl = `${protocol}//${window.location.host}/ws/cat`;
+      const connBadge = document.getElementById('conn-badge');
 
       try {
         RigState.wsCat = new WebSocket(catUrl);
       } catch (e) {
-        console.error('WebSocket creation error:', e);
         return;
       }
 
       RigState.wsCat.onopen = () => {
         RigState.connected = true;
         if (connBadge) {
-          connBadge.className = 'px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60 flex items-center gap-1.5 shrink-0';
-          connBadge.innerHTML = '<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-400"></span> Conectado';
+          connBadge.className = 'px-1.5 py-0.5 text-[9px] font-mono uppercase font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1 shrink-0';
+          connBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online';
         }
 
         sendCATCommand('PS;');
@@ -1298,8 +1139,11 @@
           if (!RigState.isTx) {
             sendCATCommand('FA;');
             sendCATCommand('SM0;');
+          } else {
+            sendCATCommand('RM4;');
+            sendCATCommand('RM6;');
           }
-        }, 250);
+        }, 300);
       };
 
       RigState.wsCat.onmessage = (event) => {
@@ -1309,30 +1153,22 @@
       RigState.wsCat.onclose = () => {
         RigState.connected = false;
         if (connBadge) {
-          connBadge.className = 'px-2 py-0.5 text-[9px] sm:text-[10px] font-mono uppercase font-bold rounded bg-red-950 text-red-400 border border-red-800/60 flex items-center gap-1.5 shrink-0';
-          connBadge.innerHTML = '<span class="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse"></span> Desconectado';
+          connBadge.className = 'px-1.5 py-0.5 text-[9px] font-mono uppercase font-bold rounded bg-red-950 text-red-400 border border-red-800 flex items-center gap-1 shrink-0';
+          connBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Offline';
         }
         if (RigState.pollingIntervalId) clearInterval(RigState.pollingIntervalId);
         setTimeout(connectDockerNetwork, 3000);
-      };
-
-      RigState.wsCat.onerror = () => {
-        if (RigState.wsCat) RigState.wsCat.close();
       };
     }
 
     function handleCatResponse(data) {
       if (!data) return;
-      const clean = data.trim();
-      const chunks = clean.split(';').filter(Boolean);
+      const chunks = data.trim().split(';').filter(Boolean);
 
       for (let chunk of chunks) {
         const cmd = chunk.replace(/\s+/g, '');
-
         if (cmd.startsWith('FA') || cmd.startsWith('FB') || cmd.startsWith('MD0') || cmd.startsWith('SM0')) {
-          if (!RigState.isPowerOn) {
-            updatePowerUI(true);
-          }
+          if (!RigState.isPowerOn) updatePowerUI(true);
         }
 
         if (cmd.startsWith('FA')) {
@@ -1351,8 +1187,7 @@
           const modeCode = cmd.substring(3);
           const modes = {
             '1':'LSB', '2':'USB', '3':'CW-U', '4':'FM', '5':'AM',
-            '6':'RTTY-L', '7':'CW-L', '8':'DATA-L', '9':'RTTY-U',
-            'A':'DATA-FM', 'B':'FM-N', 'C':'DATA-U', 'D':'AM-N'
+            '7':'CW-L', '8':'DATA-L', 'C':'DATA-U'
           };
           if (modes[modeCode]) {
             RigState.mode = modes[modeCode];
@@ -1361,35 +1196,18 @@
           }
         } else if (cmd.startsWith('RM6')) {
           const rawSwr = parseInt(cmd.substring(3), 10);
-          if (!isNaN(rawSwr)) {
-            updateSwrUI(parseSWRFromRaw(rawSwr));
-          }
+          if (!isNaN(rawSwr)) updateSwrUI(parseSWRFromRaw(rawSwr));
+        } else if (cmd.startsWith('RM4') || cmd.startsWith('RM3')) {
+          const rawAlc = parseInt(cmd.substring(3), 10);
+          if (!isNaN(rawAlc)) updateAlcUI(rawAlc);
         } else if (cmd.startsWith('SM0')) {
           const meterRaw = parseInt(cmd.substring(3), 10);
           if (!isNaN(meterRaw)) {
             RigState.sMeter = meterRaw;
             updateMeterDisplay(RigState.sMeter);
           }
-        } else if (cmd.startsWith('PA0')) {
-          const val = cmd.substring(3, 4);
-          RigState.ipo = (val === '0');
-          updateIpoUI();
-        } else if (cmd.startsWith('RA0')) {
-          const val = cmd.substring(3, 4);
-          RigState.att = (val === '1');
-          updateAttUI();
-        } else if (cmd.startsWith('TX')) {
-          const status = cmd.substring(2, 3);
-          if (AudioEngine.isPttPressed) {
-            RigState.isTx = true;
-          } else {
-            RigState.isTx = status === '1' || status === '2';
-          }
-          if (ledTx) ledTx.className = RigState.isTx ? 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
-          if (ledRx) ledRx.className = !RigState.isTx ? 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
         } else if (cmd.startsWith('PS')) {
-          const pwrState = cmd.substring(2, 3) === '1';
-          updatePowerUI(pwrState);
+          updatePowerUI(cmd.substring(2, 3) === '1');
         }
       }
     }
@@ -1397,20 +1215,17 @@
     function setupAudioRxSocket(clientRate) {
       if (!AudioEngine.active) return;
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      
       try {
         AudioEngine.rxWs = new WebSocket(`${protocol}//${window.location.host}/ws/audio/rx`);
         AudioEngine.rxWs.binaryType = 'arraybuffer';
 
         AudioEngine.rxWs.onmessage = (event) => {
           if (RigState.isTx || AudioEngine.isPttPressed || RigState.audioMuted) return;
-
           const pcm16 = new Int16Array(event.data);
           let float32 = new Float32Array(pcm16.length);
           for (let i = 0; i < pcm16.length; i++) {
             float32[i] = pcm16[i] / 32768.0;
           }
-
           if (clientRate !== 48000) {
             float32 = resampleAudio(float32, 48000, clientRate);
           }
@@ -1420,47 +1235,44 @@
             rxWriteIndex = (rxWriteIndex + 1) % RX_RING_SIZE;
           }
           rxBufferedSamples += float32.length;
-
-          if (rxBufferedSamples > RX_RING_SIZE - 2048) {
-            const drop = rxBufferedSamples - (rxTargetBufferSamples * 2);
-            rxReadIndex = (rxReadIndex + drop) % RX_RING_SIZE;
-            rxBufferedSamples = rxTargetBufferSamples * 2;
-          }
         };
 
         AudioEngine.rxWs.onclose = () => {
-          if (AudioEngine.active) {
-            setTimeout(() => setupAudioRxSocket(clientRate), 2500);
-          }
+          if (AudioEngine.active) setTimeout(() => setupAudioRxSocket(clientRate), 2500);
         };
-
-        AudioEngine.rxWs.onerror = () => {
-          if (AudioEngine.rxWs) AudioEngine.rxWs.close();
-        };
-      } catch (err) {
-        console.warn('Error iniciando socket RX:', err);
-      }
+      } catch (err) {}
     }
 
     function setupAudioTxSocket() {
       if (!AudioEngine.active) return;
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-
       try {
         AudioEngine.txWs = new WebSocket(`${protocol}//${window.location.host}/ws/audio/tx`);
         AudioEngine.txWs.binaryType = 'arraybuffer';
-
         AudioEngine.txWs.onclose = () => {
-          if (AudioEngine.active) {
-            setTimeout(setupAudioTxSocket, 2500);
-          }
+          if (AudioEngine.active) setTimeout(setupAudioTxSocket, 2500);
         };
+      } catch (err) {}
+    }
 
-        AudioEngine.txWs.onerror = () => {
-          if (AudioEngine.txWs) AudioEngine.txWs.close();
-        };
-      } catch (err) {
-        console.warn('Error iniciando socket TX:', err);
+    function updateAudioButtonUI() {
+      const btn = document.getElementById('btn-audio-toggle');
+      const icon = document.getElementById('audio-icon');
+      const label = document.getElementById('audio-label');
+      if (!btn || !icon || !label) return;
+
+      if (!AudioEngine.active) {
+        icon.textContent = '🔇';
+        label.textContent = 'Audio';
+        btn.className = 'theme-card text-slate-400 px-2 py-1 rounded border border-slate-700 text-[10px] flex items-center gap-1 transition';
+      } else if (RigState.audioMuted) {
+        icon.textContent = '🔇';
+        label.textContent = 'Mute';
+        btn.className = 'theme-card text-amber-400 px-2 py-1 rounded border border-amber-700 text-[10px] flex items-center gap-1 transition';
+      } else {
+        icon.textContent = '🔊';
+        label.textContent = 'Audio';
+        btn.className = 'theme-card text-emerald-400 px-2 py-1 rounded border border-emerald-700 text-[10px] flex items-center gap-1 transition shadow-[0_0_6px_rgba(16,185,129,0.2)]';
       }
     }
 
@@ -1469,15 +1281,14 @@
         if (AudioEngine.audioCtx && AudioEngine.audioCtx.state === 'suspended') {
           await AudioEngine.audioCtx.resume();
         }
+        updateAudioButtonUI();
         return;
       }
 
       try {
         const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
         AudioEngine.audioCtx = new AudioCtxClass();
-        if (AudioEngine.audioCtx.state === 'suspended') {
-          await AudioEngine.audioCtx.resume();
-        }
+        if (AudioEngine.audioCtx.state === 'suspended') await AudioEngine.audioCtx.resume();
 
         const clientRate = AudioEngine.audioCtx.sampleRate;
         rxTargetBufferSamples = Math.round(clientRate * 0.12);
@@ -1485,43 +1296,30 @@
         AudioEngine.rxProcessorNode = AudioEngine.audioCtx.createScriptProcessor(1024, 1, 1);
         AudioEngine.rxProcessorNode.onaudioprocess = (e) => {
           const out = e.outputBuffer.getChannelData(0);
-          const frames = out.length;
-
           if (RigState.isTx || AudioEngine.isPttPressed || RigState.audioMuted) {
             out.fill(0);
             rxBufferedSamples = 0;
             rxReadIndex = rxWriteIndex;
-            rxPrebuffering = true;
             return;
           }
 
           if (rxPrebuffering) {
-            if (rxBufferedSamples >= rxTargetBufferSamples) {
-              rxPrebuffering = false;
-            } else {
-              out.fill(0);
-              return;
-            }
+            if (rxBufferedSamples >= rxTargetBufferSamples) rxPrebuffering = false;
+            else { out.fill(0); return; }
           }
 
           const diff = rxBufferedSamples - rxTargetBufferSamples;
           let playbackRate = 1.0;
-
           if (diff > 1200) playbackRate = 1.015;
-          else if (diff > 400) playbackRate = 1.005;
           else if (diff < -1200) playbackRate = 0.985;
-          else if (diff < -400) playbackRate = 0.995;
 
-          for (let i = 0; i < frames; i++) {
-            if (rxBufferedSamples <= 1.5) {
-              out[i] = 0;
-            } else {
+          for (let i = 0; i < out.length; i++) {
+            if (rxBufferedSamples <= 1.5) out[i] = 0;
+            else {
               const idx0 = Math.floor(rxReadIndex);
               const frac = rxReadIndex - idx0;
               const idx1 = (idx0 + 1) % RX_RING_SIZE;
-              
               out[i] = rxRingBuffer[idx0] * (1.0 - frac) + rxRingBuffer[idx1] * frac;
-
               rxReadIndex = (rxReadIndex + playbackRate) % RX_RING_SIZE;
               rxBufferedSamples = Math.max(0, rxBufferedSamples - playbackRate);
             }
@@ -1537,60 +1335,33 @@
 
         AudioEngine.rxGainNode = AudioEngine.audioCtx.createGain();
         AudioEngine.rxGainNode.gain.value = 0.75;
-
         AudioEngine.rxProcessorNode.connect(AudioEngine.rxGainNode);
         AudioEngine.rxGainNode.connect(AudioEngine.audioCtx.destination);
 
         AudioEngine.active = true;
-
         setupAudioRxSocket(clientRate);
         setupAudioTxSocket();
 
         try {
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          let stream;
-          try {
-            stream = await navigator.mediaDevices.getUserMedia({
-              audio: {
-                channelCount: 1,
-                echoCancellation: false,
-                autoGainControl: isMobile ? true : false,
-                noiseSuppression: false
-              }
-            });
-          } catch (eConst) {
-            stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          }
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           AudioEngine.txMicStream = stream;
-
-          if (AudioEngine.audioCtx.state === 'suspended') {
-            await AudioEngine.audioCtx.resume();
-          }
-
           AudioEngine.txMicSourceNode = AudioEngine.audioCtx.createMediaStreamSource(stream);
           AudioEngine.txProcessorNode = AudioEngine.audioCtx.createScriptProcessor(2048, 1, 1);
 
           AudioEngine.txProcessorNode.onaudioprocess = (e) => {
             const rawInput = e.inputBuffer.getChannelData(0);
             const input = resampleAudio(rawInput, clientRate, 48000);
-
             let sum = 0;
             const pcm = new Int16Array(input.length);
             for (let i = 0; i < input.length; i++) {
-              let s = input[i] * AudioEngine.txGain;
-              if (s > 0.85) s = 0.85 + (s - 0.85) * 0.2;
-              else if (s < -0.85) s = -0.85 + (s + 0.85) * 0.2;
-
-              s = Math.max(-1.0, Math.min(1.0, s));
+              let s = Math.max(-1.0, Math.min(1.0, input[i] * AudioEngine.txGain));
               sum += s * s;
               pcm[i] = Math.round(s * 32767);
             }
 
             const rms = Math.sqrt(sum / input.length);
             const vuBar = document.getElementById('mic-vu-bar');
-            if (vuBar) {
-              vuBar.style.width = RigState.isTx ? `${Math.min(100, Math.round(rms * 180))}%` : '0%';
-            }
+            if (vuBar) vuBar.style.width = RigState.isTx ? `${Math.min(100, Math.round(rms * 180))}%` : '0%';
 
             if (AudioEngine.isPttPressed && AudioEngine.txWs && AudioEngine.txWs.readyState === WebSocket.OPEN) {
               AudioEngine.txWs.send(pcm.buffer);
@@ -1598,77 +1369,67 @@
           };
 
           AudioEngine.txMicSourceNode.connect(AudioEngine.txProcessorNode);
+          const keepAlive = AudioEngine.audioCtx.createGain();
+          keepAlive.gain.value = 0.000001;
+          AudioEngine.txProcessorNode.connect(keepAlive);
+          keepAlive.connect(AudioEngine.audioCtx.destination);
+        } catch (mErr) {}
 
-          const keepAliveGain = AudioEngine.audioCtx.createGain();
-          keepAliveGain.gain.value = 0.000001;
-          AudioEngine.txProcessorNode.connect(keepAliveGain);
-          keepAliveGain.connect(AudioEngine.audioCtx.destination);
-        } catch (micErr) {
-          console.warn('Microphone permission not granted:', micErr);
+        updateAudioButtonUI();
+      } catch (e) {}
+    }
+
+    async function handleAudioButtonClick() {
+      if (!AudioEngine.active) {
+        await initAudioEngine();
+        RigState.audioMuted = false;
+      } else {
+        RigState.audioMuted = !RigState.audioMuted;
+        if (AudioEngine.rxGainNode) {
+          const vol = parseInt(document.getElementById('slider-rx-vol')?.value || '75', 10);
+          AudioEngine.rxGainNode.gain.value = RigState.audioMuted ? 0 : (vol / 100.0);
         }
-
-        const dot = document.getElementById('audio-engine-dot');
-        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]';
-      } catch (err) {
-        console.error('Audio engine activation failed:', err);
       }
+      updateAudioButtonUI();
     }
 
     function setPTT(active) {
       if (active === RigState.isTx) return;
-
-      if (active && Date.now() < RigState.swrLockoutUntil) {
-        showQsyAlert('⚠️ BLOQUEO SWR: Espera que baje la ROE.');
-        return;
-      }
-
-      if (active && !AudioEngine.active) {
-        initAudioEngine();
-      }
-
-      if (active && AudioEngine.audioCtx && AudioEngine.audioCtx.state === 'suspended') {
-        AudioEngine.audioCtx.resume();
-      }
+      if (active && !AudioEngine.active) initAudioEngine();
 
       AudioEngine.isPttPressed = active;
       RigState.isTx = active;
 
-      if (active) {
-        rxBufferedSamples = 0;
-        rxReadIndex = rxWriteIndex;
-        rxPrebuffering = true;
-        RigState.txStartTime = Date.now();
-        RigState.swrHighCount = 0;
-        const isData = RigState.mode.includes('DATA');
-        sendCATCommand(isData ? 'TX2;' : 'TX1;');
-      } else {
-        rxBufferedSamples = 0;
-        rxReadIndex = rxWriteIndex;
-        rxPrebuffering = true;
-        sendCATCommand('TX0;');
-      }
-
-      if (ledTx) ledTx.className = active ? 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
-      if (ledRx) ledRx.className = !active ? 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
+      const ledTx = document.getElementById('led-tx');
+      const ledRx = document.getElementById('led-rx');
+      if (ledTx) ledTx.className = active ? 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]' : 'w-2 h-2 rounded-full bg-slate-700';
+      if (ledRx) ledRx.className = !active ? 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]' : 'w-2 h-2 rounded-full bg-slate-700';
 
       const pttBtn = document.getElementById('btn-touch-ptt');
       const pttLabel = document.getElementById('touch-ptt-text');
       if (pttBtn && pttLabel) {
         if (active) {
-          pttBtn.className = 'w-full min-h-[62px] py-4 px-4 bg-red-600 text-white font-bold rounded-xl border border-red-300 shadow-xl flex items-center justify-center gap-2.5 select-none font-mono';
-          pttLabel.textContent = '¡TRANSMITIENDO EN VIVO (TX)!';
+          pttBtn.className = 'w-full py-3 px-3 bg-red-600 text-white font-bold rounded-xl border border-red-300 shadow flex items-center justify-center gap-2 select-none font-mono text-sm';
+          pttLabel.textContent = '¡TRANSMITIENDO EN VIVO!';
         } else {
-          pttBtn.className = 'w-full min-h-[62px] py-4 px-4 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold rounded-xl border border-red-400 shadow-lg flex items-center justify-center gap-2.5 select-none active:scale-[0.98] transition font-mono';
-          pttLabel.textContent = RigState.pttLatchMode ? 'TOCAR PARA TRANSMITIR (ON)' : 'MANTENER PARA TRANSMITIR (PTT)';
+          pttBtn.className = 'w-full py-3 px-3 bg-gradient-to-r from-red-800 to-red-600 hover:from-red-700 hover:to-red-500 text-white font-bold rounded-xl border border-red-400 shadow flex items-center justify-center gap-2 select-none font-mono text-sm';
+          pttLabel.textContent = 'TRANSMITIR (PTT)';
         }
+      }
+
+      if (active) {
+        const isData = RigState.mode.includes('DATA');
+        sendCATCommand(isData ? 'TX2;' : 'TX1;');
+      } else {
+        sendCATCommand('TX0;');
+        updateAlcUI(0);
       }
     }
 
     function tuneStep(direction, multiplier = 1) {
       const delta = direction * RigState.step * multiplier;
       let newFreq = (RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB) + delta;
-      if (newFreq < 100000) newFreq = 100000;
-      if (newFreq > 56000000) newFreq = 56000000;
+      newFreq = Math.max(100000, Math.min(56000000, newFreq));
 
       if (RigState.activeVfo === 'A') {
         RigState.freqA = newFreq;
@@ -1681,10 +1442,12 @@
     }
 
     function showQsyAlert(msg) {
+      const qsyMsg = document.getElementById('qsy-msg');
+      const qsyAlert = document.getElementById('qsy-alert');
       if (qsyMsg) qsyMsg.textContent = msg;
       if (qsyAlert) {
         qsyAlert.classList.remove('hidden');
-        setTimeout(() => qsyAlert.classList.add('hidden'), 3500);
+        setTimeout(() => qsyAlert.classList.add('hidden'), 3000);
       }
     }
 
@@ -1721,24 +1484,16 @@
         RigState.catModeCode = radioMode.cat;
         sendCATCommand(`${radioMode.cat};`);
         renderRigDisplay();
-        showQsyAlert(`QSY a ${spotLabel || ''} ${(target / 1000000).toFixed(3)} MHz (${radioMode.name})`);
+        showQsyAlert(`QSY: ${(target / 1000000).toFixed(3)} MHz (${radioMode.name})`);
 
         if (isDigital) {
           switchGlobalModule('ft8');
-          if (activatorCall) {
-            setupQsoWithStation(activatorCall, grid || '');
-            if (Ft8State.autoTxOnSpot) {
-              armFt8Tx(true);
-            }
-          }
+          if (activatorCall) setupQsoWithStation(activatorCall, grid || '');
         }
       }, 80);
     }
 
     async function fetchSpots() {
-      const icon = document.getElementById('refresh-icon');
-      if (icon) icon.classList.add('animate-spin');
-
       try {
         const res = await fetch('/api/spots');
         if (res.ok) {
@@ -1746,26 +1501,14 @@
           allSpots = data.spots || [];
           renderSpotsList();
         }
-      } catch (e) {
-        console.warn('Error al cargar spots:', e);
-      } finally {
-        if (icon) icon.classList.remove('animate-spin');
-      }
+      } catch (e) {}
     }
 
-    function getBandFromFreqKhz(khz) {
-      if (khz >= 1800 && khz <= 2000) return '160m';
-      if (khz >= 3500 && khz <= 4000) return '80m';
-      if (khz >= 5300 && khz <= 5410) return '60m';
-      if (khz >= 7000 && khz <= 7300) return '40m';
-      if (khz >= 10100 && khz <= 10150) return '30m';
-      if (khz >= 14000 && khz <= 14350) return '20m';
-      if (khz >= 18068 && khz <= 18168) return '17m';
-      if (khz >= 21000 && khz <= 21450) return '15m';
-      if (khz >= 24890 && khz <= 24990) return '12m';
-      if (khz >= 28000 && khz <= 29700) return '10m';
-      if (khz >= 50000 && khz <= 54000) return '6m';
-      return 'OTHER';
+    function applyDropdownFilter() {
+      ActiveFilters.program = document.getElementById('sel-filter-prog')?.value || 'ALL';
+      ActiveFilters.band = document.getElementById('sel-filter-band')?.value || 'ALL';
+      ActiveFilters.mode = document.getElementById('sel-filter-mode')?.value || 'ALL';
+      renderSpotsList();
     }
 
     function renderSpotsList() {
@@ -1776,43 +1519,38 @@
       const search = (document.getElementById('search-spots')?.value || '').toUpperCase().trim();
 
       const filtered = allSpots.filter(spot => {
-        if (!ActiveFilters.programs.has('ALL')) {
-          const prog = (spot.program || '').toUpperCase();
-          if (!ActiveFilters.programs.has(prog)) return false;
+        if (ActiveFilters.program !== 'ALL') {
+          if ((spot.program || '').toUpperCase() !== ActiveFilters.program) return false;
         }
 
-        if (!ActiveFilters.bands.has('ALL')) {
-          const band = getBandFromFreqKhz(spot.freq);
-          if (!ActiveFilters.bands.has(band)) return false;
+        if (ActiveFilters.band !== 'ALL') {
+          let khz = spot.freq;
+          let spotBand = 'OTHER';
+          if (khz >= 3500 && khz <= 4000) spotBand = '80m';
+          else if (khz >= 7000 && khz <= 7300) spotBand = '40m';
+          else if (khz >= 10100 && khz <= 10150) spotBand = '30m';
+          else if (khz >= 14000 && khz <= 14350) spotBand = '20m';
+          else if (khz >= 18068 && khz <= 18168) spotBand = '17m';
+          else if (khz >= 21000 && khz <= 21450) spotBand = '15m';
+          else if (khz >= 24890 && khz <= 24990) spotBand = '12m';
+          else if (khz >= 28000 && khz <= 29700) spotBand = '10m';
+          else if (khz >= 50000 && khz <= 54000) spotBand = '6m';
+
+          if (spotBand !== ActiveFilters.band) return false;
         }
 
-        if (!ActiveFilters.modes.has('ALL')) {
+        if (ActiveFilters.mode !== 'ALL') {
           const m = (spot.mode || '').toUpperCase();
-          let matchesMode = false;
-
-          for (const selectedMode of ActiveFilters.modes) {
-            if (selectedMode === 'SSB' && (m.includes('USB') || m.includes('LSB') || m.includes('SSB'))) {
-              matchesMode = true; break;
-            }
-            if (selectedMode === 'CW' && m.includes('CW')) {
-              matchesMode = true; break;
-            }
-            if (selectedMode === 'FT8' && m.includes('FT8')) {
-              matchesMode = true; break;
-            }
-            if (selectedMode === 'FT4' && m.includes('FT4')) {
-              matchesMode = true; break;
-            }
-            if (selectedMode === 'DATA' && (m.includes('DATA') || m.includes('FT8') || m.includes('FT4') || m.includes('RTTY'))) {
-              matchesMode = true; break;
-            }
-          }
-          if (!matchesMode) return false;
+          if (ActiveFilters.mode === 'SSB' && !(m.includes('USB') || m.includes('LSB') || m.includes('SSB'))) return false;
+          if (ActiveFilters.mode === 'CW' && !m.includes('CW')) return false;
+          if (ActiveFilters.mode === 'FT8' && !m.includes('FT8')) return false;
+          if (ActiveFilters.mode === 'FT4' && !m.includes('FT4')) return false;
+          if (ActiveFilters.mode === 'DATA' && !(m.includes('DATA') || m.includes('FT8') || m.includes('FT4'))) return false;
         }
 
         if (search) {
-          const haystack = `${spot.activator} ${spot.ref} ${spot.parkName} ${spot.comments} ${spot.spotter}`.toUpperCase();
-          if (!haystack.includes(search)) return false;
+          const text = `${spot.activator} ${spot.ref} ${spot.parkName} ${spot.comments}`.toUpperCase();
+          if (!text.includes(search)) return false;
         }
 
         return true;
@@ -1820,115 +1558,66 @@
 
       if (badge) badge.textContent = filtered.length;
 
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-slate-500 font-mono text-xs font-semibold">No hay spots que coincidan con los filtros seleccionados.</div>`;
+      if (!filtered.length) {
+        container.innerHTML = '<div class="p-4 text-center text-slate-500 font-mono text-xs">Sin spots para los filtros seleccionados.</div>';
         return;
       }
 
-      requestAnimationFrame(() => {
-        const fragment = document.createDocumentFragment();
-        filtered.forEach(spot => {
-          const card = document.createElement('div');
-          card.className = 'p-2.5 rounded-lg theme-card border hover:border-amber-400 cursor-pointer transition flex justify-between items-center group active:scale-[0.99] shadow-sm';
+      const fragment = document.createDocumentFragment();
+      filtered.forEach(spot => {
+        const card = document.createElement('div');
+        card.className = 'p-2 rounded-lg theme-card border hover:border-amber-400 cursor-pointer flex justify-between items-center transition shadow-sm';
 
-          let freqHz = Math.round(spot.freq * 1000);
-          if (freqHz < 1000000) freqHz *= 1000;
+        let freqHz = Math.round(spot.freq * 1000);
+        if (freqHz < 1000000) freqHz *= 1000;
+        const isDigital = (spot.mode || '').toUpperCase().includes('FT8') || (spot.mode || '').toUpperCase().includes('FT4');
 
-          let progBadgeClass = 'bg-cyan-950 text-cyan-400 border-cyan-800';
-          if (spot.program === 'DX') {
-            progBadgeClass = 'bg-purple-950 text-purple-300 border-purple-800';
-          } else if (spot.program === 'SOTA') {
-            progBadgeClass = 'bg-emerald-950 text-emerald-400 border-emerald-800';
-          } else if (spot.program === 'LLOTA') {
-            progBadgeClass = 'bg-blue-950 text-blue-400 border-blue-800';
-          }
-
-          const isDigital = (spot.mode || '').toUpperCase().includes('FT8') ||
-                            (spot.mode || '').toUpperCase().includes('FT4') ||
-                            (spot.mode || '').toUpperCase().includes('DATA');
-
-          const btnText = isDigital ? 'QSY FT8' : 'QSY';
-          const btnClass = isDigital ? 'bg-cyan-500 hover:bg-cyan-400 text-black' : 'bg-amber-500 hover:bg-amber-400 text-black';
-
-          card.innerHTML = `
-            <div class="flex-1 min-w-0 pr-2">
-              <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
-                <span class="font-bold spot-callsign font-mono text-xs sm:text-sm">${spot.activator}</span>
-                <span class="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold border ${progBadgeClass}">${spot.ref || spot.program}</span>
-                <span class="text-[9px] spot-time-text font-mono font-semibold">${spot.time || ''}</span>
-                <span class="text-[9px] text-slate-500 font-mono font-bold">via ${spot.spotter || ''}</span>
-              </div>
-              <div class="text-[10px] sm:text-[11px] spot-park-title truncate font-mono font-semibold">${spot.parkName || ''}</div>
-              <div class="text-[9px] spot-comment-text truncate font-mono">${spot.comments || ''}</div>
+        card.innerHTML = `
+          <div class="flex-1 min-w-0 pr-2">
+            <div class="flex items-center gap-1.5 mb-0.5">
+              <span class="font-bold font-mono text-xs text-amber-400">${spot.activator}</span>
+              <span class="px-1 py-0.2 rounded text-[8px] font-mono font-bold border border-slate-700 bg-slate-900">${spot.ref || spot.program}</span>
+              <span class="text-[8px] text-slate-400 font-mono">${spot.time || ''}</span>
             </div>
-            <div class="text-right shrink-0 flex flex-col items-end gap-1">
-              <span class="font-lcd font-bold spot-freq-display text-xs sm:text-sm tracking-tight">${(freqHz / 1000000).toFixed(3)} <span class="text-[10px] ${isDigital ? 'text-cyan-400' : 'text-amber-500'} font-bold">${spot.mode || ''}</span></span>
-              <button class="px-2 py-0.5 rounded ${btnClass} font-bold font-mono text-[10px] tracking-wider shadow-sm transition">
-                ${btnText}
-              </button>
-            </div>
-          `;
+            <div class="text-[10px] text-slate-300 truncate font-mono">${spot.parkName || spot.comments || ''}</div>
+          </div>
+          <div class="text-right shrink-0">
+            <div class="font-lcd font-bold text-xs">${(freqHz / 1000000).toFixed(3)} <span class="text-[9px] ${isDigital ? 'text-cyan-400' : 'text-amber-500'} font-bold">${spot.mode || ''}</span></div>
+            <button class="px-1.5 py-0.5 rounded ${isDigital ? 'bg-cyan-500' : 'bg-amber-500'} text-black font-bold font-mono text-[9px] mt-0.5">
+              ${isDigital ? 'QSY FT8' : 'QSY'}
+            </button>
+          </div>
+        `;
 
-          card.addEventListener('click', () => {
-            performQSY(freqHz, spot.mode, `${spot.activator} (${spot.ref || spot.program})`, spot.activator, spot.ref);
-          });
-
-          fragment.appendChild(card);
+        card.addEventListener('click', () => {
+          performQSY(freqHz, spot.mode, spot.activator, spot.activator, spot.ref);
         });
 
-        container.innerHTML = '';
-        container.appendChild(fragment);
+        fragment.appendChild(card);
       });
-    }
 
-    function toggleChipFilter(setObj, value, containerId) {
-      if (value === 'ALL') {
-        setObj.clear();
-        setObj.add('ALL');
-      } else {
-        setObj.delete('ALL');
-        if (setObj.has(value)) {
-          setObj.delete(value);
-          if (setObj.size === 0) setObj.add('ALL');
-        } else {
-          setObj.add(value);
-        }
-      }
-
-      const container = document.getElementById(containerId);
-      if (container) {
-        container.querySelectorAll('button').forEach(btn => {
-          const key = btn.dataset.prog || btn.dataset.band || btn.dataset.mode;
-          if (setObj.has(key)) {
-            btn.className = btn.className.replace('theme-btn', '').trim() + ' btn-active-theme';
-          } else {
-            btn.className = btn.className.replace('btn-active-theme', '').trim() + ' theme-btn';
-          }
-        });
-      }
-
-      renderSpotsList();
+      container.innerHTML = '';
+      container.appendChild(fragment);
     }
 
     function switchGlobalModule(mod) {
-      const radioView = document.getElementById('module-main-radio');
-      const ft8View = document.getElementById('module-main-ft8');
-      const btnRadio = document.getElementById('nav-btn-radio');
-      const btnFt8 = document.getElementById('nav-btn-ft8');
+      const rView = document.getElementById('module-main-radio');
+      const fView = document.getElementById('module-main-ft8');
+      const bRad = document.getElementById('nav-btn-radio');
+      const bFt8 = document.getElementById('nav-btn-ft8');
 
-      if (!radioView || !ft8View) return;
-
+      if (!rView || !fView) return;
       if (mod === 'ft8') {
-        radioView.classList.add('hidden');
-        ft8View.classList.remove('hidden');
-        if (btnFt8) btnFt8.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1';
-        if (btnRadio) btnRadio.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold text-slate-300 flex items-center gap-1';
+        rView.classList.add('hidden');
+        fView.classList.remove('hidden');
+        if (bFt8) bFt8.className = 'px-2.5 py-1 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1';
+        if (bRad) bRad.className = 'px-2.5 py-1 rounded theme-btn border text-[11px] font-bold text-slate-400 flex items-center gap-1';
         initFt8WebSocket();
       } else {
-        ft8View.classList.add('hidden');
-        radioView.classList.remove('hidden');
-        if (btnRadio) btnRadio.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1';
-        if (btnFt8) btnFt8.className = 'px-2.5 py-1.5 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1';
+        fView.classList.add('hidden');
+        rView.classList.remove('hidden');
+        if (bRad) bRad.className = 'px-2.5 py-1 rounded theme-btn border text-[11px] font-bold btn-active-theme flex items-center gap-1';
+        if (bFt8) bFt8.className = 'px-2.5 py-1 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1';
       }
     }
 
@@ -1937,7 +1626,6 @@
         switchGlobalModule('ft8');
         return;
       }
-
       switchGlobalModule('radio');
       const rig = document.getElementById('panel-rig');
       const spots = document.getElementById('panel-spots');
@@ -1945,18 +1633,17 @@
       const btnS = document.getElementById('tab-btn-spots');
 
       if (!rig || !spots) return;
-
       rig.classList.add('hidden-mobile');
       spots.classList.add('hidden-mobile');
-      if (btnR) btnR.className = 'flex-1 py-1.5 px-2 rounded font-medium text-center border border-slate-700 theme-card text-slate-400 flex items-center justify-center gap-1.5';
-      if (btnS) btnS.className = 'flex-1 py-1.5 px-2 rounded font-medium text-center border border-slate-700 theme-card text-slate-400 flex items-center justify-center gap-1.5';
+      if (btnR) btnR.className = 'flex-1 py-1.5 rounded font-medium text-center border border-slate-700 theme-card text-slate-400';
+      if (btnS) btnS.className = 'flex-1 py-1.5 rounded font-medium text-center border border-slate-700 theme-card text-slate-400';
 
       if (tab === 'radio') {
         rig.classList.remove('hidden-mobile');
-        if (btnR) btnR.className = 'flex-1 py-1.5 px-2 rounded font-bold text-center border border-amber-500/80 bg-amber-950/40 text-amber-300 flex items-center justify-center gap-1.5';
+        if (btnR) btnR.className = 'flex-1 py-1.5 rounded font-bold text-center border border-amber-500 bg-amber-950/40 text-amber-300';
       } else if (tab === 'spots') {
         spots.classList.remove('hidden-mobile');
-        if (btnS) btnS.className = 'flex-1 py-1.5 px-2 rounded font-bold text-center border border-amber-500/80 bg-amber-950/40 text-amber-300 flex items-center justify-center gap-1.5';
+        if (btnS) btnS.className = 'flex-1 py-1.5 rounded font-bold text-center border border-amber-500 bg-amber-950/40 text-amber-300';
       }
     }
 
@@ -1965,45 +1652,20 @@
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       Ft8State.ws = new WebSocket(`${protocol}//${window.location.host}/ws/ft8`);
 
-      Ft8State.ws.onopen = () => {
-        Ft8State.connected = true;
-        sendFt8Command({
-          action: 'set_station',
-          my_call: Ft8State.myCall,
-          my_grid: Ft8State.myGrid
-        });
-      };
-
       Ft8State.ws.onmessage = (event) => {
         try {
-          const data = jsonParseSafe(event.data);
-          if (!data) return;
-
+          const data = JSON.parse(event.data);
           if (data.event === 'decodes' && Array.isArray(data.data)) {
             handleIncomingDecodes(data.data, data.slot);
           } else if (data.event === 'tx_started') {
-            updateFt8TxUI(true, data.msg);
             recordTxMessageInDecodes(data.msg, data.freq, data.slot);
           } else if (data.event === 'tx_finished') {
-            updateFt8TxUI(false, data.msg);
             handleTxFinishedWait();
-          } else if (data.event === 'tx_status') {
-            Ft8State.txArmed = data.state.tx_armed;
-            updateFt8TxStatusBadge();
           }
-        } catch (e) {
-          console.warn('[FT8 WS] Error:', e);
-        }
+        } catch (e) {}
       };
 
-      Ft8State.ws.onclose = () => {
-        Ft8State.connected = false;
-        setTimeout(initFt8WebSocket, 3000);
-      };
-    }
-
-    function jsonParseSafe(str) {
-      try { return JSON.parse(str); } catch (e) { return null; }
+      Ft8State.ws.onclose = () => setTimeout(initFt8WebSocket, 3000);
     }
 
     function sendFt8Command(cmdObj) {
@@ -2014,25 +1676,10 @@
 
     function setFt8Mode(mode) {
       Ft8State.mode = mode;
-      Ft8State.slotDuration = mode === 'FT4' ? 7.5 : 15.0;
-      document.getElementById('btn-mode-ft8').className = mode === 'FT8' ? 'px-2.5 py-1 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2.5 py-1 rounded theme-btn border font-bold text-xs';
-      document.getElementById('btn-mode-ft4').className = mode === 'FT4' ? 'px-2.5 py-1 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2.5 py-1 rounded theme-btn border font-bold text-xs';
+      Ft8State.slotDuration = (mode === 'FT4') ? 7.5 : 15.0;
+      document.getElementById('btn-mode-ft8').className = mode === 'FT8' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
+      document.getElementById('btn-mode-ft4').className = mode === 'FT4' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
       sendFt8Command({ action: 'set_mode', mode: mode });
-    }
-
-    function tuneFt8Preset(freqHz, bandLabel) {
-      RigState.mode = 'DATA-U';
-      RigState.catModeCode = 'MD0C';
-      if (RigState.activeVfo === 'A') {
-        RigState.freqA = freqHz;
-        sendCATCommand(`FA${String(freqHz).padStart(9, '0')};`);
-      } else {
-        RigState.freqB = freqHz;
-        sendCATCommand(`FB${String(freqHz).padStart(9, '0')};`);
-      }
-      sendCATCommand('MD0C;');
-      renderRigDisplay();
-      showQsyAlert(`QSY FT8 ${bandLabel}: ${(freqHz / 1000000).toFixed(3)} MHz (DATA-U)`);
     }
 
     function updateStationConfig() {
@@ -2046,12 +1693,14 @@
       localStorage.setItem('ft8_tx_freq', Ft8State.txFreq);
 
       recalculateQsoMsgs();
+      updateOnAirFrequencyDisplays();
+      sendFt8Command({ action: 'set_station', my_call: Ft8State.myCall, my_grid: Ft8State.myGrid });
+    }
 
-      sendFt8Command({
-        action: 'set_station',
-        my_call: Ft8State.myCall,
-        my_grid: Ft8State.myGrid
-      });
+    function formatFt8Report(val) {
+      const num = parseInt(val, 10);
+      if (isNaN(num)) return '-10';
+      return `${num >= 0 ? '+' : '-'}${String(Math.abs(num)).padStart(2, '0')}`;
     }
 
     function recalculateQsoMsgs() {
@@ -2059,13 +1708,11 @@
       const myGrid = Ft8State.myGrid;
       const dxCall = (document.getElementById('qso-dx-call')?.value || Ft8State.dxCall || 'K1JT').toUpperCase().trim();
       const dxGrid = (document.getElementById('qso-dx-grid')?.value || Ft8State.dxGrid || 'FN20').toUpperCase().trim();
-      const report = document.getElementById('qso-dx-report')?.value || Ft8State.dxReport || '-10';
+      const rptFormatted = formatFt8Report(document.getElementById('qso-dx-report')?.value || Ft8State.dxReport || '-10');
 
       Ft8State.dxCall = dxCall;
       Ft8State.dxGrid = dxGrid;
-      Ft8State.dxReport = report;
-
-      const rptFormatted = (report.startsWith('+') || report.startsWith('-')) ? report : (parseInt(report, 10) >= 0 ? `+${report}` : report);
+      Ft8State.dxReport = rptFormatted;
 
       document.getElementById('tx-label-1').textContent = `CQ ${myCall} ${myGrid}`;
       document.getElementById('tx-label-2').textContent = `${dxCall} ${myCall} ${myGrid}`;
@@ -2075,9 +1722,7 @@
       document.getElementById('tx-label-6').textContent = `${dxCall} ${myCall} 73`;
 
       const targetBadge = document.getElementById('ft8-target-badge');
-      if (targetBadge) {
-        targetBadge.textContent = dxCall ? `DX: ${dxCall} (${dxGrid})` : 'DX: NINGUNO';
-      }
+      if (targetBadge) targetBadge.textContent = dxCall ? `DX: ${dxCall} (${dxGrid})` : 'DX: NINGUNO';
     }
 
     function selectTxMessageRow(rowNum) {
@@ -2086,37 +1731,23 @@
         const row = document.getElementById(`tx-row-${i}`);
         const rad = document.getElementById(`radio-tx-${i}`);
         if (row && rad) {
-          if (i === rowNum) {
-            rad.checked = true;
-            row.className = 'p-1.5 rounded theme-card border border-amber-500 bg-amber-950/30 flex items-center justify-between cursor-pointer';
-          } else {
-            rad.checked = false;
-            row.className = 'p-1.5 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400 transition';
-          }
+          rad.checked = (i === rowNum);
+          row.className = (i === rowNum)
+            ? 'p-1 rounded theme-card border border-amber-500 bg-amber-950/30 flex items-center justify-between cursor-pointer'
+            : 'p-1 rounded theme-card border flex items-center justify-between cursor-pointer hover:border-amber-400';
         }
       }
-      if (Ft8State.txArmed) {
-        armFt8Tx(true);
-      }
+      if (Ft8State.txArmed) armFt8Tx(true);
     }
 
-    function setupQsoWithStation(call, grid, snrReceived, audioFreq, slotReceived) {
+    function setupQsoWithStation(call, grid, snrReceived, audioFreq) {
       Ft8State.dxCall = call.toUpperCase().trim();
       if (grid) Ft8State.dxGrid = grid.toUpperCase().trim();
-      if (snrReceived !== undefined) {
-        Ft8State.dxReport = String(snrReceived);
-      }
-
+      if (snrReceived !== undefined) Ft8State.dxReport = String(snrReceived);
       if (audioFreq && !isNaN(audioFreq)) {
         Ft8State.txFreq = audioFreq;
         const inFreq = document.getElementById('ft8-tx-freq');
         if (inFreq) inFreq.value = audioFreq;
-      }
-
-      if (slotReceived) {
-        Ft8State.txSlot = (slotReceived === 'even') ? 'odd' : 'even';
-        const selSlot = document.getElementById('ft8-tx-slot-select');
-        if (selSlot) selSlot.value = Ft8State.txSlot;
       }
 
       document.getElementById('qso-dx-call').value = Ft8State.dxCall;
@@ -2124,7 +1755,6 @@
       document.getElementById('qso-dx-report').value = Ft8State.dxReport;
 
       Ft8State.retryCount = 0;
-      updateFsmUI(`Respondiendo a ${Ft8State.dxCall} (Enviando Grid)`);
       recalculateQsoMsgs();
       selectTxMessageRow(2);
     }
@@ -2147,124 +1777,34 @@
           freq: Ft8State.txFreq,
           slot: Ft8State.txSlot
         });
-
-        if (lbl) lbl.textContent = 'TX ARMADO (EN ESPERA)';
-        if (btn) btn.className = 'py-2.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition animate-pulse';
+        if (lbl) lbl.textContent = 'TX ARMADO';
+        if (btn) btn.className = 'py-2 rounded bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs flex items-center justify-center gap-1 animate-pulse';
       } else {
         sendFt8Command({ action: 'abort_tx' });
-        if (lbl) lbl.textContent = 'HABILITAR TX (PROX)';
-        if (btn) btn.className = 'py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-wider flex items-center justify-center gap-2 shadow-lg active:scale-95 transition';
+        if (lbl) lbl.textContent = 'HABILITAR TX';
+        if (btn) btn.className = 'py-2 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1';
       }
-      updateFt8TxStatusBadge();
     }
 
     function abortFt8Tx() {
       armFt8Tx(false);
-      sendFt8Command({ action: 'abort_tx' });
       Ft8State.retryCount = 0;
-      if (Ft8State.autoCq) {
-        Ft8State.autoCq = false;
-        const chk = document.getElementById('check-auto-cq-loop');
-        if (chk) chk.checked = false;
-      }
-      updateFsmUI('Transmisión detenida por el operador');
     }
 
     function toggleAutoCqMode(enabled) {
       Ft8State.autoCq = enabled;
-      if (enabled) {
-        showQsyAlert('Auto-CQ activado: llamará CQ y atenderá a quien responda');
-        if (!Ft8State.dxCall || Ft8State.activeTxRow === 1) {
-          selectTxMessageRow(1);
-          armFt8Tx(true);
-        }
-      } else {
-        showQsyAlert('Auto-CQ desactivado');
+      if (enabled && (!Ft8State.dxCall || Ft8State.activeTxRow === 1)) {
+        selectTxMessageRow(1);
+        armFt8Tx(true);
       }
-    }
-
-    function resumeAutoCq() {
-      Ft8State.dxCall = '';
-      Ft8State.dxGrid = '';
-      Ft8State.retryCount = 0;
-      const inCall = document.getElementById('qso-dx-call');
-      const inGrid = document.getElementById('qso-dx-grid');
-      if (inCall) inCall.value = '';
-      if (inGrid) inGrid.value = '';
-      recalculateQsoMsgs();
-      selectTxMessageRow(1);
-      updateFsmUI('QSO finalizado y registrado. Retomando Auto-CQ...');
-      armFt8Tx(true);
-    }
-
-    function updateFt8TxStatusBadge() {
-      const badge = document.getElementById('ft8-tx-status-badge');
-      if (!badge) return;
-      if (RigState.isTx) {
-        badge.textContent = 'TRANSMITIENDO (TX)';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white animate-pulse';
-      } else if (Ft8State.txArmed) {
-        badge.textContent = `ARMADO PARA ${Ft8State.txSlot.toUpperCase()}`;
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-black';
-      } else {
-        badge.textContent = 'TX LISTO (STANDBY)';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700';
-      }
-    }
-
-    function updateFt8TxUI(isTxNow, msg) {
-      RigState.isTx = isTxNow;
-      if (ledTx) ledTx.className = isTxNow ? 'w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
-      if (ledRx) ledRx.className = !isTxNow ? 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'w-2.5 h-2.5 rounded-full bg-slate-700';
-      updateFt8TxStatusBadge();
-    }
-
-    function updateFsmUI(statusText) {
-      const label = document.getElementById('fsm-status-label');
-      const counter = document.getElementById('fsm-retry-counter');
-      if (label) label.textContent = statusText;
-      if (counter) counter.textContent = `Intento: ${Ft8State.retryCount}/${Ft8State.maxRetries}`;
-    }
-
-    function recordTxMessageInDecodes(msg, freq, slot) {
-      const now = new Date();
-      const timeFmt = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}z`;
-      const txEntry = {
-        isTx: true,
-        time: timeFmt,
-        snr: 0,
-        dt: 0.0,
-        freq: freq || Ft8State.txFreq,
-        msg: msg || `TX ${Ft8State.myCall}`,
-        slot: slot || Ft8State.txSlot
-      };
-
-      Ft8State.decodes.unshift(txEntry);
-      if (Ft8State.decodes.length > 160) Ft8State.decodes.pop();
-      renderFt8Decodes();
     }
 
     function handleTxFinishedWait() {
-      if (!Ft8State.dxCall) {
-        if (Ft8State.autoCq && Ft8State.activeTxRow === 1) {
-          updateFsmUI('CQ transmitido. Esperando respuestas en RX (Auto-CQ activo)...');
-          armFt8Tx(true);
-        }
-        return;
-      }
-
-      const currentTx = Ft8State.activeTxRow;
-
-      // SI ACABAMOS DE TRANSMITIR EL 73 FINAL (Tx 6):
-      // El QSO está completado.
-      if (currentTx === 6) {
-        updateFsmUI(`¡QSO finalizado con éxito con ${Ft8State.dxCall}!`);
+      if (Ft8State.activeTxRow === 6) {
         logCurrentQso();
-        showQsyAlert(`¡QSO completado con ${Ft8State.dxCall}! Guardado en log.`);
-        Ft8State.retryCount = 0;
-
         if (Ft8State.autoCq) {
-          resumeAutoCq();
+          selectTxMessageRow(1);
+          armFt8Tx(true);
         } else {
           armFt8Tx(false);
         }
@@ -2272,100 +1812,57 @@
       }
 
       Ft8State.retryCount++;
+      const counter = document.getElementById('fsm-retry-counter');
+      if (counter) counter.textContent = `${Ft8State.retryCount}/${Ft8State.maxRetries}`;
 
       if (Ft8State.retryCount >= Ft8State.maxRetries) {
-        updateFsmUI(`Sin respuesta de ${Ft8State.dxCall} tras ${Ft8State.maxRetries} intentos. Abortando.`);
-        if (Ft8State.autoCq) {
-          resumeAutoCq();
-        } else {
-          abortFt8Tx();
-        }
-        return;
+        abortFt8Tx();
       }
+    }
 
-      updateFsmUI(`Tx ${currentTx} transmitido. Esperando respuesta en RX (Intento ${Ft8State.retryCount}/${Ft8State.maxRetries})...`);
+    function recordTxMessageInDecodes(msg, freq, slot) {
+      const now = new Date();
+      const timeFmt = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}z`;
+      Ft8State.decodes.unshift({
+        isTx: true,
+        time: timeFmt,
+        snr: 0,
+        dt: 0.0,
+        freq: freq || Ft8State.txFreq,
+        msg: msg || `TX ${Ft8State.myCall}`
+      });
+      if (Ft8State.decodes.length > 120) Ft8State.decodes.pop();
+      renderFt8Decodes();
     }
 
     function handleIncomingDecodes(decodes, slot) {
       const myCall = Ft8State.myCall.toUpperCase();
       const dxCall = Ft8State.dxCall.toUpperCase();
 
-      const now = new Date();
-      const timeFmt = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}z`;
-      const slotUpper = (slot || 'EVEN').toUpperCase();
-
-      const divider = {
-        isDivider: true,
-        time: timeFmt,
-        slot: slotUpper,
-        count: decodes.length
-      };
-
-      Ft8State.decodes.unshift(divider);
-
       for (let i = decodes.length - 1; i >= 0; i--) {
         const d = decodes[i];
         Ft8State.decodes.unshift(d);
-        if (Ft8State.decodes.length > 160) Ft8State.decodes.pop();
+        if (Ft8State.decodes.length > 120) Ft8State.decodes.pop();
 
-        // 1. DETECCIÓN DE RESPUESTA A NUESTRO CQ (O LLAMADA DIRIGIDA A NUESTRA ESTACIÓN):
         const tokens = d.msg ? d.msg.trim().split(/\s+/) : [];
         if (tokens.length >= 2 && tokens[0] === myCall && tokens[1] !== myCall) {
-          const caller = tokens[1];
-          if (!dxCall || Ft8State.activeTxRow === 1) {
-            console.log(`[Auto-CQ] ¡Estación ${caller} nos respondió!`);
-            const callerParam = tokens[2] || '';
-            setupQsoWithStation(caller, callerParam.length === 4 ? callerParam : '', d.snr, d.freq, slot);
-            if (callerParam.startsWith('-') || callerParam.startsWith('+')) {
-              Ft8State.mySentReport = callerParam;
-              selectTxMessageRow(4); // R-Report si ya nos envió reporte directo
-            } else {
-              selectTxMessageRow(3); // Enviar nuestro reporte de señal al corresponsal
-            }
-            updateFsmUI(`¡${caller} respondió nuestro CQ! Enviando reporte.`);
-            armFt8Tx(true);
-            continue;
-          }
+          setupQsoWithStation(tokens[1], tokens[2] || '', d.snr, d.freq);
+          selectTxMessageRow(3);
+          armFt8Tx(true);
+          continue;
         }
 
-        // 2. LÓGICA DE AUTO-SECUENCIA ESTRICTA (QSO EN CURSO):
         if (Ft8State.autoSeq && dxCall && d.msg.includes(myCall) && d.msg.includes(dxCall)) {
-          console.log(`[FSM RX] Respuesta recibida de ${dxCall}: "${d.msg}"`);
           Ft8State.retryCount = 0;
-
-          // CASO 1: El DX nos envía RR73 o 73
           if (d.msg.includes(' RR73') || d.msg.includes(' 73')) {
-            if (Ft8State.activeTxRow === 5 || Ft8State.activeTxRow === 6) {
-              updateFsmUI(`¡${dxCall} confirmó con 73! QSO finalizado por ambas partes.`);
-              logCurrentQso();
-              showQsyAlert(`¡QSO finalizado con ${dxCall}!`);
-              Ft8State.retryCount = 0;
-              if (Ft8State.autoCq) {
-                resumeAutoCq();
-              } else {
-                armFt8Tx(false);
-              }
-            } else {
-              updateFsmUI(`¡${dxCall} confirmó con RR73/73! Enviando 73 final.`);
-              selectTxMessageRow(6);
-              armFt8Tx(true);
-            }
-          }
-          // CASO 2: El DX confirma nuestro reporte con R+SNR (ej: "LU1AA K1JT R-05")
-          else if (d.msg.includes(' R-') || d.msg.includes(' R+')) {
-            updateFsmUI(`${dxCall} envió R-Report. Enviando RR73.`);
+            selectTxMessageRow(6);
+            armFt8Tx(true);
+          } else if (d.msg.includes(' R-') || d.msg.includes(' R+')) {
             selectTxMessageRow(5);
             armFt8Tx(true);
-          }
-          // CASO 3: El DX nos envía su reporte SNR directo (ej: "LU1AA K1JT -12")
-          else {
-            const rptToken = tokens[2] || '';
-            if (rptToken.startsWith('-') || rptToken.startsWith('+')) {
-              Ft8State.mySentReport = rptToken;
-              updateFsmUI(`Reporte recibido de ${dxCall}: ${rptToken} dB. Enviando R-Report.`);
-              selectTxMessageRow(4);
-              armFt8Tx(true);
-            }
+          } else {
+            selectTxMessageRow(4);
+            armFt8Tx(true);
           }
         }
       }
@@ -2380,97 +1877,53 @@
       const myCall = Ft8State.myCall.toUpperCase();
 
       if (!container) return;
-      if (badge) {
-        const decodesOnlyCount = Ft8State.decodes.filter(d => !d.isDivider && !d.isTx).length;
-        badge.textContent = `${decodesOnlyCount} decodes`;
-      }
+      if (badge) badge.textContent = Ft8State.decodes.filter(d => !d.isTx).length;
 
       let list = Ft8State.decodes;
-      if (onlyCq) {
-        list = list.filter(d => !d.isDivider && !d.isTx && (d.msg && d.msg.startsWith('CQ ')));
-      }
+      if (onlyCq) list = list.filter(d => d.msg && d.msg.startsWith('CQ '));
 
-      if (list.length === 0) {
-        container.innerHTML = '<div class="p-6 text-center text-slate-500 text-xs">Sin decodificaciones en este ciclo.</div>';
+      if (!list.length) {
+        container.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs">Sin decodificaciones.</div>';
         return;
       }
 
       const fragment = document.createDocumentFragment();
       list.forEach(d => {
-        // CASO 1: SEPARADOR DE CICLO UTC
-        if (d.isDivider) {
-          const divRow = document.createElement('div');
-          divRow.className = 'py-1 my-1 flex items-center justify-between text-[10px] font-bold text-slate-400 border-y border-slate-700/60 bg-slate-900/60 px-2 select-none font-mono rounded';
-          divRow.innerHTML = `
-            <div class="flex items-center gap-2">
-              <span class="w-1.5 h-1.5 rounded-full ${d.slot === 'EVEN' ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
-              <span class="text-slate-300">${d.time}</span>
-              <span class="${d.slot === 'EVEN' ? 'text-cyan-400' : 'text-amber-400'} font-bold">[${d.slot}]</span>
-            </div>
-            <span class="text-slate-400 text-[9px] font-semibold">${d.count} decodificado(s)</span>
-          `;
-          fragment.appendChild(divRow);
-          return;
-        }
-
-        // CASO 2: MENSAJE TRANSMITIDO POR NUESTRA ESTACIÓN (TX)
-        if (d.isTx) {
-          const txRow = document.createElement('div');
-          txRow.className = 'grid grid-cols-12 text-[11px] items-center p-1 rounded font-mono bg-amber-950/70 border border-amber-500/80 shadow-sm text-amber-300';
-          txRow.innerHTML = `
-            <span class="col-span-2 text-amber-400 font-bold text-[10px] flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
-              ${d.time || ''}
-            </span>
-            <span class="col-span-1 text-center font-extrabold text-black bg-amber-400 px-1 rounded text-[9px]">TX</span>
-            <span class="col-span-2 text-center text-amber-400/90 text-[10px] font-bold">[${(d.slot || 'TX').toUpperCase()}]</span>
-            <span class="col-span-2 text-right font-bold text-amber-300 text-[10px]">${d.freq}Hz</span>
-            <span class="col-span-5 pl-3 truncate font-bold text-amber-200">▶ ${d.msg}</span>
-          `;
-          fragment.appendChild(txRow);
-          return;
-        }
-
-        // CASO 3: MENSAJE RECIBIDO (RX)
         const row = document.createElement('div');
-        const isCq = d.msg && d.msg.startsWith('CQ ');
-        const isToMe = d.msg && d.msg.includes(myCall);
+        if (d.isTx) {
+          row.className = 'grid grid-cols-12 text-[10px] items-center p-1 rounded font-mono bg-amber-950/70 border border-amber-500/80 text-amber-300';
+          row.innerHTML = `
+            <span class="col-span-2 text-amber-400 font-bold">${d.time || ''}</span>
+            <span class="col-span-1 text-center font-extrabold text-black bg-amber-400 px-1 rounded text-[8px]">TX</span>
+            <span class="col-span-2 text-center text-amber-400/90 text-[9px] font-bold">OUT</span>
+            <span class="col-span-2 text-right font-bold text-amber-300">${d.freq}Hz</span>
+            <span class="col-span-5 pl-2 truncate font-bold text-amber-200">▶ ${d.msg}</span>
+          `;
+        } else {
+          const isToMe = d.msg && d.msg.includes(myCall);
+          const isCq = d.msg && d.msg.startsWith('CQ ');
 
-        let rowStyle = 'hover:bg-slate-800/60 cursor-pointer rounded p-1 transition border-b border-slate-900/40';
-        let textStyle = 'text-slate-300';
+          let rowStyle = 'hover:bg-slate-800/60 cursor-pointer rounded p-1 transition border-b border-slate-900/40 text-[10px]';
+          let textStyle = isToMe ? 'text-red-300 font-bold' : (isCq ? 'text-emerald-400 font-semibold' : 'text-slate-300');
 
-        if (isToMe) {
-          rowStyle = 'bg-red-950/60 border border-red-700/80 cursor-pointer rounded p-1 transition shadow-sm';
-          textStyle = 'text-red-300 font-bold';
-        } else if (isCq) {
-          rowStyle = 'bg-emerald-950/30 hover:bg-emerald-950/60 border-l-2 border-emerald-500 cursor-pointer rounded p-1 transition';
-          textStyle = 'text-emerald-400 font-semibold';
+          row.className = `grid grid-cols-12 ${rowStyle} ${isToMe ? 'bg-red-950/60 border border-red-700/80' : ''}`;
+          row.innerHTML = `
+            <span class="col-span-2 text-slate-400">${d.time || ''}</span>
+            <span class="col-span-1 text-center font-bold text-cyan-400">${d.snr}</span>
+            <span class="col-span-2 text-center text-slate-400">${d.dt > 0 ? '+' : ''}${Number(d.dt).toFixed(1)}s</span>
+            <span class="col-span-2 text-right font-bold text-cyan-400">${d.freq}Hz</span>
+            <span class="col-span-5 pl-2 truncate ${textStyle}">${d.msg}</span>
+          `;
+
+          row.addEventListener('click', () => {
+            const tokens = d.msg.split(/\s+/).filter(Boolean);
+            if (tokens[0] === 'CQ') {
+              setupQsoWithStation(tokens[1], tokens[tokens.length - 1], d.snr, d.freq);
+            } else if (tokens.length >= 2) {
+              setupQsoWithStation(tokens[1], tokens[2] || '', d.snr, d.freq);
+            }
+          });
         }
-
-        row.className = `grid grid-cols-12 text-[11px] items-center ${rowStyle}`;
-        row.innerHTML = `
-          <span class="col-span-2 text-slate-400 text-[10px]">${d.time || ''}</span>
-          <span class="col-span-1 text-center font-bold ${d.snr >= 0 ? 'text-amber-400' : 'text-slate-400'} text-[10px]">${d.snr > 0 ? '+' : ''}${d.snr}</span>
-          <span class="col-span-2 text-center text-slate-400 text-[10px]">${d.dt > 0 ? '+' : ''}${Number(d.dt).toFixed(1)}s</span>
-          <span class="col-span-2 text-right font-bold text-cyan-400 text-[10px]">${d.freq}Hz</span>
-          <span class="col-span-5 pl-3 truncate ${textStyle}">${d.msg}</span>
-        `;
-
-        row.addEventListener('click', () => {
-          const tokens = d.msg.split(/\s+/).filter(Boolean);
-          if (tokens[0] === 'CQ') {
-            const targetCall = tokens[1] === 'POTA' || tokens[1] === 'SOTA' || tokens[1].length === 2 ? tokens[2] : tokens[1];
-            const targetGrid = tokens[tokens.length - 1];
-            setupQsoWithStation(targetCall, targetGrid, d.snr, d.freq);
-          } else if (tokens.length >= 2) {
-            setupQsoWithStation(tokens[1], tokens[2] || '', d.snr, d.freq);
-          }
-
-          if (document.getElementById('check-auto-tx')?.checked) {
-            armFt8Tx(true);
-          }
-        });
-
         fragment.appendChild(row);
       });
 
@@ -2489,17 +1942,13 @@
       Ft8State.dxCall = '';
       Ft8State.dxGrid = '';
       Ft8State.retryCount = 0;
-      updateFsmUI('QSO reiniciado');
       selectTxMessageRow(1);
       recalculateQsoMsgs();
       armFt8Tx(false);
     }
 
     function logCurrentQso() {
-      if (!Ft8State.dxCall) {
-        showQsyAlert('Selecciona una estación DX antes de guardar.');
-        return;
-      }
+      if (!Ft8State.dxCall) return;
       const qso = {
         date: new Date().toISOString().slice(0, 10).replace(/-/g, ''),
         time: new Date().toISOString().slice(11, 19).replace(/:/g, ''),
@@ -2510,87 +1959,55 @@
         rstRcvd: Ft8State.mySentReport,
         grid: Ft8State.dxGrid
       };
-
       Ft8State.completedQSOs.push(qso);
       localStorage.setItem('ft8_qso_log', JSON.stringify(Ft8State.completedQSOs));
-      showQsyAlert(`QSO guardado con ${qso.call} en log local`);
+      showQsyAlert(`QSO guardado con ${qso.call}`);
     }
 
     function exportAdifLog() {
       if (!Ft8State.completedQSOs.length) {
-        showQsyAlert('No hay contactos en el log para exportar.');
+        showQsyAlert('Log vacío.');
         return;
       }
-      let adif = "FT-891 WebCAT ADIF Log Export\n<EOH>\n";
+      let adif = "FT-891 ADIF Log\n<EOH>\n";
       Ft8State.completedQSOs.forEach(q => {
-        adif += `<CALL:${q.call.length}>${q.call} `;
-        adif += `<QSO_DATE:${q.date.length}>${q.date} `;
-        adif += `<TIME_ON:${q.time.length}>${q.time} `;
-        adif += `<MODE:${q.mode.length}>${q.mode} `;
-        adif += `<FREQ:${q.freq.length}>${q.freq} `;
-        adif += `<RST_SENT:${q.rstSent.length}>${q.rstSent} `;
-        adif += `<RST_RCVD:${q.rstRcvd.length}>${q.rstRcvd} `;
-        if (q.grid) adif += `<GRIDSQUARE:${q.grid.length}>${q.grid} `;
-        adif += "<EOR>\n";
+        adif += `<CALL:${q.call.length}>${q.call} <QSO_DATE:${q.date.length}>${q.date} <TIME_ON:${q.time.length}>${q.time} <MODE:${q.mode.length}>${q.mode} <FREQ:${q.freq.length}>${q.freq} <RST_SENT:${q.rstSent.length}>${q.rstSent} <RST_RCVD:${q.rstRcvd.length}>${q.rstRcvd} <EOR>\n`;
       });
-
       const blob = new Blob([adif], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `FT891_QSO_Log_${new Date().toISOString().slice(0, 10)}.adi`;
+      a.download = `FT891_Log_${new Date().toISOString().slice(0, 10)}.adi`;
       a.click();
     }
 
     function updateUtcClock() {
       const now = new Date();
-      const utcHours = String(now.getUTCHours()).padStart(2, '0');
-      const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
-      const utcSecs = String(now.getUTCSeconds()).padStart(2, '0');
       const clockEl = document.getElementById('ft8-utc-clock');
-      if (clockEl) clockEl.textContent = `${utcHours}:${utcMins}:${utcSecs}z`;
+      if (clockEl) {
+        clockEl.textContent = `${String(now.getUTCHours()).padStart(2, '0')}:${String(now.getUTCMinutes()).padStart(2, '0')}:${String(now.getUTCSeconds()).padStart(2, '0')}z`;
+      }
 
       const totalSec = now.getUTCSeconds() + now.getUTCMilliseconds() / 1000.0;
       const slotDuration = Ft8State.slotDuration;
       const secInSlot = totalSec % slotDuration;
-      const slotIndex = Math.floor(totalSec / slotDuration);
-      const isEven = (slotIndex % 2 === 0);
+      const isEven = (Math.floor(totalSec / slotDuration) % 2 === 0);
 
       const bar = document.getElementById('ft8-cycle-bar');
       const lblSec = document.getElementById('ft8-cycle-seconds');
       const lblSlot = document.getElementById('ft8-slot-indicator');
 
       if (bar) bar.style.width = `${Math.min(100, (secInSlot / slotDuration) * 100)}%`;
-      if (lblSec) lblSec.textContent = `${secInSlot.toFixed(1)}s / ${slotDuration.toFixed(1)}s`;
+      if (lblSec) lblSec.textContent = `${secInSlot.toFixed(0)}s`;
       if (lblSlot) {
-        lblSlot.textContent = isEven ? 'EVEN (:00 / :30)' : 'ODD (:15 / :45)';
-        lblSlot.className = isEven ? 'font-bold text-cyan-400' : 'font-bold text-amber-400';
+        lblSlot.textContent = isEven ? 'EVEN' : 'ODD';
+        lblSlot.className = isEven ? 'font-bold text-cyan-400 text-[10px] shrink-0' : 'font-bold text-amber-400 text-[10px] shrink-0';
       }
     }
 
     function setupEventListeners() {
-      document.querySelectorAll('.filter-prog-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-          toggleChipFilter(ActiveFilters.programs, btn.dataset.prog, 'filter-programs-group');
-        });
-      });
-
-      document.querySelectorAll('.filter-band-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-          toggleChipFilter(ActiveFilters.bands, btn.dataset.band, 'filter-bands-group');
-        });
-      });
-
-      document.querySelectorAll('.filter-mode-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-          toggleChipFilter(ActiveFilters.modes, btn.dataset.mode, 'filter-modes-group');
-        });
-      });
-
       document.getElementById('btn-tune-down-10')?.addEventListener('click', () => tuneStep(-1, 10));
-      document.getElementById('btn-tune-down-5')?.addEventListener('click', () => tuneStep(-1, 5));
       document.getElementById('btn-tune-down-1')?.addEventListener('click', () => tuneStep(-1, 1));
       document.getElementById('btn-tune-up-1')?.addEventListener('click', () => tuneStep(1, 1));
-      document.getElementById('btn-tune-up-5')?.addEventListener('click', () => tuneStep(1, 5));
       document.getElementById('btn-tune-up-10')?.addEventListener('click', () => tuneStep(1, 10));
 
       const knob = document.getElementById('vfo-knob');
@@ -2607,9 +2024,7 @@
         }, { passive: false });
 
         knob.addEventListener('touchstart', (e) => {
-          if (e.touches.length > 0) {
-            lastTouchY = e.touches[0].clientY;
-          }
+          if (e.touches.length > 0) lastTouchY = e.touches[0].clientY;
         }, { passive: true });
 
         knob.addEventListener('touchmove', (e) => {
@@ -2626,34 +2041,41 @@
           }
         }, { passive: true });
 
-        knob.addEventListener('touchend', () => {
-          lastTouchY = null;
-        });
+        knob.addEventListener('touchend', () => { lastTouchY = null; });
       }
 
       const pttBtn = document.getElementById('btn-touch-ptt');
       const btnTogglePttMode = document.getElementById('btn-toggle-ptt-mode');
 
       if (btnTogglePttMode) {
-        btnTogglePttMode.addEventListener('click', () => {
+        btnTogglePttMode.addEventListener('click', (e) => {
+          e.preventDefault();
           RigState.pttLatchMode = !RigState.pttLatchMode;
-          btnTogglePttMode.textContent = RigState.pttLatchMode ? 'PULSAR ON/OFF' : 'MANTENER';
-          const pttLabel = document.getElementById('touch-ptt-text');
-          if (pttLabel && !RigState.isTx) {
-            pttLabel.textContent = RigState.pttLatchMode ? 'TOCAR PARA TRANSMITIR (ON)' : 'MANTENER PARA TRANSMITIR (PTT)';
-          }
+          btnTogglePttMode.textContent = RigState.pttLatchMode ? 'MODO: PULSAR ON/OFF' : 'MODO: MANTENER';
+          btnTogglePttMode.blur();
         });
       }
 
       if (pttBtn) {
         pttBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          pttBtn.blur();
           if (RigState.pttLatchMode) {
-            e.preventDefault();
             setPTT(!RigState.isTx);
           }
         });
 
+        pttBtn.addEventListener('mousedown', (e) => {
+          if (e.button !== 0) return;
+          pttBtn.blur();
+          if (!RigState.pttLatchMode) {
+            e.preventDefault();
+            setPTT(true);
+          }
+        });
+
         pttBtn.addEventListener('touchstart', (e) => {
+          pttBtn.blur();
           if (!RigState.pttLatchMode) {
             e.preventDefault();
             setPTT(true);
@@ -2673,48 +2095,43 @@
             setPTT(false);
           }
         }, { passive: false });
-
-        pttBtn.addEventListener('mousedown', (e) => {
-          if (!RigState.pttLatchMode && e.button === 0) {
-            e.preventDefault();
-            setPTT(true);
-          }
-        });
-
-        window.addEventListener('mouseup', (e) => {
-          if (!RigState.pttLatchMode && AudioEngine.isPttPressed) {
-            setPTT(false);
-          }
-        });
-
-        pttBtn.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-        });
       }
 
+      window.addEventListener('mouseup', () => {
+        if (!RigState.pttLatchMode && AudioEngine.isPttPressed) {
+          setPTT(false);
+        }
+      });
+
+      // PTT con Barra Espaciadora en Teclado
       window.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && !e.repeat && document.activeElement.tagName !== 'INPUT') {
-          e.preventDefault();
-          if (RigState.pttLatchMode) {
-            setPTT(!RigState.isTx);
-          } else {
-            setPTT(true);
+        if (e.code === 'Space' && !e.repeat) {
+          const tag = (document.activeElement?.tagName || '').toLowerCase();
+          if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+            e.preventDefault();
+            if (RigState.pttLatchMode) {
+              setPTT(!RigState.isTx);
+            } else {
+              setPTT(true);
+            }
           }
         }
       });
 
       window.addEventListener('keyup', (e) => {
-        if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
-          if (!RigState.pttLatchMode && AudioEngine.isPttPressed) {
-            setPTT(false);
+        if (e.code === 'Space') {
+          const tag = (document.activeElement?.tagName || '').toLowerCase();
+          if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') {
+            e.preventDefault();
+            if (!RigState.pttLatchMode) {
+              setPTT(false);
+            }
           }
         }
       });
 
       document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.mode-btn').forEach(b => b.className = 'mode-btn py-1 rounded theme-btn border');
-          btn.className = 'mode-btn py-1 rounded theme-btn border btn-active-theme';
           RigState.mode = btn.dataset.mode;
           RigState.catModeCode = btn.dataset.cat;
           sendCATCommand(`${btn.dataset.cat};`);
@@ -2724,23 +2141,21 @@
 
       document.querySelectorAll('.band-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const freq = parseInt(btn.dataset.freq, 10);
-          const mode = btn.dataset.mode;
-          performQSY(freq, mode, btn.textContent);
+          performQSY(parseInt(btn.dataset.freq, 10), btn.dataset.mode, btn.textContent);
         });
       });
 
       document.querySelectorAll('.step-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.step-btn').forEach(b => b.className = 'step-btn py-1 rounded theme-btn border');
-          btn.className = 'step-btn py-1 rounded theme-btn border btn-active-theme';
+          document.querySelectorAll('.step-btn').forEach(b => b.className = 'step-btn px-1.5 py-0.5 rounded theme-btn border text-[10px]');
+          btn.className = 'step-btn px-1.5 py-0.5 rounded theme-btn border btn-active-theme text-[10px]';
           RigState.step = parseInt(btn.dataset.step, 10);
           document.getElementById('current-step-label').textContent = btn.textContent;
         });
       });
 
       document.getElementById('btn-vfo-swap')?.addEventListener('click', () => {
-        RigState.activeVfo = RigState.activeVfo === 'A' ? 'B' : 'A';
+        RigState.activeVfo = (RigState.activeVfo === 'A') ? 'B' : 'A';
         sendCATCommand('SV;');
         renderRigDisplay();
       });
@@ -2751,22 +2166,14 @@
         sendCATCommand('FB;');
         sendCATCommand('MD0;');
         sendCATCommand('SM0;');
-        showQsyAlert('Sincronizando estado CAT...');
       });
 
       document.getElementById('btn-power')?.addEventListener('click', () => {
-        if (RigState.isPowerOn) {
-          sendCATCommand('PS0;');
-          updatePowerUI(false);
-        } else {
-          sendCATCommand('PS1;');
-          updatePowerUI(true);
-        }
+        sendCATCommand(RigState.isPowerOn ? 'PS0;' : 'PS1;');
       });
 
-      document.getElementById('btn-audio-engine')?.addEventListener('click', () => {
-        initAudioEngine();
-      });
+      // Botón único de Audio Web
+      document.getElementById('btn-audio-toggle')?.addEventListener('click', handleAudioButtonClick);
 
       document.getElementById('btn-theme-toggle')?.addEventListener('click', () => {
         const isDark = document.documentElement.classList.toggle('dark');
@@ -2775,129 +2182,103 @@
         localStorage.setItem('ft891_theme', isDark ? 'dark' : 'light');
       });
 
-      document.getElementById('btn-audio-mute')?.addEventListener('click', () => {
-        RigState.audioMuted = !RigState.audioMuted;
-        const icon = document.getElementById('audio-icon');
-        if (icon) icon.textContent = RigState.audioMuted ? '🔇' : '🔊';
-        if (AudioEngine.rxGainNode) {
-          AudioEngine.rxGainNode.gain.value = RigState.audioMuted ? 0 : (parseInt(document.getElementById('slider-rx-vol')?.value || '75', 10) / 100.0);
-        }
+      document.getElementById('slider-pwr')?.addEventListener('input', (e) => setGlobalPower(e.target.value));
+
+      document.getElementById('slider-sql')?.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        RigState.squelch = val;
+        document.getElementById('val-sql').textContent = val;
+        sendCATCommand(`SQ0${String(val).padStart(3, '0')};`);
       });
 
-      const sPwr = document.getElementById('slider-pwr');
-      if (sPwr) {
-        sPwr.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
-          RigState.rfPower = val;
-          document.getElementById('val-pwr').textContent = `${val}W`;
-          if (dispPwrTag) dispPwrTag.textContent = `${val}W`;
-          sendCATCommand(`PC${String(val).padStart(3, '0')};`);
-        });
-      }
+      document.getElementById('slider-rx-vol')?.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        document.getElementById('val-rx-vol').textContent = `${val}%`;
+        if (AudioEngine.rxGainNode && !RigState.audioMuted) AudioEngine.rxGainNode.gain.value = val / 100.0;
+      });
 
-      const sSql = document.getElementById('slider-sql');
-      if (sSql) {
-        sSql.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
-          RigState.squelch = val;
-          document.getElementById('val-sql').textContent = val;
-          sendCATCommand(`SQ0${String(val).padStart(3, '0')};`);
-        });
-      }
-
-      const sRxVol = document.getElementById('slider-rx-vol');
-      if (sRxVol) {
-        sRxVol.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
-          document.getElementById('val-rx-vol').textContent = `${val}%`;
-          if (AudioEngine.rxGainNode && !RigState.audioMuted) AudioEngine.rxGainNode.gain.value = val / 100.0;
-        });
-      }
-
-      const sMicGain = document.getElementById('slider-mic-gain');
-      if (sMicGain) {
-        sMicGain.addEventListener('input', (e) => {
-          const val = parseInt(e.target.value, 10);
-          document.getElementById('val-mic-gain').textContent = `${val}%`;
-          AudioEngine.txGain = val / 100.0;
-        });
-      }
+      document.getElementById('slider-mic-gain')?.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value, 10);
+        document.getElementById('val-mic-gain').textContent = `${val}%`;
+        AudioEngine.txGain = val / 100.0;
+      });
 
       document.getElementById('btn-toggle-dnr')?.addEventListener('click', () => {
         RigState.dnr = !RigState.dnr;
         sendCATCommand(`NR0${RigState.dnr ? '1' : '0'};`);
-        updateDnrUI();
+        const btn = document.getElementById('btn-toggle-dnr');
+        if (btn) {
+          btn.className = RigState.dnr ? 'px-1.5 py-0.2 rounded theme-btn border btn-active-theme text-[9px]' : 'px-1.5 py-0.2 rounded theme-btn border text-[9px]';
+          btn.textContent = RigState.dnr ? 'ON' : 'OFF';
+        }
       });
 
       document.getElementById('slider-dnr-level')?.addEventListener('input', (e) => {
         RigState.dnrLevel = parseInt(e.target.value, 10);
         sendCATCommand(`RL0${String(RigState.dnrLevel).padStart(2, '0')};`);
-        updateDnrUI();
+        document.getElementById('val-dnr-level').textContent = RigState.dnrLevel;
       });
 
       document.getElementById('btn-toggle-dnf')?.addEventListener('click', () => {
         RigState.dnf = !RigState.dnf;
         sendCATCommand(`BC0${RigState.dnf ? '1' : '0'};`);
-        updateDnfUI();
+        const btn = document.getElementById('btn-toggle-dnf');
+        if (btn) {
+          btn.className = RigState.dnf ? 'px-1.5 py-0.5 rounded theme-btn border btn-active-theme text-[9px]' : 'px-1.5 py-0.5 rounded theme-btn border text-[9px]';
+          btn.textContent = RigState.dnf ? 'ON' : 'OFF';
+        }
       });
 
       document.getElementById('btn-toggle-notch')?.addEventListener('click', () => {
         RigState.manualNotch = !RigState.manualNotch;
         sendCATCommand(`BP00${RigState.manualNotch ? '001' : '000'};`);
-        updateNotchUI();
+        const btn = document.getElementById('btn-toggle-notch');
+        if (btn) {
+          btn.className = RigState.manualNotch ? 'px-1.5 py-0.2 rounded theme-btn border btn-active-theme text-[9px]' : 'px-1.5 py-0.2 rounded theme-btn border text-[9px]';
+          btn.textContent = RigState.manualNotch ? 'ON' : 'OFF';
+        }
       });
 
       document.getElementById('slider-notch-freq')?.addEventListener('input', (e) => {
         RigState.notchFreq = parseInt(e.target.value, 10);
         sendCATCommand(`BP01${String(Math.round(RigState.notchFreq / 10)).padStart(3, '0')};`);
-        updateNotchUI();
+        document.getElementById('val-notch-freq').textContent = `${RigState.notchFreq}Hz`;
       });
 
       document.getElementById('btn-ipo-norm')?.addEventListener('click', () => {
         RigState.ipo = false;
         sendCATCommand('PA01;');
-        updateIpoUI();
+        document.getElementById('btn-ipo-norm').className = 'px-1 py-0.5 rounded theme-btn border btn-active-theme text-[9px]';
+        document.getElementById('btn-ipo-on').className = 'px-1 py-0.5 rounded theme-btn border text-[9px]';
       });
 
       document.getElementById('btn-ipo-on')?.addEventListener('click', () => {
         RigState.ipo = true;
         sendCATCommand('PA00;');
-        updateIpoUI();
+        document.getElementById('btn-ipo-on').className = 'px-1 py-0.5 rounded theme-btn border btn-active-theme text-[9px]';
+        document.getElementById('btn-ipo-norm').className = 'px-1 py-0.5 rounded theme-btn border text-[9px]';
       });
 
       document.getElementById('btn-toggle-att')?.addEventListener('click', () => {
         RigState.att = !RigState.att;
         sendCATCommand(`RA0${RigState.att ? '1' : '0'};`);
-        updateAttUI();
+        const btn = document.getElementById('btn-toggle-att');
+        if (btn) {
+          btn.className = RigState.att ? 'px-1.5 py-0.5 rounded theme-btn border btn-active-theme text-[9px]' : 'px-1.5 py-0.5 rounded theme-btn border text-[9px]';
+          btn.textContent = RigState.att ? 'ON' : 'OFF';
+        }
       });
 
       document.querySelectorAll('.btn-width-preset').forEach(btn => {
         btn.addEventListener('click', () => {
+          document.querySelectorAll('.btn-width-preset').forEach(b => b.className = 'btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]');
+          btn.className = 'btn-width-preset flex-1 py-0.2 rounded theme-btn border btn-active-theme text-[8px]';
           RigState.ifWidth = parseInt(btn.dataset.width, 10);
           sendCATCommand(`SH0${String(Math.round(RigState.ifWidth / 10)).padStart(3, '0')};`);
-          updateWidthUI();
+          const valKHz = (RigState.ifWidth / 1000).toFixed(1);
+          document.getElementById('label-width-val').textContent = `${valKHz}k`;
+          document.getElementById('disp-filter').textContent = `WIDTH: ${valKHz}k`;
         });
-      });
-
-      document.getElementById('slider-width')?.addEventListener('input', (e) => {
-        RigState.ifWidth = parseInt(e.target.value, 10);
-        sendCATCommand(`SH0${String(Math.round(RigState.ifWidth / 10)).padStart(3, '0')};`);
-        updateWidthUI();
-      });
-
-      document.getElementById('slider-shift')?.addEventListener('input', (e) => {
-        RigState.ifShift = parseInt(e.target.value, 10);
-        const sign = RigState.ifShift >= 0 ? '+' : '-';
-        sendCATCommand(`IS0${sign}${String(Math.abs(RigState.ifShift)).padStart(4, '0')};`);
-        updateShiftUI();
-      });
-
-      document.getElementById('btn-reset-shift')?.addEventListener('click', () => {
-        RigState.ifShift = 0;
-        const slider = document.getElementById('slider-shift');
-        if (slider) slider.value = 0;
-        sendCATCommand('IS0+0000;');
-        updateShiftUI();
       });
 
       document.getElementById('search-spots')?.addEventListener('input', renderSpotsList);
@@ -2909,8 +2290,7 @@
       document.getElementById('btn-direct-freq')?.addEventListener('click', () => {
         if (modalFreq) modalFreq.classList.remove('hidden');
         if (inputFreq) {
-          const currentKhz = (RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB) / 1000;
-          inputFreq.value = currentKhz.toFixed(1);
+          inputFreq.value = ((RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB) / 1000).toFixed(1);
           inputFreq.focus();
         }
       });
@@ -2937,9 +2317,7 @@
       });
 
       inputFreq?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          document.getElementById('btn-apply-freq')?.click();
-        }
+        if (e.key === 'Enter') document.getElementById('btn-apply-freq')?.click();
       });
     }
 
@@ -2954,15 +2332,15 @@
       setupEventListeners();
       renderRigDisplay();
       updateMeterDisplay(0);
-      updateWidthUI();
-      updateShiftUI();
       updatePowerUI(false);
+      updateAudioButtonUI();
       recalculateQsoMsgs();
+      updateOnAirFrequencyDisplays();
+      setGlobalPower(RigState.rfPower);
 
       connectDockerNetwork();
       fetchSpots();
       setInterval(fetchSpots, 30000);
-
       setInterval(updateUtcClock, 100);
     };
   </script>

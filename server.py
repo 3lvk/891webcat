@@ -58,6 +58,7 @@ tx_audio_logged_time = 0
 tx_prebuffering = True
 tone_phase = 0.0
 ft8_tx_active = False
+voice_tx_active = False
 
 # Búfer circular de recepción FT8/FT4 (12000 Hz, 16 segundos)
 FT8_SAMPLE_RATE = 12000
@@ -122,8 +123,8 @@ def tx_audio_callback(outdata, frames, time_info, status):
         t = (np.arange(frames) + tone_phase) / actual_sample_rate
         tone_phase = (tone_phase + frames) % actual_sample_rate
         
-        # Mantener el tono de 1000 Hz activo mientras dure la modulación o FT8 esté transmitiendo
-        if ft8_tx_active or np.max(np.abs(mono)) > 100:
+        # Mantener el tono de 1000 Hz activo de forma continua y sólida mientras dure el PTT
+        if ft8_tx_active or voice_tx_active:
             stereo[:, 1] = (np.sin(2.0 * np.pi * 1000.0 * t) * 26000).astype(np.int16)
         else:
             stereo[:, 1] = 0
@@ -263,6 +264,23 @@ def set_hardware_ptt(active: bool):
     else:
         send_cat_internal("TX0;")
 
+def calibrate_ft8_snr(raw_val: float) -> int:
+    """
+    Convierte el score bruto de detección (ft8_lib candidate.score o SNR en bin de 6.25 Hz)
+    al estándar internacional WSJT-X referenciado a 2500 Hz:
+    SNR_2500Hz = SNR_bin - 10*log10(2500 / 6.25) ≈ SNR_bin - 26 dB.
+
+    - Si el valor ya es negativo (ej. un fork que ya entrega WSJT-X SNR), se conserva.
+    - Si el valor es positivo (> 0), se calibra con el desplazamiento de 26 dB
+      para reflejar señales reales entre -24 dB y +15 dB.
+    """
+    val = int(round(raw_val))
+    if val < 0:
+        return max(-26, min(24, val))
+
+    calibrated = val - 26
+    return max(-26, min(24, calibrated))
+
 def run_decode_ft8_file(wav_path):
     """Decodifica un bloque de audio WAV utilizando el binario decode_ft8."""
     candidates = ["/usr/local/bin/decode_ft8", "./decode_ft8", "decode_ft8"]
@@ -289,9 +307,10 @@ def run_decode_ft8_file(wav_path):
                     dt_str = meta[2]
                     freq_str = meta[3] if len(meta) > 3 else "1200"
 
-                    # Conversión robusta de SNR (soporta enteros como -12 y flotantes como -06.0)
+                    # Conversión y calibración a escala estándar WSJT-X (dB)
                     try:
-                        snr_val = int(round(float(snr_str)))
+                        raw_snr = float(snr_str)
+                        snr_val = calibrate_ft8_snr(raw_snr)
                     except Exception:
                         snr_val = -15
 
@@ -761,7 +780,7 @@ async def get_index():
 
 @app.websocket("/ws/cat")
 async def websocket_cat_endpoint(websocket: WebSocket):
-    global ft8_tx_active
+    global ft8_tx_active, voice_tx_active
     await websocket.accept()
     cat_clients.add(websocket)
     try:
@@ -775,6 +794,22 @@ async def websocket_cat_endpoint(websocket: WebSocket):
             if ft8_tx_active and cmd.startswith("TX0"):
                 continue
 
+            # Enclavar y desenclavar PTT hardware y tono auxiliar según el comando CAT
+            if cmd.startswith("TX1") or cmd.startswith("TX2"):
+                voice_tx_active = True
+                if ser and ser.is_open:
+                    try:
+                        ser.rts = True
+                    except Exception:
+                        pass
+            elif cmd.startswith("TX0"):
+                voice_tx_active = False
+                if ser and ser.is_open and not ft8_tx_active:
+                    try:
+                        ser.rts = False
+                    except Exception:
+                        pass
+
             if ser and ser.is_open:
                 if cmd.startswith("PS1"):
                     ser.write(b"    ;")
@@ -784,47 +819,56 @@ async def websocket_cat_endpoint(websocket: WebSocket):
                 await websocket.send_text(cmd)
     except WebSocketDisconnect:
         cat_clients.discard(websocket)
+        voice_tx_active = False
+        if ser and ser.is_open and not ft8_tx_active:
+            try:
+                ser.rts = False
+            except Exception:
+                pass
+            with tx_lock:
+                tx_pcm_buffer.clear()
+                tx_prebuffering = True
 
 @app.websocket("/ws/audio/rx")
 async def websocket_audio_rx_endpoint(websocket: WebSocket):
+    """Envía el stream de audio capturado desde el Digirig (48 kHz) hacia el navegador."""
     await websocket.accept()
-    q = asyncio.Queue(maxsize=50)
-    rx_client_queues[websocket] = q
+    q = asyncio.Queue(maxsize=30)
+    client_id = id(websocket)
+    rx_client_queues[client_id] = q
     try:
         while True:
             pcm_bytes = await q.get()
             await websocket.send_bytes(pcm_bytes)
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, asyncio.CancelledError):
         pass
+    except Exception as e:
+        print(f"[AUDIO RX WS Error] {e}")
     finally:
-        rx_client_queues.pop(websocket, None)
+        rx_client_queues.pop(client_id, None)
 
 @app.websocket("/ws/audio/tx")
 async def websocket_audio_tx_endpoint(websocket: WebSocket):
-    global tx_pcm_buffer, tx_prebuffering, ft8_tx_active
+    """Recibe paquetes PCM del micrófono del navegador y los encola en el buffer de salida."""
+    global ft8_tx_active
     await websocket.accept()
-    print("[AUDIO TX WS] Micrófono Web conectado.")
-    with tx_lock:
-        if not ft8_tx_active:
-            tx_pcm_buffer.clear()
-            tx_prebuffering = True
-
     try:
         while True:
             data = await websocket.receive_bytes()
-            # Si FT8 está transmitiendo, descartar el micrófono para evitar borrar o pisar la trama
+            # Si FT8 está transmitiendo, descartar el micrófono para evitar sobreescribir la trama
             if ft8_tx_active:
                 continue
             with tx_lock:
                 if len(tx_pcm_buffer) > 96000:
                     del tx_pcm_buffer[:38400]
                 tx_pcm_buffer.extend(data)
-    except WebSocketDisconnect:
-        print("[AUDIO TX WS] Micrófono Web desconectado.")
+    except (WebSocketDisconnect, asyncio.CancelledError):
         with tx_lock:
             if not ft8_tx_active:
                 tx_pcm_buffer.clear()
                 tx_prebuffering = True
+    except Exception as e:
+        print(f"[AUDIO TX WS Error] {e}")
 
 @app.websocket("/ws/ft8")
 async def websocket_ft8_endpoint(websocket: WebSocket):
