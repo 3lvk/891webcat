@@ -1555,7 +1555,7 @@
           const table = getIfWidthTable();
           const idx = parseInt(cmd.substring(4, 6), 10);
           if (table && idx >= 0 && idx < table.widths.length) {
-            RigState.ifWidth = idx === 0 ? (RigState.narrow ? table.defaultNarrow : table.defaultWide) : table.widths[idx];
+            RigState.ifWidth = (idx === 0 || cmd.substring(3, 4) === '0') ? (RigState.narrow ? table.defaultNarrow : table.defaultWide) : table.widths[idx];
             renderIfWidth();
           }
         } else if (cmd.startsWith('RM6')) {
@@ -3336,7 +3336,7 @@
           // La radio exige fijar NAR antes que el ancho
           sendCATSequence([
             `NA0${table.widths[index] <= table.narrowMax ? '1' : '0'};`,
-            `SH00${String(index).padStart(2, '0')};`,
+            `SH01${String(index).padStart(2, '0')};`,
             'NA0;',
             'SH0;'
           ]);
