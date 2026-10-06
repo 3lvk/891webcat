@@ -1085,13 +1085,28 @@
       return RigState.connected && RigState.powerKnown && RigState.isPowerOn;
     }
 
+    let catSequenceQueue = Promise.resolve();
+    // La radio descarta comandos que llegan en ráfaga tras NA/SH; se espacian.
+    function sendCATSequence(commands, delayMs = 150) {
+      catSequenceQueue = catSequenceQueue.then(async () => {
+        for (const command of commands) {
+          if (!isRadioControlAvailable()) return;
+          sendCATCommand(command);
+          await sleep(delayMs);
+        }
+      });
+      return catSequenceQueue;
+    }
+
     const IF_WIDTH_TABLES = {
-      cw: { narrowMax: 500, widths: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 800, 1200, 1400, 1700, 2000, 2400, 3000] },
-      ssb: { narrowMax: 1800, widths: [0, 200, 400, 600, 850, 1100, 1350, 1500, 1650, 1800, 1950, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3200] }
+      cw: { narrowMax: 500, defaultNarrow: 500, defaultWide: 2400, widths: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 800, 1200, 1400, 1700, 2000, 2400, 3000] },
+      data: { narrowMax: 500, defaultNarrow: 300, defaultWide: 500, widths: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 800, 1200, 1400, 1700, 2000, 2400, 3000] },
+      ssb: { narrowMax: 1800, defaultNarrow: 1500, defaultWide: 2400, widths: [0, 200, 400, 600, 850, 1100, 1350, 1500, 1650, 1800, 1950, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3200] }
     };
 
     function getIfWidthTable() {
-      if (['CW-U', 'CW-L', 'DATA-U', 'DATA-L'].includes(RigState.mode)) return IF_WIDTH_TABLES.cw;
+      if (['CW-U', 'CW-L'].includes(RigState.mode)) return IF_WIDTH_TABLES.cw;
+      if (['DATA-U', 'DATA-L'].includes(RigState.mode)) return IF_WIDTH_TABLES.data;
       if (['LSB', 'USB'].includes(RigState.mode)) return IF_WIDTH_TABLES.ssb;
       return null;
     }
@@ -1538,9 +1553,9 @@
           renderIfWidth();
         } else if (cmd.startsWith('SH0')) {
           const table = getIfWidthTable();
-          const idx = parseInt(cmd.substring(3), 10);
+          const idx = parseInt(cmd.substring(4, 6), 10);
           if (table && idx >= 0 && idx < table.widths.length) {
-            RigState.ifWidth = idx === 0 ? (RigState.narrow ? (table === IF_WIDTH_TABLES.cw ? 500 : 1500) : 2400) : table.widths[idx];
+            RigState.ifWidth = idx === 0 ? (RigState.narrow ? table.defaultNarrow : table.defaultWide) : table.widths[idx];
             renderIfWidth();
           }
         } else if (cmd.startsWith('RM6')) {
@@ -3302,9 +3317,7 @@
           showQsyAlert('NAR/ancho FI no aplica en el modo actual.');
           return;
         }
-        sendCATCommand(`NA0${RigState.narrow ? '0' : '1'};`);
-        sendCATCommand('NA0;');
-        sendCATCommand('SH0;');
+        sendCATSequence([`NA0${RigState.narrow ? '0' : '1'};`, 'NA0;', 'SH0;']);
       });
 
       document.querySelectorAll('.btn-width-preset').forEach(btn => {
@@ -3321,10 +3334,12 @@
             if (Math.abs(table.widths[i] - target) < Math.abs(table.widths[index] - target)) index = i;
           }
           // La radio exige fijar NAR antes que el ancho
-          sendCATCommand(`NA0${table.widths[index] <= table.narrowMax ? '1' : '0'};`);
-          sendCATCommand(`SH00${String(index).padStart(2, '0')};`);
-          sendCATCommand('NA0;');
-          sendCATCommand('SH0;');
+          sendCATSequence([
+            `NA0${table.widths[index] <= table.narrowMax ? '1' : '0'};`,
+            `SH00${String(index).padStart(2, '0')};`,
+            'NA0;',
+            'SH0;'
+          ]);
         });
       });
 
