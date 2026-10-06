@@ -641,6 +641,22 @@
           </div>
           <span id="ft8-alc-badge" class="font-bold text-emerald-400 text-[9px]">OK</span>
         </div>
+
+        <div class="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
+          <span class="text-slate-400">PO:</span>
+          <div class="w-12 h-1.5 bg-slate-900 rounded overflow-hidden flex">
+            <div id="ft8-po-bar" class="h-full bg-emerald-500 w-0"></div>
+          </div>
+          <span id="ft8-po-badge" class="font-bold text-emerald-400 text-[9px] w-8 text-right">0W</span>
+        </div>
+
+        <div class="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
+          <span class="text-slate-400">SWR:</span>
+          <div class="w-12 h-1.5 bg-slate-900 rounded overflow-hidden flex">
+            <div id="ft8-swr-bar" class="h-full bg-emerald-500 w-0"></div>
+          </div>
+          <span id="ft8-swr-badge" class="font-bold text-emerald-400 text-[9px] w-6 text-right">1.0</span>
+        </div>
       </div>
     </div>
 
@@ -1007,6 +1023,7 @@
       txFreq: parseInt(localStorage.getItem('ft8_tx_freq') || '1250', 10),
       txSlot: 'even',
       txArmed: false,
+      txOnAir: false,
       activeTxRow: 1,
       dxCall: '',
       dxGrid: '',
@@ -1304,6 +1321,15 @@
       }
     }
 
+    function updatePoUI(rawVal) {
+      const v = Math.min(255, Math.max(0, parseInt(rawVal, 10) || 0));
+      const pct = Math.round((v / 255) * 100);
+      const bar = document.getElementById('ft8-po-bar');
+      const badge = document.getElementById('ft8-po-badge');
+      if (bar) bar.style.width = `${pct}%`;
+      if (badge) badge.textContent = `${pct}W`;
+    }
+
     function updateActiveBandUI(freqHz) {
       updateGlobalBandSelection(freqHz);
     }
@@ -1458,6 +1484,13 @@
 
     function updateSwrUI(swrVal) {
       RigState.swr = swrVal;
+      const swrBar = document.getElementById('ft8-swr-bar');
+      const swrBadge = document.getElementById('ft8-swr-badge');
+      if (swrBar) {
+        swrBar.style.width = `${Math.min(100, Math.max(0, ((swrVal - 1) / 2) * 100))}%`;
+        swrBar.className = `h-full ${swrVal >= 2.5 ? 'bg-red-500' : (swrVal >= 1.8 ? 'bg-amber-400' : 'bg-emerald-500')}`;
+      }
+      if (swrBadge) swrBadge.textContent = swrVal.toFixed(1);
       const tag = document.getElementById('disp-swr-tag');
       if (tag) {
         tag.textContent = `SWR ${swrVal.toFixed(1)}`;
@@ -1510,7 +1543,7 @@
               sendCATCommand('PS;');
               lastPowerQueryAt = Date.now();
             }
-          } else if (!RigState.isTx) {
+          } else if (!RigState.isTx && !Ft8State.txOnAir) {
             sendCATCommand('FA;');
             sendCATCommand('SM0;');
             if (Date.now() - lastFilterSyncAt >= 5000) {
@@ -1519,6 +1552,7 @@
             }
           } else {
             sendCATCommand('RM4;');
+            sendCATCommand('RM5;');
             sendCATCommand('RM6;');
           }
         }, 300);
@@ -1616,6 +1650,9 @@
         } else if (cmd.startsWith('RM6')) {
           const rawSwr = parseInt(cmd.substring(3), 10);
           if (!isNaN(rawSwr)) updateSwrUI(parseSWRFromRaw(rawSwr));
+        } else if (cmd.startsWith('RM5')) {
+          const rawPo = parseInt(cmd.substring(3), 10);
+          if (!isNaN(rawPo)) updatePoUI(rawPo);
         } else if (cmd.startsWith('RM4') || cmd.startsWith('RM3')) {
           const rawAlc = parseInt(cmd.substring(3), 10);
           if (!isNaN(rawAlc)) updateAlcUI(rawAlc);
@@ -1846,6 +1883,7 @@
       } else {
         sendCATCommand('TX0;');
         updateAlcUI(0);
+        updatePoUI(0);
       }
     }
 
@@ -2655,8 +2693,12 @@
           if (data.event === 'decodes' && Array.isArray(data.data)) {
             handleIncomingDecodes(data.data, data.slot);
           } else if (data.event === 'tx_started') {
+            Ft8State.txOnAir = true;
             recordTxMessageInDecodes(data.msg, data.freq, data.slot);
           } else if (data.event === 'tx_finished') {
+            Ft8State.txOnAir = false;
+            updateAlcUI(0);
+            updatePoUI(0);
             handleTxFinishedWait();
           }
         } catch (e) {}
