@@ -126,12 +126,28 @@
         display: none !important;
       }
     }
+
+    body:not(.authenticated) > :not(#auth-gate) {
+      visibility: hidden;
+    }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-black pb-8 lg:pb-0">
+  <section id="auth-gate" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950 p-4">
+    <form id="login-form" class="w-full max-w-sm rounded-xl border border-slate-700 bg-slate-900 p-6 text-slate-100 shadow-xl">
+      <h1 class="mb-1 font-lcd text-xl font-bold text-amber-400">FT-891 WebCAT</h1>
+      <p class="mb-5 text-sm text-slate-400">Inicia sesión para controlar la estación.</p>
+      <label class="mb-3 block text-xs font-bold uppercase text-slate-300" for="login-username">Usuario</label>
+      <input id="login-username" name="username" autocomplete="username" required class="mb-4 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+      <label class="mb-3 block text-xs font-bold uppercase text-slate-300" for="login-password">Contraseña</label>
+      <input id="login-password" name="password" type="password" autocomplete="current-password" required class="mb-3 w-full rounded border border-slate-700 bg-slate-950 px-3 py-2 text-sm" />
+      <p id="login-error" class="mb-3 hidden text-sm text-red-400" role="alert"></p>
+      <button id="login-submit" type="submit" class="w-full rounded bg-amber-500 px-3 py-2 font-bold text-slate-950 hover:bg-amber-400">Ingresar</button>
+    </form>
+  </section>
 
-  <header class="theme-panel border-b px-3 py-2 flex items-center justify-between sticky top-0 z-30 shadow-md">
+  <header class="theme-panel border-b px-3 py-2 flex flex-wrap items-center justify-between sticky top-0 z-30 shadow-md">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded bg-amber-500 flex items-center justify-center font-lcd font-bold text-black text-sm shadow shrink-0">
         891
@@ -161,7 +177,7 @@
           <span>⚡</span> CW Morse
         </button>
         <button id="nav-btn-ft8" onclick="switchGlobalModule('ft8')" class="px-2.5 py-1 rounded theme-btn border text-[11px] font-bold text-cyan-400 hover:border-cyan-400 flex items-center gap-1">
-          <span>📟</span> FT8/FT4
+          <span>📟</span> FT8
         </button>
         <div class="h-4 w-[1px] bg-slate-700 mx-1"></div>
       </div>
@@ -179,10 +195,42 @@
       <button id="btn-theme-toggle" class="theme-card px-2 py-1 rounded border text-xs" title="Cambiar Tema">
         <span id="theme-icon">☀️</span>
       </button>
+      <button id="btn-logout" class="theme-btn border rounded px-2 py-1 text-[10px] font-bold" title="Cerrar sesión">Salir</button>
+    </div>
+
+    <div id="global-radio-controls" class="basis-full flex flex-wrap items-center gap-2 border-t border-slate-700/60 pt-2 font-mono text-[10px]">
+      <label class="flex items-center gap-1 text-slate-400">
+        <span class="font-bold">BANDA</span>
+        <select id="global-band-select" disabled class="theme-btn rounded border px-2 py-1 font-bold text-amber-400">
+          <option value="160m">160m</option><option value="80m">80m</option><option value="60m">60m</option>
+          <option value="40m">40m</option><option value="30m">30m</option><option value="20m">20m</option>
+          <option value="17m">17m</option><option value="15m">15m</option><option value="12m">12m</option>
+          <option value="10m">10m</option><option value="6m">6m</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-1 text-slate-400">
+        <span class="font-bold">MODO</span>
+        <select id="global-mode-select" disabled class="theme-btn rounded border px-2 py-1 font-bold text-cyan-300">
+          <option value="LSB">LSB</option><option value="USB">USB</option>
+          <option value="CW-U">CW-U</option><option value="CW-L">CW-L</option>
+          <option value="DATA-U">DATA-U</option><option value="DATA-L">DATA-L</option>
+          <option value="AM">AM</option><option value="FM">FM</option>
+        </select>
+      </label>
+      <label class="flex min-w-[135px] flex-1 items-center gap-2 text-slate-400 sm:max-w-[220px]">
+        <span class="shrink-0 font-bold">MIC (WEB)</span>
+        <input type="range" id="slider-mic-gain" min="10" max="200" value="100" disabled class="w-full accent-amber-500">
+        <span id="val-mic-gain" class="w-10 text-right font-bold text-amber-400">100%</span>
+      </label>
+      <label class="flex min-w-[135px] flex-1 items-center gap-2 text-slate-400 sm:max-w-[220px]">
+        <span class="shrink-0 font-bold">POTENCIA</span>
+        <input type="range" id="slider-pwr" min="5" max="100" value="100" step="5" disabled class="w-full accent-amber-500">
+        <span id="val-pwr" class="w-10 text-right font-bold text-amber-400">100W</span>
+      </label>
     </div>
   </header>
 
-  <nav class="lg:hidden theme-panel border-b px-2 py-1.5 sticky top-[45px] z-20 flex gap-1 font-mono text-xs">
+  <nav class="lg:hidden theme-panel border-b px-2 py-1.5 sticky top-[102px] z-20 flex gap-1 font-mono text-xs">
     <button id="tab-btn-radio" onclick="switchMobileTab('radio')" class="flex-1 py-1.5 rounded font-bold text-center border border-amber-500 bg-amber-950/40 text-amber-300">
       📻 Radio
     </button>
@@ -299,39 +347,6 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1 border-t border-slate-700/60 font-mono text-xs">
-            <div>
-              <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">Modo:</span>
-              <div class="grid grid-cols-4 gap-1 text-[10px] font-bold">
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD01" data-mode="LSB">LSB</button>
-                <button class="mode-btn py-1 rounded theme-btn border btn-active-theme" data-cat="MD02" data-mode="USB">USB</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD03" data-mode="CW-U">CW-U</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD0C" data-mode="DATA-U">DATA-U</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD05" data-mode="AM">AM</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD04" data-mode="FM">FM</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD07" data-mode="CW-L">CW-L</button>
-                <button class="mode-btn py-1 rounded theme-btn border" data-cat="MD08" data-mode="DATA-L">DATA-L</button>
-              </div>
-            </div>
-
-            <div>
-              <span class="text-[9px] text-slate-400 font-bold uppercase block mb-1">Banda:</span>
-              <div class="grid grid-cols-6 gap-1 text-[10px] font-bold">
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="3573000" data-mode="LSB">80m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="7150000" data-mode="LSB">40m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="10136000" data-mode="USB">30m</button>
-                <button class="band-btn py-1 rounded theme-btn border btn-active-theme" data-freq="14250000" data-mode="USB">20m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="18100000" data-mode="USB">17m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="21250000" data-mode="USB">15m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="24915000" data-mode="USB">12m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="28400000" data-mode="USB">10m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="50125000" data-mode="USB">6m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="5357000" data-mode="USB">60m</button>
-                <button class="band-btn py-1 rounded theme-btn border" data-freq="1840000" data-mode="LSB">160m</button>
-              </div>
-            </div>
-          </div>
-
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 border-t border-slate-700/60 font-mono text-[10px]">
             <div class="theme-card p-1.5 rounded border">
               <div class="flex justify-between text-slate-400 mb-0.5">
@@ -339,22 +354,6 @@
                 <span id="val-rx-vol" class="text-cyan-400 font-bold">75%</span>
               </div>
               <input type="range" id="slider-rx-vol" min="0" max="100" value="75" class="w-full accent-cyan-500 h-1">
-            </div>
-
-            <div class="theme-card p-1.5 rounded border">
-              <div class="flex justify-between text-slate-400 mb-0.5">
-                <span>MIC GAIN:</span>
-                <span id="val-mic-gain" class="text-amber-400 font-bold">100%</span>
-              </div>
-              <input type="range" id="slider-mic-gain" min="10" max="200" value="100" class="w-full accent-amber-500 h-1">
-            </div>
-
-            <div class="theme-card p-1.5 rounded border">
-              <div class="flex justify-between text-slate-400 mb-0.5">
-                <span>POTENCIA:</span>
-                <span id="val-pwr" class="text-amber-400 font-bold">100W</span>
-              </div>
-              <input type="range" id="slider-pwr" min="5" max="100" value="100" step="5" class="w-full accent-amber-500 h-1">
             </div>
 
             <div class="theme-card p-1.5 rounded border">
@@ -500,15 +499,6 @@
       <div class="flex items-center gap-2 flex-wrap">
         <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b]"></span>
         <h2 class="font-lcd font-bold text-base text-amber-400 mr-1">TELEGRAFÍA CW</h2>
-
-        <div class="flex items-center gap-1">
-          <button id="cw-mode-btn-cwu" onclick="setCwMode('CW-U')" class="px-2.5 py-1 rounded theme-btn border font-bold text-xs btn-active-theme">
-            CW-U (Nativo DAKY)
-          </button>
-          <button id="cw-mode-btn-datau" onclick="setCwMode('DATA-U')" class="px-2.5 py-1 rounded theme-btn border font-bold text-xs">
-            DATA-U (AFSK Audio)
-          </button>
-        </div>
       </div>
 
       <div class="flex items-center gap-4 flex-wrap">
@@ -621,25 +611,9 @@
 
         <div class="flex items-center gap-1">
           <button id="btn-mode-ft8" onclick="setFt8Mode('FT8', true)" class="px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs">FT8</button>
-          <button id="btn-mode-ft4" onclick="setFt8Mode('FT4', true)" class="px-2 py-0.5 rounded theme-btn border font-bold text-xs">FT4</button>
+          <button id="btn-mode-ft4" type="button" disabled title="FT4 no está soportado por el motor digital actual" class="px-2 py-0.5 rounded theme-btn border font-bold text-xs opacity-50 cursor-not-allowed">FT4 (no disponible)</button>
         </div>
 
-        <div class="flex items-center gap-1 bg-black/60 px-1.5 py-0.5 rounded border border-slate-700 text-[10px]">
-          <span class="text-slate-400 font-bold">BANDA:</span>
-          <select id="ft8-band-select" onchange="changeFt8Band(this.value)" class="bg-transparent text-amber-400 font-bold focus:outline-none cursor-pointer">
-            <option value="160m" class="bg-slate-900 text-white">160m</option>
-            <option value="80m" class="bg-slate-900 text-white">80m</option>
-            <option value="60m" class="bg-slate-900 text-white">60m</option>
-            <option value="40m" class="bg-slate-900 text-white">40m</option>
-            <option value="30m" class="bg-slate-900 text-white">30m</option>
-            <option value="20m" class="bg-slate-900 text-white" selected>20m</option>
-            <option value="17m" class="bg-slate-900 text-white">17m</option>
-            <option value="15m" class="bg-slate-900 text-white">15m</option>
-            <option value="12m" class="bg-slate-900 text-white">12m</option>
-            <option value="10m" class="bg-slate-900 text-white">10m</option>
-            <option value="6m" class="bg-slate-900 text-white">6m</option>
-          </select>
-        </div>
       </div>
 
       <div class="flex items-center gap-2 flex-1 max-w-xs mx-2">
@@ -655,13 +629,6 @@
           <span class="text-amber-500 font-bold mr-1">AIRE:</span>
           <span id="ft8-disp-band" class="px-1 rounded bg-amber-950 text-amber-300 font-bold text-[9px] mr-1">20m</span>
           <span id="ft8-disp-onair-freq" class="font-lcd font-bold text-cyan-300">14.075.25 MHz</span>
-        </div>
-
-        <div class="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
-          <span class="text-slate-400">PWR:</span>
-          <button onclick="setGlobalPower(10)" class="pwr-chip px-1 rounded theme-btn border">10W</button>
-          <button onclick="setGlobalPower(50)" class="pwr-chip px-1 rounded theme-btn border">50W</button>
-          <button onclick="setGlobalPower(100)" class="pwr-chip px-1 rounded theme-btn border btn-active-theme">100W</button>
         </div>
 
         <div class="flex items-center gap-1 bg-black/60 px-2 py-0.5 rounded border border-slate-700 text-[10px]">
@@ -883,18 +850,32 @@
         '10m':  28074000,
         '6m':   50313000
       },
-      FT4: {
-        '80m':  3575000,
-        '40m':  7047500,
-        '30m':  10140000,
-        '20m':  14080000,
-        '17m':  18104000,
-        '15m':  21140000,
-        '12m':  24919000,
-        '10m':  28180000,
-        '6m':   50318000
-      }
     };
+
+    const RADIO_BAND_PRESETS = {
+      '160m': { freq: 1840000, mode: 'LSB' },
+      '80m': { freq: 3573000, mode: 'LSB' },
+      '60m': { freq: 5357000, mode: 'USB' },
+      '40m': { freq: 7150000, mode: 'LSB' },
+      '30m': { freq: 10136000, mode: 'USB' },
+      '20m': { freq: 14250000, mode: 'USB' },
+      '17m': { freq: 18100000, mode: 'USB' },
+      '15m': { freq: 21250000, mode: 'USB' },
+      '12m': { freq: 24915000, mode: 'USB' },
+      '10m': { freq: 28400000, mode: 'USB' },
+      '6m': { freq: 50125000, mode: 'USB' }
+    };
+
+    const RADIO_MODE_PRESETS = [
+      { code: 'MD01', name: 'LSB' },
+      { code: 'MD02', name: 'USB' },
+      { code: 'MD03', name: 'CW-U' },
+      { code: 'MD07', name: 'CW-L' },
+      { code: 'MD0C', name: 'DATA-U' },
+      { code: 'MD08', name: 'DATA-L' },
+      { code: 'MD05', name: 'AM' },
+      { code: 'MD04', name: 'FM' }
+    ];
 
     const MORSE_CODE_MAP = {
       'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
@@ -910,6 +891,8 @@
     const RigState = {
       connected: false,
       isPowerOn: false,
+      powerKnown: false,
+      activeModule: 'radio',
       activeVfo: 'A',
       freqA: 14074000,
       freqB: 7074000,
@@ -1082,24 +1065,139 @@
     }
 
     function setGlobalPower(val) {
+      if (!isRadioControlAvailable()) return;
       const pwr = Math.min(100, Math.max(5, parseInt(val, 10) || 100));
       RigState.rfPower = pwr;
 
-      const slider = document.getElementById('slider-pwr');
       const valPwr = document.getElementById('val-pwr');
       const dispPwr = document.getElementById('disp-pwr-tag');
-      if (slider) slider.value = pwr;
       if (valPwr) valPwr.textContent = `${pwr}W`;
       if (dispPwr) dispPwr.textContent = `${pwr}W`;
 
-      document.querySelectorAll('.pwr-chip').forEach(btn => {
-        const btnVal = parseInt(btn.textContent, 10);
-        btn.className = (btnVal === pwr)
-          ? 'pwr-chip px-1 rounded theme-btn border btn-active-theme'
-          : 'pwr-chip px-1 rounded theme-btn border';
+      sendCATCommand(`PC${String(pwr).padStart(3, '0')};`);
+    }
+
+    function isRadioControlAvailable() {
+      return RigState.connected && RigState.powerKnown && RigState.isPowerOn;
+    }
+
+    function updateRadioControlsAvailability() {
+      const enabled = isRadioControlAvailable();
+      const selectors = [
+        '#global-radio-controls select, #global-radio-controls input',
+        '#panel-rig button, #panel-rig input, #panel-rig select',
+        '#module-main-cw button, #module-main-cw input, #module-main-cw select, #module-main-cw textarea',
+        '#module-main-ft8 button, #module-main-ft8 input, #module-main-ft8 select, #module-main-ft8 textarea',
+        '#modal-freq button, #modal-freq input',
+        '#btn-audio-toggle'
+      ];
+
+      document.querySelectorAll(selectors.join(', ')).forEach(control => {
+        if (control.dataset.radioControlInitiallyDisabled === undefined) {
+          control.dataset.radioControlInitiallyDisabled = control.disabled ? 'true' : 'false';
+        }
+        control.disabled = !enabled || control.dataset.radioControlInitiallyDisabled === 'true';
       });
 
-      sendCATCommand(`PC${String(pwr).padStart(3, '0')};`);
+      const powerButton = document.getElementById('btn-power');
+      if (powerButton) powerButton.disabled = !RigState.connected;
+    }
+
+    function updateGlobalBandSelection(freqHz) {
+      const bandSelect = document.getElementById('global-band-select');
+      if (bandSelect) bandSelect.value = getBandNameFromHz(freqHz);
+    }
+
+    function applyGlobalBand(bandName) {
+      if (!isRadioControlAvailable()) return;
+      const preset = RADIO_BAND_PRESETS[bandName];
+      if (!preset) return;
+
+      let frequency = preset.freq;
+      let mode = preset.mode;
+      if (RigState.activeModule === 'ft8') {
+        frequency = STANDARD_DIGITAL_FREQS.FT8[bandName] || frequency;
+        mode = 'DATA-U';
+      } else if (RigState.activeModule === 'cw') {
+        mode = ['CW-U', 'CW-L', 'DATA-U'].includes(RigState.mode) ? RigState.mode : 'CW-U';
+      }
+
+      qsyLockUntil = Date.now() + 850;
+      if (RigState.activeVfo === 'A') {
+        RigState.freqA = frequency;
+        sendCATCommand(`FA${String(frequency).padStart(9, '0')};`);
+      } else {
+        RigState.freqB = frequency;
+        sendCATCommand(`FB${String(frequency).padStart(9, '0')};`);
+      }
+
+      const modePreset = RADIO_MODE_PRESETS.find(item => item.name === mode);
+      if (!modePreset) return;
+      RigState.mode = modePreset.name;
+      RigState.catModeCode = modePreset.code;
+      if (mode === 'CW-U' || mode === 'CW-L' || mode === 'DATA-U') {
+        setCwMode(mode);
+      } else {
+        sendCATCommand(`${modePreset.code};`);
+      }
+      if (RigState.activeModule === 'ft8') setFt8Mode('FT8', false);
+
+      renderRigDisplay();
+      showQsyAlert(`Banda ${bandName}: ${(frequency / 1000000).toFixed(3)} MHz · ${mode}`);
+    }
+
+    function applyGlobalMode(mode) {
+      if (!isRadioControlAvailable()) return;
+      if (RigState.activeModule === 'ft8' && mode !== 'DATA-U') {
+        showQsyAlert('La vista Digital requiere DATA-U.');
+        updateGlobalModeSelection();
+        return;
+      }
+      if (RigState.activeModule === 'cw' && !['CW-U', 'CW-L', 'DATA-U'].includes(mode)) {
+        showQsyAlert('La vista CW requiere CW-U, CW-L o DATA-U.');
+        updateGlobalModeSelection();
+        return;
+      }
+
+      const preset = RADIO_MODE_PRESETS.find(item => item.name === mode);
+      if (!preset) return;
+      RigState.mode = preset.name;
+      RigState.catModeCode = preset.code;
+      if (mode === 'CW-U' || mode === 'CW-L' || mode === 'DATA-U') {
+        setCwMode(mode);
+      } else {
+        sendCATCommand(`${preset.code};`);
+        renderRigDisplay();
+      }
+    }
+
+    function updateGlobalModeSelection() {
+      const modeSelect = document.getElementById('global-mode-select');
+      if (modeSelect) modeSelect.value = RigState.mode;
+    }
+
+    function applyViewDefaultMode(moduleName) {
+      if (!isRadioControlAvailable()) return;
+      let mode = RigState.mode;
+      if (moduleName === 'ft8') {
+        mode = 'DATA-U';
+      } else if (moduleName === 'cw' && !['CW-U', 'CW-L', 'DATA-U'].includes(mode)) {
+        mode = 'CW-U';
+      } else if (moduleName === 'radio' && ['CW-U', 'CW-L', 'DATA-U', 'DATA-L'].includes(mode)) {
+        const band = getBandNameFromHz(RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB);
+        mode = RADIO_BAND_PRESETS[band].mode;
+      }
+      if (mode === RigState.mode) return;
+      const preset = RADIO_MODE_PRESETS.find(item => item.name === mode);
+      if (!preset) return;
+      RigState.mode = preset.name;
+      RigState.catModeCode = preset.code;
+      if (moduleName === 'cw' && ['CW-U', 'CW-L', 'DATA-U'].includes(mode)) {
+        setCwMode(mode);
+      } else {
+        sendCATCommand(`${preset.code};`);
+        renderRigDisplay();
+      }
     }
 
     function updateOnAirFrequencyDisplays() {
@@ -1108,7 +1206,6 @@
 
       const ft8Band = document.getElementById('ft8-disp-band');
       const ft8OnAir = document.getElementById('ft8-disp-onair-freq');
-      const selBand = document.getElementById('ft8-band-select');
 
       const txAudio = Ft8State.txFreq || 1250;
       const totalOnAirHz = activeFreq + txAudio;
@@ -1116,9 +1213,7 @@
 
       if (ft8Band) ft8Band.textContent = band;
       if (ft8OnAir) ft8OnAir.textContent = `${onAirParts.mhz}.${onAirParts.khz} MHz`;
-      if (selBand && selBand.value !== band && selBand.querySelector(`option[value="${band}"]`)) {
-        selBand.value = band;
-      }
+      updateGlobalBandSelection(activeFreq);
     }
 
     function updateAlcUI(rawVal) {
@@ -1153,38 +1248,55 @@
     }
 
     function updateActiveBandUI(freqHz) {
-      const f = Number(freqHz) || 0;
-      const targetBand = getBandNameFromHz(f);
-      document.querySelectorAll('.band-btn').forEach(b => {
-        b.className = (b.textContent.trim() === targetBand)
-          ? 'band-btn py-1 rounded theme-btn border btn-active-theme'
-          : 'band-btn py-1 rounded theme-btn border';
-      });
+      updateGlobalBandSelection(freqHz);
     }
 
     function updateActiveModeUI(modeName) {
-      document.querySelectorAll('.mode-btn').forEach(b => {
-        b.className = (b.dataset.mode === modeName)
-          ? 'mode-btn py-1 rounded theme-btn border btn-active-theme'
-          : 'mode-btn py-1 rounded theme-btn border';
-      });
+      const modeSelect = document.getElementById('global-mode-select');
+      if (modeSelect) modeSelect.value = modeName;
     }
 
-    function updatePowerUI(isOn) {
+    function updatePowerUI(isOn, known = true) {
+      const wasOn = RigState.isPowerOn;
       RigState.isPowerOn = isOn;
+      RigState.powerKnown = known;
+      if (!isOn && wasOn) {
+        if (RigState.isTx) setPTT(false);
+        if (Ft8State.txArmed) abortFt8Tx();
+        CwState.txAbort = true;
+        if (CwState.ws && CwState.ws.readyState === WebSocket.OPEN) {
+          sendCwSocket({ action: 'key_up', mode: CwState.mode });
+        }
+      }
       const powerIndicator = document.getElementById('power-indicator');
       const powerBtnLabel = document.getElementById('power-btn-label');
       if (powerIndicator) {
-        powerIndicator.className = isOn ? 'w-1.5 h-1.5 rounded-full bg-emerald-400' : 'w-1.5 h-1.5 rounded-full bg-red-600';
+        powerIndicator.className = isOn
+          ? 'w-1.5 h-1.5 rounded-full bg-emerald-400'
+          : (!RigState.connected
+            ? 'w-1.5 h-1.5 rounded-full bg-red-600'
+            : (known ? 'w-1.5 h-1.5 rounded-full bg-red-600' : 'w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse'));
       }
       if (powerBtnLabel) {
-        powerBtnLabel.textContent = isOn ? 'ON' : 'STANDBY';
+        powerBtnLabel.textContent = isOn ? 'ON' : (!RigState.connected ? 'SIN CAT' : (known ? 'STANDBY' : 'CONSULTANDO'));
       }
 
       const lcdDisplay = document.getElementById('main-lcd-display');
       if (lcdDisplay) {
         if (isOn) lcdDisplay.classList.remove('lcd-powered-off');
         else lcdDisplay.classList.add('lcd-powered-off');
+      }
+      updateRadioControlsAvailability();
+      if (isOn && known && !wasOn) {
+        sendCATCommand('FA;');
+        sendCATCommand('FB;');
+        sendCATCommand('MD0;');
+        sendCATCommand('SM0;');
+        if (CwState.ws && CwState.ws.readyState === WebSocket.OPEN) {
+          sendCwSocket({ action: 'enable_breakin' });
+          sendCwSocket({ action: 'set_speed', wpm: CwState.wpm });
+          sendCwSocket({ action: 'set_pitch', pitch: CwState.pitch });
+        }
       }
     }
 
@@ -1209,6 +1321,7 @@
 
       updateActiveBandUI(activeFreq);
       updateActiveModeUI(RigState.mode);
+      updateGlobalModeSelection();
       updateOnAirFrequencyDisplays();
     }
 
@@ -1272,9 +1385,13 @@
     function sendCATCommand(cmd) {
       if (!cmd) return;
       const clean = cmd.endsWith(';') ? cmd : cmd + ';';
+      const isPowerCommand = clean === 'PS;' || clean === 'PS1;' || clean === 'PS0;';
+      if (!RigState.connected || (!isRadioControlAvailable() && !isPowerCommand)) return false;
       if (RigState.wsCat && RigState.wsCat.readyState === WebSocket.OPEN) {
         RigState.wsCat.send(clean);
+        return true;
       }
+      return false;
     }
 
     function connectDockerNetwork() {
@@ -1290,20 +1407,24 @@
 
       RigState.wsCat.onopen = () => {
         RigState.connected = true;
+        updatePowerUI(false, false);
         if (connBadge) {
           connBadge.className = 'px-1.5 py-0.5 text-[9px] font-mono uppercase font-bold rounded bg-emerald-950 text-emerald-400 border border-emerald-800 flex items-center gap-1 shrink-0';
           connBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Online';
         }
 
         sendCATCommand('PS;');
-        sendCATCommand('FA;');
-        sendCATCommand('FB;');
-        sendCATCommand('MD0;');
 
         if (RigState.pollingIntervalId) clearInterval(RigState.pollingIntervalId);
+        let lastPowerQueryAt = 0;
         RigState.pollingIntervalId = setInterval(() => {
           if (!RigState.connected) return;
-          if (!RigState.isTx) {
+          if (!RigState.powerKnown || !RigState.isPowerOn) {
+            if (Date.now() - lastPowerQueryAt >= 1000) {
+              sendCATCommand('PS;');
+              lastPowerQueryAt = Date.now();
+            }
+          } else if (!RigState.isTx) {
             sendCATCommand('FA;');
             sendCATCommand('SM0;');
           } else {
@@ -1319,6 +1440,7 @@
 
       RigState.wsCat.onclose = () => {
         RigState.connected = false;
+        updatePowerUI(false, false);
         if (connBadge) {
           connBadge.className = 'px-1.5 py-0.5 text-[9px] font-mono uppercase font-bold rounded bg-red-950 text-red-400 border border-red-800 flex items-center gap-1 shrink-0';
           connBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Offline';
@@ -1334,11 +1456,12 @@
 
       for (let chunk of chunks) {
         const cmd = chunk.replace(/\s+/g, '');
-        if (cmd.startsWith('FA') || cmd.startsWith('FB') || cmd.startsWith('MD0') || cmd.startsWith('SM0')) {
-          if (!RigState.isPowerOn) updatePowerUI(true);
-        }
-
-        if (cmd.startsWith('FA')) {
+        if (cmd.startsWith('PS')) {
+          const powerState = cmd.substring(2, 3);
+          if (powerState === '0' || powerState === '1') {
+            updatePowerUI(powerState === '1');
+          }
+        } else if (cmd.startsWith('FA')) {
           if (Date.now() < qsyLockUntil) continue;
           const freq = parseInt(cmd.substring(2), 10);
           if (!isNaN(freq) && freq !== RigState.freqA) {
@@ -1376,8 +1499,6 @@
             RigState.sMeter = meterRaw;
             updateMeterDisplay(RigState.sMeter);
           }
-        } else if (cmd.startsWith('PS')) {
-          updatePowerUI(cmd.substring(2, 3) === '1');
         }
       }
     }
@@ -1569,6 +1690,7 @@
     }
 
     function setPTT(active) {
+      if (active && !isRadioControlAvailable()) return;
       if (active === RigState.isTx) return;
       if (active && !AudioEngine.active) initAudioEngine();
 
@@ -1776,9 +1898,11 @@
       CwState.ws = new WebSocket(`${protocol}//${window.location.host}/ws/cw`);
 
       CwState.ws.onopen = () => {
-        sendCwSocket({ action: "enable_breakin" });
-        sendCwSocket({ action: "set_speed", wpm: CwState.wpm });
-        sendCwSocket({ action: "set_pitch", pitch: CwState.pitch });
+        if (isRadioControlAvailable()) {
+          sendCwSocket({ action: "enable_breakin" });
+          sendCwSocket({ action: "set_speed", wpm: CwState.wpm });
+          sendCwSocket({ action: "set_pitch", pitch: CwState.pitch });
+        }
       };
 
       CwState.ws.onmessage = (event) => {
@@ -1801,20 +1925,20 @@
     }
 
     function setCwMode(mode) {
+      if (!isRadioControlAvailable()) return;
       CwState.mode = mode;
-      const btnCwu = document.getElementById('cw-mode-btn-cwu');
-      const btnDatau = document.getElementById('cw-mode-btn-datau');
 
       if (mode === 'CW-U') {
-        if (btnCwu) btnCwu.className = 'px-2.5 py-1 rounded theme-btn border font-bold text-xs btn-active-theme';
-        if (btnDatau) btnDatau.className = 'px-2.5 py-1 rounded theme-btn border font-bold text-xs';
         RigState.mode = 'CW-U';
         RigState.catModeCode = 'MD03';
         sendCATCommand('MD03;');
         sendCATCommand('BI1;');
+      } else if (mode === 'CW-L') {
+        RigState.mode = 'CW-L';
+        RigState.catModeCode = 'MD07';
+        sendCATCommand('MD07;');
+        sendCATCommand('BI1;');
       } else {
-        if (btnDatau) btnDatau.className = 'px-2.5 py-1 rounded theme-btn border font-bold text-xs btn-active-theme';
-        if (btnCwu) btnCwu.className = 'px-2.5 py-1 rounded theme-btn border font-bold text-xs';
         RigState.mode = 'DATA-U';
         RigState.catModeCode = 'MD0C';
         sendCATCommand('MD0C;');
@@ -1881,6 +2005,10 @@
     }
 
     function cwKeyPulse(active) {
+      if (active && !isRadioControlAvailable()) {
+        CwState.txAbort = true;
+        active = false;
+      }
       if (active) startLocalSidetone(CwState.pitch);
       else stopLocalSidetone();
 
@@ -1930,6 +2058,7 @@
     }
 
     async function transmitMorseSequence(text) {
+      if (!isRadioControlAvailable()) return;
       CwState.txAbort = false;
       const status = document.getElementById('cw-buffer-status');
       if (status) status.textContent = 'Transmitiendo...';
@@ -1938,7 +2067,7 @@
       const dahMs = ditMs * 3;
 
       for (let i = 0; i < text.length; i++) {
-        if (CwState.txAbort) break;
+        if (CwState.txAbort || !isRadioControlAvailable()) break;
         const char = text[i];
         if (char === ' ') {
           await sleep(ditMs * 7);
@@ -1966,6 +2095,7 @@
     }
 
     function tuneStep(direction, multiplier = 1) {
+      if (!isRadioControlAvailable()) return;
       const delta = direction * RigState.step * multiplier;
       let newFreq = (RigState.activeVfo === 'A' ? RigState.freqA : RigState.freqB) + delta;
       newFreq = Math.max(100000, Math.min(56000000, newFreq));
@@ -2002,11 +2132,19 @@
     }
 
     function performQSY(freqHz, modeStr, spotLabel, activatorCall, grid) {
+      if (!isRadioControlAvailable()) {
+        showQsyAlert('Encienda la radio y espere el estado CAT antes de sintonizar.');
+        return;
+      }
       let target = Math.round(Number(freqHz));
       if (target < 1000000) target *= 1000;
 
       const mUpper = (modeStr || '').toUpperCase().trim();
       const isFt4 = mUpper.includes('FT4');
+      if (isFt4) {
+        showQsyAlert('FT4 no está soportado por el motor digital actual; no se modificó la radio.');
+        return;
+      }
       const isDigital = mUpper.includes('FT8') || isFt4 || mUpper.includes('DATA');
       const isCw = mUpper.includes('CW');
 
@@ -2014,7 +2152,7 @@
       qsyLockUntil = Date.now() + 850;
 
       if (isDigital) {
-        const digitalMode = isFt4 ? 'FT4' : 'FT8';
+        const digitalMode = 'FT8';
         const band = getBandNameFromHz(target);
         const freqTable = STANDARD_DIGITAL_FREQS[digitalMode] || STANDARD_DIGITAL_FREQS.FT8;
         const dialFreq = freqTable[band] || target;
@@ -2040,12 +2178,9 @@
         RigState.catModeCode = 'MD0C';
         sendCATCommand('MD0C;');
 
-        // Cambiar vista a FT8/FT4 y actualizar controles
+        // Cambiar vista a FT8 y actualizar controles
         switchGlobalModule('ft8');
         setFt8Mode(digitalMode, false);
-
-        const selBand = document.getElementById('ft8-band-select');
-        if (selBand) selBand.value = band;
 
         renderRigDisplay();
         updateOnAirFrequencyDisplays();
@@ -2114,7 +2249,8 @@
 
       const targetBadge = document.getElementById('ft8-target-badge');
       if (targetBadge) {
-        targetBadge.innerHTML = `<span class="text-amber-400 font-bold animate-pulse">🎯 ESPERANDO CQ DE: ${call}</span>`;
+        targetBadge.textContent = `🎯 ESPERANDO CQ DE: ${call}`;
+        targetBadge.classList.add('text-amber-400', 'font-bold', 'animate-pulse');
       }
 
       document.getElementById('qso-dx-call').value = call;
@@ -2126,6 +2262,7 @@
     }
 
     function changeFt8Band(bandName) {
+      if (!isRadioControlAvailable()) return;
       const mode = Ft8State.mode || 'FT8';
       const freqTable = STANDARD_DIGITAL_FREQS[mode] || STANDARD_DIGITAL_FREQS.FT8;
       const targetFreq = freqTable[bandName];
@@ -2153,14 +2290,17 @@
     }
 
     function setFt8Mode(mode, doQsy = true) {
+      if (!isRadioControlAvailable()) return;
+      if (mode !== 'FT8') {
+        showQsyAlert('FT4 no está soportado por el motor digital actual.');
+        return;
+      }
       Ft8State.mode = mode;
-      Ft8State.slotDuration = (mode === 'FT4') ? 7.5 : 15.0;
+      Ft8State.slotDuration = 15.0;
 
       const btnFt8 = document.getElementById('btn-mode-ft8');
-      const btnFt4 = document.getElementById('btn-mode-ft4');
-      if (btnFt8 && btnFt4) {
-        btnFt8.className = mode === 'FT8' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
-        btnFt4.className = mode === 'FT4' ? 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs' : 'px-2 py-0.5 rounded theme-btn border font-bold text-xs';
+      if (btnFt8) {
+        btnFt8.className = 'px-2 py-0.5 rounded theme-btn border font-bold btn-active-theme text-xs';
       }
 
       sendFt8Command({ action: 'set_mode', mode: mode });
@@ -2249,7 +2389,9 @@
 
         let freqHz = Math.round(spot.freq * 1000);
         if (freqHz < 1000000) freqHz *= 1000;
-        const isDigital = (spot.mode || '').toUpperCase().includes('FT8') || (spot.mode || '').toUpperCase().includes('FT4');
+        const spotMode = String(spot.mode || '').toUpperCase();
+        const isFt4 = spotMode.includes('FT4');
+        const isDigital = spotMode.includes('FT8') || isFt4;
         const isCw = (spot.mode || '').toUpperCase().includes('CW');
 
         let modeBadgeColor = isDigital ? 'text-cyan-400' : (isCw ? 'text-amber-400' : 'text-emerald-400');
@@ -2257,23 +2399,37 @@
         card.innerHTML = `
           <div class="flex-1 min-w-0 pr-2">
             <div class="flex items-center gap-1.5 mb-0.5">
-              <span class="font-bold font-mono text-xs text-amber-400">${spot.activator}</span>
-              <span class="px-1 py-0.2 rounded text-[8px] font-mono font-bold border border-slate-700 bg-slate-900">${spot.ref || spot.program}</span>
-              <span class="text-[8px] text-slate-400 font-mono">${spot.time || ''}</span>
+              <span class="js-activator font-bold font-mono text-xs text-amber-400"></span>
+              <span class="js-ref px-1 py-0.2 rounded text-[8px] font-mono font-bold border border-slate-700 bg-slate-900"></span>
+              <span class="js-time text-[8px] text-slate-400 font-mono"></span>
             </div>
-            <div class="text-[10px] text-slate-300 truncate font-mono">${spot.parkName || spot.comments || ''}</div>
+            <div class="js-name text-[10px] text-slate-300 truncate font-mono"></div>
           </div>
           <div class="text-right shrink-0">
-            <div class="font-lcd font-bold text-xs">${(freqHz / 1000000).toFixed(3)} <span class="text-[9px] ${modeBadgeColor} font-bold">${spot.mode || ''}</span></div>
-            <button class="px-1.5 py-0.5 rounded ${isDigital ? 'bg-cyan-500' : (isCw ? 'bg-amber-500' : 'bg-emerald-600')} text-black font-bold font-mono text-[9px] mt-0.5">
-              ${isDigital ? 'SINTONIZAR' : (isCw ? 'CW QSY' : 'QSY')}
-            </button>
+            <div class="font-lcd font-bold text-xs"><span class="js-frequency"></span> <span class="js-mode text-[9px] font-bold"></span></div>
+            <button class="js-qsy px-1.5 py-0.5 rounded text-black font-bold font-mono text-[9px] mt-0.5"></button>
           </div>
         `;
 
-        card.addEventListener('click', () => {
-          performQSY(freqHz, spot.mode, spot.activator, spot.activator, spot.ref);
-        });
+        card.querySelector('.js-activator').textContent = String(spot.activator || '');
+        card.querySelector('.js-ref').textContent = String(spot.ref || spot.program || '');
+        card.querySelector('.js-time').textContent = String(spot.time || '');
+        card.querySelector('.js-name').textContent = String(spot.parkName || spot.comments || '');
+        card.querySelector('.js-frequency').textContent = (freqHz / 1000000).toFixed(3);
+        const modeLabel = card.querySelector('.js-mode');
+        modeLabel.textContent = String(spot.mode || '');
+        modeLabel.classList.add(...modeBadgeColor.split(' '));
+        const qsyButton = card.querySelector('.js-qsy');
+        qsyButton.textContent = isFt4 ? 'FT4 NO DISP.' : (isDigital ? 'SINTONIZAR' : (isCw ? 'CW QSY' : 'QSY'));
+        qsyButton.classList.add(...(isFt4 ? 'bg-slate-500' : (isDigital ? 'bg-cyan-500' : (isCw ? 'bg-amber-500' : 'bg-emerald-600'))).split(' '));
+        qsyButton.disabled = isFt4;
+        if (isFt4) qsyButton.title = 'FT4 no está soportado por el motor digital actual';
+
+        if (!isFt4) {
+          card.addEventListener('click', () => {
+            performQSY(freqHz, spot.mode, spot.activator, spot.activator, spot.ref);
+          });
+        }
 
         fragment.appendChild(card);
       });
@@ -2283,6 +2439,7 @@
     }
 
     function switchGlobalModule(mod) {
+      const previousModule = RigState.activeModule;
       const rView = document.getElementById('module-main-radio');
       const cView = document.getElementById('module-main-cw');
       const fView = document.getElementById('module-main-ft8');
@@ -2297,6 +2454,8 @@
       const mSpots = document.getElementById('tab-btn-spots');
 
       if (!rView || !cView || !fView) return;
+      RigState.activeModule = ['radio', 'cw', 'ft8'].includes(mod) ? mod : 'radio';
+      if (previousModule !== RigState.activeModule) applyViewDefaultMode(RigState.activeModule);
 
       rView.classList.add('hidden');
       cView.classList.add('hidden');
@@ -2468,6 +2627,10 @@
     }
 
     function armFt8Tx(enable) {
+      if (enable && !isRadioControlAvailable()) {
+        showQsyAlert('Encienda la radio y espere el estado CAT antes de habilitar TX.');
+        return;
+      }
       Ft8State.txArmed = enable;
       const lbl = document.getElementById('lbl-arm-ft8-tx');
       const btn = document.getElementById('btn-arm-ft8-tx');
@@ -2689,30 +2852,40 @@
         if (d.isTx) {
           row.className = 'grid grid-cols-12 text-[10px] items-center p-1 rounded font-mono bg-amber-950/70 border border-amber-500/80 text-amber-300';
           row.innerHTML = `
-            <span class="col-span-2 text-amber-400 font-bold">${d.time || ''}</span>
+            <span class="js-time col-span-2 text-amber-400 font-bold"></span>
             <span class="col-span-1 text-center font-extrabold text-black bg-amber-400 px-1 rounded text-[8px]">TX</span>
             <span class="col-span-2 text-center text-amber-400/90 text-[9px] font-bold">OUT</span>
-            <span class="col-span-2 text-right font-bold text-amber-300">${d.freq}Hz</span>
-            <span class="col-span-5 pl-2 truncate font-bold text-amber-200">▶ ${d.msg}</span>
+            <span class="js-freq col-span-2 text-right font-bold text-amber-300"></span>
+            <span class="js-msg col-span-5 pl-2 truncate font-bold text-amber-200"></span>
           `;
+          row.querySelector('.js-time').textContent = String(d.time || '');
+          row.querySelector('.js-freq').textContent = `${Number(d.freq) || 0}Hz`;
+          row.querySelector('.js-msg').textContent = `▶ ${String(d.msg || '')}`;
         } else {
-          const isToMe = d.msg && d.msg.includes(myCall);
-          const isCq = d.msg && d.msg.startsWith('CQ ');
+          const message = String(d.msg || '');
+          const isToMe = message.includes(myCall);
+          const isCq = message.startsWith('CQ ');
 
           let rowStyle = 'hover:bg-slate-800/60 cursor-pointer rounded p-1 transition border-b border-slate-900/40 text-[10px]';
           let textStyle = isToMe ? 'text-red-300 font-bold' : (isCq ? 'text-emerald-400 font-semibold' : 'text-slate-300');
 
           row.className = `grid grid-cols-12 ${rowStyle} ${isToMe ? 'bg-red-950/60 border border-red-700/80' : ''}`;
           row.innerHTML = `
-            <span class="col-span-2 text-slate-400">${d.time || ''}</span>
-            <span class="col-span-1 text-center font-bold text-cyan-400">${d.snr}</span>
-            <span class="col-span-2 text-center text-slate-400">${d.dt > 0 ? '+' : ''}${Number(d.dt).toFixed(1)}s</span>
-            <span class="col-span-2 text-right font-bold text-cyan-400">${d.freq}Hz</span>
-            <span class="col-span-5 pl-2 truncate ${textStyle}">${d.msg}</span>
+            <span class="js-time col-span-2 text-slate-400"></span>
+            <span class="js-snr col-span-1 text-center font-bold text-cyan-400"></span>
+            <span class="js-dt col-span-2 text-center text-slate-400"></span>
+            <span class="js-freq col-span-2 text-right font-bold text-cyan-400"></span>
+            <span class="js-msg col-span-5 pl-2 truncate ${textStyle}"></span>
           `;
+          row.querySelector('.js-time').textContent = String(d.time || '');
+          row.querySelector('.js-snr').textContent = String(d.snr ?? '');
+          const dt = Number(d.dt) || 0;
+          row.querySelector('.js-dt').textContent = `${dt > 0 ? '+' : ''}${dt.toFixed(1)}s`;
+          row.querySelector('.js-freq').textContent = `${Number(d.freq) || 0}Hz`;
+          row.querySelector('.js-msg').textContent = message;
 
           row.addEventListener('click', () => {
-            const tokens = d.msg.split(/\s+/).filter(Boolean);
+            const tokens = message.split(/\s+/).filter(Boolean);
             if (tokens[0] === 'CQ') {
               setupQsoWithStation(tokens[1], tokens[tokens.length - 1], d.snr, d.freq);
             } else if (tokens.length >= 2) {
@@ -2929,19 +3102,11 @@
         }
       });
 
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          RigState.mode = btn.dataset.mode;
-          RigState.catModeCode = btn.dataset.cat;
-          sendCATCommand(`${btn.dataset.cat};`);
-          renderRigDisplay();
-        });
+      document.getElementById('global-band-select')?.addEventListener('change', (event) => {
+        applyGlobalBand(event.target.value);
       });
-
-      document.querySelectorAll('.band-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          performQSY(parseInt(btn.dataset.freq, 10), btn.dataset.mode, btn.textContent);
-        });
+      document.getElementById('global-mode-select')?.addEventListener('change', (event) => {
+        applyGlobalMode(event.target.value);
       });
 
       document.querySelectorAll('.step-btn').forEach(btn => {
@@ -2968,7 +3133,14 @@
       });
 
       document.getElementById('btn-power')?.addEventListener('click', () => {
-        sendCATCommand(RigState.isPowerOn ? 'PS0;' : 'PS1;');
+        if (!RigState.connected) return;
+        if (RigState.isPowerOn && RigState.isTx) {
+          showQsyAlert('Suelte PTT antes de poner la radio en standby.');
+          return;
+        }
+        const command = RigState.isPowerOn ? 'PS0;' : 'PS1;';
+        if (command === 'PS0;') updatePowerUI(false, false);
+        sendCATCommand(command);
       });
 
       document.getElementById('btn-audio-toggle')?.addEventListener('click', handleAudioButtonClick);
@@ -2981,6 +3153,12 @@
       });
 
       document.getElementById('slider-pwr')?.addEventListener('input', (e) => setGlobalPower(e.target.value));
+      document.getElementById('slider-mic-gain')?.addEventListener('input', (e) => {
+        if (!isRadioControlAvailable()) return;
+        const val = parseInt(e.target.value, 10);
+        document.getElementById('val-mic-gain').textContent = `${val}%`;
+        AudioEngine.txGain = val / 100.0;
+      });
 
       document.getElementById('slider-sql')?.addEventListener('input', (e) => {
         const val = parseInt(e.target.value, 10);
@@ -2993,12 +3171,6 @@
         const val = parseInt(e.target.value, 10);
         document.getElementById('val-rx-vol').textContent = `${val}%`;
         if (AudioEngine.rxGainNode && !RigState.audioMuted) AudioEngine.rxGainNode.gain.value = val / 100.0;
-      });
-
-      document.getElementById('slider-mic-gain')?.addEventListener('input', (e) => {
-        const val = parseInt(e.target.value, 10);
-        document.getElementById('val-mic-gain').textContent = `${val}%`;
-        AudioEngine.txGain = val / 100.0;
       });
 
       document.getElementById('btn-toggle-dnr')?.addEventListener('click', () => {
@@ -3119,7 +3291,18 @@
       });
     }
 
-    window.onload = function() {
+    function showLoginError(message) {
+      const error = document.getElementById('login-error');
+      if (!error) return;
+      error.textContent = message;
+      error.classList.remove('hidden');
+    }
+
+    function initializeApplication() {
+      document.body.classList.add('authenticated');
+      document.getElementById('auth-gate')?.classList.add('hidden');
+      updateRadioControlsAvailability();
+
       const savedTheme = localStorage.getItem('ft891_theme');
       if (savedTheme === 'light') {
         document.documentElement.classList.remove('dark');
@@ -3141,6 +3324,56 @@
       fetchSpots();
       setInterval(fetchSpots, 30000);
       setInterval(updateUtcClock, 100);
+    }
+
+    async function logoutStation() {
+      abortCwTx();
+      abortFt8Tx();
+      setPTT(false);
+      try {
+        await fetch('/api/logout', { method: 'POST' });
+      } finally {
+        window.location.reload();
+      }
+    }
+
+    window.onload = async function() {
+      const loginForm = document.getElementById('login-form');
+      loginForm?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const submit = document.getElementById('login-submit');
+        const error = document.getElementById('login-error');
+        const username = document.getElementById('login-username').value;
+        const passwordInput = document.getElementById('login-password');
+        if (submit) submit.disabled = true;
+        if (error) error.classList.add('hidden');
+        try {
+          const response = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password: passwordInput.value })
+          });
+          if (!response.ok) {
+            showLoginError(response.status === 401 ? 'Usuario o contraseña incorrectos.' : 'No se pudo iniciar sesión.');
+            return;
+          }
+          passwordInput.value = '';
+          initializeApplication();
+        } catch (err) {
+          showLoginError('No se pudo contactar con el servidor.');
+        } finally {
+          if (submit) submit.disabled = false;
+        }
+      });
+      document.getElementById('btn-logout')?.addEventListener('click', logoutStation);
+
+      try {
+        const response = await fetch('/api/session', { cache: 'no-store' });
+        const state = await response.json();
+        if (state.authenticated) initializeApplication();
+      } catch (err) {
+        showLoginError('No se pudo contactar con el servidor.');
+      }
     };
   </script>
 </body>

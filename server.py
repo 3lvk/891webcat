@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import datetime
 import asyncio
@@ -9,13 +8,20 @@ import subprocess
 import wave
 import tempfile
 import urllib.request
+import base64
+import hashlib
+import hmac
+import secrets
+from urllib.parse import urlsplit
 from contextlib import asynccontextmanager
 import serial
 import numpy as np
 import sounddevice as sd
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Response
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Response, Request, Body
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+from starlette.websockets import WebSocketState
 import uvicorn
 
 SERIAL_PORT = os.getenv("SERIAL_PORT", "/dev/ttyUSB0")
@@ -25,6 +31,25 @@ HTTP_PORT = int(os.getenv("HTTP_PORT", "8000"))
 SAMPLE_RATE = int(os.getenv("AUDIO_SAMPLE_RATE", "48000"))
 AUDIO_CARD_KEYWORD = os.getenv("AUDIO_CARD_KEYWORD", "USB").lower()
 DEMO_FALLBACK = os.getenv("DEMO_FALLBACK", "true").lower() == "true"
+STATION_USERNAME = os.getenv("STATION_USERNAME", "")
+STATION_PASSWORD = os.getenv("STATION_PASSWORD", "")
+STATION_SESSION_SECRET = os.getenv("STATION_SESSION_SECRET", "")
+SESSION_COOKIE_NAME = "ft891_session"
+SESSION_MAX_AGE = 12 * 60 * 60
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
+SESSION_NONCES = {}
+SESSION_LOCK = threading.Lock()
+LOGIN_FAILURES = {}
+LOGIN_LOCK = threading.Lock()
+LOGIN_FAILURE_LIMIT = 5
+LOGIN_WINDOW_SECONDS = 300
+LOGIN_BLOCK_SECONDS = 300
+websocket_auth_tasks = set()
+
+
+class LoginCredentials(BaseModel):
+    username: str = Field(min_length=1, max_length=128)
+    password: str = Field(min_length=1, max_length=256)
 
 def unmute_alsa_cards():
     """Configura los niveles de volumen en ALSA para operación sin saturación."""
@@ -41,10 +66,8 @@ def unmute_alsa_cards():
     for cmd in cmds:
         try:
             subprocess.run(cmd, capture_output=True, timeout=1)
-        except Exception:
-            pass
-
-unmute_alsa_cards()
+        except (OSError, subprocess.SubprocessError) as exc:
+            print(f"[AUDIO] No se pudo configurar ALSA ({' '.join(cmd)}): {exc}")
 
 cat_clients = set()
 rx_client_queues = {}
@@ -64,6 +87,7 @@ cw_tone_phase = 0.0
 ft8_tx_active = False
 cw_tx_active = False
 voice_tx_active = False
+radio_power_state = None
 
 FT8_SAMPLE_RATE = 12000
 FT8_BUFFER_SAMPLES = FT8_SAMPLE_RATE * 16
@@ -113,7 +137,7 @@ def tx_audio_callback(outdata, frames, time_info, status):
         cw_tone_phase = 0.0
         mono.fill(0)
     else:
-        # Modos Digitales (FT8/FT4) o Fonía desde WebAudio
+        # FT8 digital o fonía desde WebAudio
         cw_tone_phase = 0.0
         with tx_lock:
             buffer_len = len(tx_pcm_buffer)
@@ -155,59 +179,13 @@ def tx_audio_callback(outdata, frames, time_info, status):
     outdata[:] = stereo
 
 main_event_loop = None
-
-try:
-    ser = serial.Serial(
-        port=SERIAL_PORT,
-        baudrate=BAUD_RATE,
-        bytesize=serial.EIGHTBITS,
-        parity=serial.PARITY_NONE,
-        stopbits=serial.STOPBITS_TWO,
-        timeout=0,
-        rtscts=False,
-        dsrdtr=False
-    )
-    ser.rts = False
-    ser.dtr = False
-    print(f"[CAT] Puerto serie CAT conectado en {SERIAL_PORT} @ {BAUD_RATE} bps")
-except Exception as e:
-    print(f"[CAT] Advertencia en puerto {SERIAL_PORT}: {e}")
-    if not DEMO_FALLBACK:
-        sys.exit(1)
-
-if os.path.exists(CW_KEY_PORT) and CW_KEY_PORT != SERIAL_PORT:
-    try:
-        cw_ser = serial.Serial(
-            port=CW_KEY_PORT,
-            baudrate=BAUD_RATE,
-            timeout=0,
-            rtscts=False,
-            dsrdtr=False
-        )
-        cw_ser.rts = False
-        cw_ser.dtr = False
-        print(f"[CW HW] Puerto serie secundario conectado en {CW_KEY_PORT}")
-    except Exception as e:
-        print(f"[CW HW] No se pudo abrir {CW_KEY_PORT}: {e}")
-
 input_device_id = None
 output_device_id = None
 actual_sample_rate = SAMPLE_RATE
-
-try:
-    devices = sd.query_devices()
-    for idx, dev in enumerate(devices):
-        name = dev['name'].lower()
-        if AUDIO_CARD_KEYWORD in name:
-            if dev['max_input_channels'] > 0 and input_device_id is None:
-                input_device_id = idx
-                actual_sample_rate = 48000
-                print(f"[AUDIO RX] Dispositivo #{idx} {dev['name']} @ {actual_sample_rate}Hz")
-            if dev['max_output_channels'] > 0 and output_device_id is None:
-                output_device_id = idx
-                print(f"[AUDIO TX] Dispositivo #{idx} {dev['name']}")
-except Exception as e:
-    print(f"[AUDIO] Error enumerando dispositivos: {e}")
+worker_stop_event = threading.Event()
+ft8_worker_thread = None
+spots_worker_thread = None
+serial_reader_task_handle = None
 
 def rx_audio_callback(indata, frames, time_info, status):
     """Callback de recepción de audio desde el transceptor."""
@@ -245,6 +223,7 @@ def rx_audio_callback(indata, frames, time_info, status):
             ft8_rx_idx = rem
 
 async def serial_reader_task():
+    global radio_power_state
     buffer = b""
     while True:
         if ser and ser.is_open:
@@ -256,6 +235,12 @@ async def serial_reader_task():
                     while b";" in buffer:
                         cmd, buffer = buffer.split(b";", 1)
                         full_cmd = (cmd + b";").decode("ascii", errors="ignore")
+                        normalized_cmd = full_cmd.strip().upper()
+                        if normalized_cmd == "PS1;":
+                            radio_power_state = True
+                        elif normalized_cmd == "PS0;":
+                            radio_power_state = False
+                            force_release_transmit_controls()
                         disconnected = set()
                         for client in list(cat_clients):
                             try:
@@ -277,6 +262,8 @@ def send_cat_internal(cmd_str):
             print(f"[CAT INTERNAL] Error enviando '{cmd_str}': {e}")
 
 def set_hardware_ptt(active: bool):
+    if active and radio_power_state is not True:
+        return
     if ser and ser.is_open:
         try:
             ser.rts = active
@@ -291,11 +278,31 @@ def set_hardware_ptt(active: bool):
 
     if active:
         send_cat_internal("TX2;")
-    else:
+    elif radio_power_state is True:
         send_cat_internal("TX0;")
+
+
+def force_release_transmit_controls():
+    global ft8_tx_active, cw_tx_active, voice_tx_active, tx_prebuffering
+    ft8_tx_active = False
+    cw_tx_active = False
+    voice_tx_active = False
+    for serial_device in (ser, cw_ser):
+        if serial_device and serial_device.is_open:
+            try:
+                serial_device.rts = False
+                serial_device.dtr = False
+            except serial.SerialException as exc:
+                print(f"[PTT HW] Error liberando líneas RTS/DTR: {exc}")
+    with tx_lock:
+        tx_pcm_buffer.clear()
+        tx_prebuffering = True
+    ft8_engine_state["tx_armed"] = False
 
 def set_hardware_cw_key(active: bool, mode: str = "CW-U"):
     global cw_tx_active
+    if active and radio_power_state is not True:
+        return
     cw_tx_active = active
     mode_upper = str(mode).upper()
     is_pure_cw = ("CW" in mode_upper) and ("DATA" not in mode_upper)
@@ -317,7 +324,7 @@ def set_hardware_cw_key(active: bool, mode: str = "CW-U"):
     if is_pure_cw:
         if active:
             send_cat_internal("BI1;")
-    else:
+    elif radio_power_state is True:
         send_cat_internal("TX2;" if active else "TX0;")
 
 def calibrate_ft8_snr(raw_val: float) -> int:
@@ -430,13 +437,13 @@ def broadcast_ft8_event(event_dict):
                 pass
     main_event_loop.call_soon_threadsafe(dispatch)
 
-def ft8_cycle_worker():
+def ft8_cycle_worker(stop_event):
     global tx_pcm_buffer, tx_prebuffering, ft8_tx_active
     print("[FT8 WORKER] Sincronizador UTC activo.")
     last_tx_slot = -1
     last_rx_slot = -1
 
-    while True:
+    while not stop_event.is_set():
         now = datetime.datetime.now(datetime.timezone.utc)
         sec = now.second + now.microsecond / 1_000_000.0
         slot_dur = ft8_engine_state["slot_duration"]
@@ -451,7 +458,7 @@ def ft8_cycle_worker():
             desired_slot = ft8_engine_state["tx_slot"]
             should_tx = False
 
-            if armed:
+            if armed and radio_power_state is True:
                 if desired_slot == "now":
                     should_tx = True
                 elif desired_slot == "even" and is_even:
@@ -493,8 +500,9 @@ def ft8_cycle_worker():
                             tx_pcm_buffer.extend(scaled_48k.tobytes())
                             tx_prebuffering = False
 
-                        time.sleep(tx_duration)
-                        time.sleep(0.12)
+                        stop_event.wait(tx_duration)
+                        if not stop_event.is_set():
+                            stop_event.wait(0.12)
                     except Exception as ex:
                         print(f"[FT8 TX] Error en transmisión: {ex}")
                     finally:
@@ -520,8 +528,8 @@ def ft8_cycle_worker():
         # 2. Disparador de Decodificación Temprano:
         # En FT8 la modulación concluye a los 12.64s. Se dispara a los 12.8s para entregar decodes
         # al navegador antes de los 13.5s, permitiendo más de 1.5s de holgura para armar el siguiente slot.
-        decode_trigger = 5.0 if slot_dur < 10.0 else 12.8
-        capture_duration = 5.2 if slot_dur < 10.0 else 12.8
+        decode_trigger = 12.8
+        capture_duration = 12.8
         if sec_in_slot >= decode_trigger and sec_in_slot < decode_trigger + 0.65 and slot_idx != last_rx_slot:
             last_rx_slot = slot_idx
 
@@ -561,31 +569,145 @@ def ft8_cycle_worker():
                 except Exception:
                     pass
 
-        time.sleep(0.08)
+        stop_event.wait(0.08)
 
-threading.Thread(target=ft8_cycle_worker, daemon=True).start()
+def initialize_hardware():
+    global ser, cw_ser, input_device_id, output_device_id, actual_sample_rate
+    unmute_alsa_cards()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global main_event_loop, rx_stream, tx_stream
-    main_event_loop = asyncio.get_running_loop()
+    try:
+        ser = serial.Serial(
+            port=SERIAL_PORT,
+            baudrate=BAUD_RATE,
+            bytesize=serial.EIGHTBITS,
+            parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_TWO,
+            timeout=0,
+            rtscts=False,
+            dsrdtr=False
+        )
+        ser.rts = False
+        ser.dtr = False
+        print(f"[CAT] Puerto serie CAT conectado en {SERIAL_PORT} @ {BAUD_RATE} bps")
+    except (OSError, serial.SerialException) as exc:
+        ser = None
+        print(f"[CAT] Advertencia en puerto {SERIAL_PORT}: {exc}")
+        if not DEMO_FALLBACK:
+            raise RuntimeError(f"No se pudo abrir el puerto CAT {SERIAL_PORT}") from exc
 
-    asyncio.create_task(serial_reader_task())
+    if os.path.exists(CW_KEY_PORT) and CW_KEY_PORT != SERIAL_PORT:
+        try:
+            cw_ser = serial.Serial(
+                port=CW_KEY_PORT,
+                baudrate=BAUD_RATE,
+                timeout=0,
+                rtscts=False,
+                dsrdtr=False
+            )
+            cw_ser.rts = False
+            cw_ser.dtr = False
+            print(f"[CW HW] Puerto serie secundario conectado en {CW_KEY_PORT}")
+        except (OSError, serial.SerialException) as exc:
+            cw_ser = None
+            print(f"[CW HW] No se pudo abrir {CW_KEY_PORT}: {exc}")
 
+    input_device_id = None
+    output_device_id = None
+    actual_sample_rate = SAMPLE_RATE
+    try:
+        devices = sd.query_devices()
+        for idx, dev in enumerate(devices):
+            name = dev["name"].lower()
+            if AUDIO_CARD_KEYWORD in name:
+                if dev["max_input_channels"] > 0 and input_device_id is None:
+                    input_device_id = idx
+                    actual_sample_rate = 48000
+                    print(f"[AUDIO RX] Dispositivo #{idx} {dev['name']} @ {actual_sample_rate}Hz")
+                if dev["max_output_channels"] > 0 and output_device_id is None:
+                    output_device_id = idx
+                    print(f"[AUDIO TX] Dispositivo #{idx} {dev['name']}")
+    except Exception as exc:
+        print(f"[AUDIO] Error enumerando dispositivos: {exc}")
+
+
+def validate_auth_configuration():
+    if not STATION_USERNAME or not STATION_PASSWORD:
+        raise RuntimeError("Configure STATION_USERNAME y STATION_PASSWORD antes de iniciar.")
+    if len(STATION_USERNAME) > 128 or ":" in STATION_USERNAME or STATION_USERNAME.strip() != STATION_USERNAME:
+        raise RuntimeError("STATION_USERNAME admite hasta 128 caracteres, sin espacios externos ni dos puntos.")
+    if len(STATION_PASSWORD) > 256:
+        raise RuntimeError("STATION_PASSWORD no puede superar 256 caracteres.")
+    if len(STATION_SESSION_SECRET.encode("utf-8")) < 32:
+        raise RuntimeError("STATION_SESSION_SECRET debe tener al menos 32 bytes.")
+
+
+def create_session_token(username):
+    expires_at = int(time.time()) + SESSION_MAX_AGE
+    nonce = secrets.token_urlsafe(24)
+    payload = f"{username}:{expires_at}:{nonce}".encode("utf-8")
+    signature = hmac.new(STATION_SESSION_SECRET.encode("utf-8"), payload, hashlib.sha256).digest()
+    with SESSION_LOCK:
+        now = int(time.time())
+        for old_nonce, old_expiry in list(SESSION_NONCES.items()):
+            if old_expiry <= now:
+                SESSION_NONCES.pop(old_nonce, None)
+        SESSION_NONCES[nonce] = expires_at
+    return f"{base64.urlsafe_b64encode(payload).decode('ascii').rstrip('=')}.{base64.urlsafe_b64encode(signature).decode('ascii').rstrip('=')}"
+
+
+def is_valid_session(token):
+    if not token:
+        return False
+    try:
+        encoded_payload, encoded_signature = token.split(".", 1)
+        payload = base64.urlsafe_b64decode(encoded_payload + "=" * (-len(encoded_payload) % 4))
+        signature = base64.urlsafe_b64decode(encoded_signature + "=" * (-len(encoded_signature) % 4))
+        expected = hmac.new(STATION_SESSION_SECRET.encode("utf-8"), payload, hashlib.sha256).digest()
+        username, expires_at, nonce = payload.decode("utf-8").split(":", 2)
+        is_signed_session = (
+            hmac.compare_digest(signature, expected)
+            and hmac.compare_digest(username.encode("utf-8"), STATION_USERNAME.encode("utf-8"))
+            and int(expires_at) > int(time.time())
+        )
+        if not is_signed_session:
+            return False
+        with SESSION_LOCK:
+            expiry = SESSION_NONCES.get(nonce)
+            return expiry is not None and expiry > int(time.time())
+    except (ValueError, UnicodeDecodeError):
+        return False
+
+
+def revoke_session(token):
+    if not is_valid_session(token):
+        return False
+    try:
+        encoded_payload, _ = token.split(".", 1)
+        payload = base64.urlsafe_b64decode(encoded_payload + "=" * (-len(encoded_payload) % 4))
+        _, _, nonce = payload.decode("utf-8").split(":", 2)
+    except (ValueError, UnicodeDecodeError):
+        return False
+    with SESSION_LOCK:
+        return SESSION_NONCES.pop(nonce, None) is not None
+
+
+def initialize_hardware_streams():
+    global rx_stream, tx_stream
     if input_device_id is not None:
         try:
             rx_stream = sd.InputStream(
                 device=input_device_id,
                 channels=1,
                 samplerate=actual_sample_rate,
-                dtype='int16',
+                dtype="int16",
                 blocksize=1920,
                 callback=rx_audio_callback
             )
             rx_stream.start()
             print(f"[AUDIO RX] Entrada iniciada en #{input_device_id} @ {actual_sample_rate} Hz")
-        except Exception as e:
-            print(f"[AUDIO RX] Error iniciando InputStream: {e}")
+        except Exception as exc:
+            rx_stream = None
+            print(f"[AUDIO RX] Error iniciando InputStream: {exc}")
 
     if output_device_id is not None:
         try:
@@ -593,39 +715,74 @@ async def lifespan(app: FastAPI):
                 device=output_device_id,
                 channels=2,
                 samplerate=actual_sample_rate,
-                dtype='int16',
+                dtype="int16",
                 blocksize=480,
                 callback=tx_audio_callback
             )
             tx_stream.start()
             print(f"[AUDIO TX] Modulación estéreo en #{output_device_id} @ {actual_sample_rate} Hz")
-        except Exception as e:
-            print(f"[AUDIO TX] Error iniciando OutputStream: {e}")
+        except Exception as exc:
+            tx_stream = None
+            print(f"[AUDIO TX] Error iniciando OutputStream: {exc}")
 
-    yield
 
-    set_hardware_ptt(False)
-    if rx_stream:
-        try:
-            rx_stream.stop()
-            rx_stream.close()
-        except Exception:
-            pass
-    if tx_stream:
-        try:
-            tx_stream.stop()
-            tx_stream.close()
-        except Exception:
-            pass
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global main_event_loop, rx_stream, tx_stream, serial_reader_task_handle
+    global ft8_worker_thread, spots_worker_thread, radio_power_state
+    validate_auth_configuration()
+    worker_stop_event.clear()
+    radio_power_state = None
+    initialize_hardware()
+    main_event_loop = asyncio.get_running_loop()
+    try:
+        initialize_hardware_streams()
+        serial_reader_task_handle = asyncio.create_task(serial_reader_task())
+        ft8_worker_thread = threading.Thread(target=ft8_cycle_worker, args=(worker_stop_event,), daemon=True)
+        spots_worker_thread = threading.Thread(target=background_spots_worker, args=(worker_stop_event,), daemon=True)
+        ft8_worker_thread.start()
+        spots_worker_thread.start()
+        yield
+    finally:
+        worker_stop_event.set()
+        set_hardware_ptt(False)
+        if serial_reader_task_handle:
+            serial_reader_task_handle.cancel()
+            try:
+                await serial_reader_task_handle
+            except asyncio.CancelledError:
+                pass
+            serial_reader_task_handle = None
+        for worker, timeout in ((ft8_worker_thread, 5), (spots_worker_thread, 20)):
+            if worker and worker.is_alive():
+                worker.join(timeout=timeout)
+        ft8_worker_thread = None
+        spots_worker_thread = None
+        for stream in (rx_stream, tx_stream):
+            if stream:
+                try:
+                    stream.stop()
+                    stream.close()
+                except Exception as exc:
+                    print(f"[AUDIO] Error cerrando stream: {exc}")
+        rx_stream = None
+        tx_stream = None
+        for serial_device in (ser, cw_ser):
+            if serial_device and serial_device.is_open:
+                try:
+                    serial_device.close()
+                except serial.SerialException as exc:
+                    print(f"[SERIAL] Error cerrando puerto: {exc}")
+        main_event_loop = None
 
 app = FastAPI(title="Yaesu FT-891 WebCAT, Digital & CW Station Server", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
 cached_spots_data = {"spots": []}
 
-def background_spots_worker():
+def background_spots_worker(stop_event):
     global cached_spots_data
-    while True:
+    while not stop_event.is_set():
         combined = []
 
         # 1. POTA
@@ -781,9 +938,7 @@ def background_spots_worker():
         if combined:
             cached_spots_data = {"spots": combined}
 
-        time.sleep(45)
-
-threading.Thread(target=background_spots_worker, daemon=True).start()
+        stop_event.wait(45)
 
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
@@ -795,8 +950,119 @@ async def favicon():
     )
     return Response(content=svg_favicon, media_type="image/svg+xml")
 
+@app.post("/api/login")
+async def login(request: Request, response: Response, credentials: LoginCredentials = Body(...)):
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.monotonic()
+    with LOGIN_LOCK:
+        failures = LOGIN_FAILURES.get(client_ip)
+        if failures and failures["blocked_until"] > now:
+            retry_after = max(1, int(failures["blocked_until"] - now))
+            return Response(
+                status_code=429,
+                headers={"Retry-After": str(retry_after)},
+                content="Too many login attempts"
+            )
+        if failures and failures["window_started"] + LOGIN_WINDOW_SECONDS <= now:
+            LOGIN_FAILURES.pop(client_ip, None)
+
+    username_matches = hmac.compare_digest(
+        credentials.username.encode("utf-8"), STATION_USERNAME.encode("utf-8")
+    )
+    password_matches = hmac.compare_digest(
+        credentials.password.encode("utf-8"), STATION_PASSWORD.encode("utf-8")
+    )
+    if not (username_matches and password_matches):
+        with LOGIN_LOCK:
+            failures = LOGIN_FAILURES.get(client_ip)
+            if not failures or failures["window_started"] + LOGIN_WINDOW_SECONDS <= now:
+                failures = {"count": 0, "window_started": now, "blocked_until": 0}
+            failures["count"] += 1
+            if failures["count"] >= LOGIN_FAILURE_LIMIT:
+                failures["blocked_until"] = now + LOGIN_BLOCK_SECONDS
+            LOGIN_FAILURES[client_ip] = failures
+        return Response(status_code=401, content="Invalid username or password")
+    with LOGIN_LOCK:
+        LOGIN_FAILURES.pop(client_ip, None)
+
+    response.set_cookie(
+        key=SESSION_COOKIE_NAME,
+        value=create_session_token(credentials.username),
+        max_age=SESSION_MAX_AGE,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="strict",
+        path="/"
+    )
+    return {"authenticated": True}
+
+@app.get("/api/session")
+async def session_status(request: Request):
+    return {"authenticated": is_valid_session(request.cookies.get(SESSION_COOKIE_NAME))}
+
+@app.post("/api/logout")
+async def logout(request: Request, response: Response):
+    token = request.cookies.get(SESSION_COOKIE_NAME)
+    if token:
+        revoke_session(token)
+    response.delete_cookie(
+        key=SESSION_COOKIE_NAME,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="strict",
+        path="/"
+    )
+    return {"authenticated": False}
+
+def websocket_session_is_valid(websocket: WebSocket):
+    origin = websocket.headers.get("origin")
+    host = websocket.headers.get("host", "").lower()
+    if not origin or not host:
+        return False
+    parsed_origin = urlsplit(origin)
+    return (
+        parsed_origin.scheme in ("http", "https")
+        and parsed_origin.netloc.lower() == host
+        and is_valid_session(websocket.cookies.get(SESSION_COOKIE_NAME))
+    )
+
+async def authenticate_websocket(websocket: WebSocket):
+    if not websocket_session_is_valid(websocket):
+        await websocket.close(code=1008, reason="Authentication required")
+        return False
+    return True
+
+
+def is_cat_command_allowed(command):
+    if radio_power_state is True:
+        return True
+    return command in {"PS;", "PS1;", "PS0;"}
+
+
+async def monitor_websocket_session(websocket: WebSocket, token: str):
+    while websocket.client_state == WebSocketState.CONNECTED:
+        await asyncio.sleep(1)
+        if not is_valid_session(token):
+            try:
+                await websocket.close(code=1008, reason="Session expired or revoked")
+            except RuntimeError:
+                pass
+            return
+
+
+def track_websocket_session(websocket: WebSocket):
+    token = websocket.cookies.get(SESSION_COOKIE_NAME)
+    if not token:
+        return
+    task = asyncio.create_task(monitor_websocket_session(websocket, token))
+    websocket_auth_tasks.add(task)
+    task.add_done_callback(websocket_auth_tasks.discard)
+
+
 @app.get("/api/spots")
-async def get_spots_proxy():
+async def get_spots_proxy(request: Request):
+    if not is_valid_session(request.cookies.get(SESSION_COOKIE_NAME)):
+        return Response(status_code=401, content="Authentication required")
     return cached_spots_data
 
 @app.get("/")
@@ -809,8 +1075,11 @@ async def get_index():
 
 @app.websocket("/ws/cat")
 async def websocket_cat_endpoint(websocket: WebSocket):
-    global ft8_tx_active, voice_tx_active, cw_tx_active
+    global ft8_tx_active, voice_tx_active, cw_tx_active, radio_power_state
+    if not await authenticate_websocket(websocket):
+        return
     await websocket.accept()
+    track_websocket_session(websocket)
     cat_clients.add(websocket)
     try:
         while True:
@@ -818,6 +1087,15 @@ async def websocket_cat_endpoint(websocket: WebSocket):
             cmd = cmd.strip()
             if not cmd.endswith(";"):
                 cmd += ";"
+
+            if not is_cat_command_allowed(cmd):
+                await websocket.send_text("ERR RADIO_STANDBY;")
+                continue
+            if cmd == "PS0;":
+                radio_power_state = False
+                force_release_transmit_controls()
+            elif cmd == "PS1;":
+                radio_power_state = None
 
             if ft8_tx_active and cmd.startswith("TX0"):
                 continue
@@ -867,13 +1145,16 @@ async def websocket_cat_endpoint(websocket: WebSocket):
                 cw_ser.rts = False
             except Exception:
                 pass
-            with tx_lock:
-                tx_pcm_buffer.clear()
-                tx_prebuffering = True
+        with tx_lock:
+            tx_pcm_buffer.clear()
+            tx_prebuffering = True
 
 @app.websocket("/ws/audio/rx")
 async def websocket_audio_rx_endpoint(websocket: WebSocket):
+    if not await authenticate_websocket(websocket):
+        return
     await websocket.accept()
+    track_websocket_session(websocket)
     q = asyncio.Queue(maxsize=30)
     client_id = id(websocket)
     rx_client_queues[client_id] = q
@@ -891,7 +1172,10 @@ async def websocket_audio_rx_endpoint(websocket: WebSocket):
 @app.websocket("/ws/audio/tx")
 async def websocket_audio_tx_endpoint(websocket: WebSocket):
     global ft8_tx_active, cw_tx_active
+    if not await authenticate_websocket(websocket):
+        return
     await websocket.accept()
+    track_websocket_session(websocket)
     try:
         while True:
             data = await websocket.receive_bytes()
@@ -912,10 +1196,12 @@ async def websocket_audio_tx_endpoint(websocket: WebSocket):
 @app.websocket("/ws/cw")
 async def websocket_cw_endpoint(websocket: WebSocket):
     global cw_tx_active
+    if not await authenticate_websocket(websocket):
+        return
     await websocket.accept()
+    track_websocket_session(websocket)
     cw_clients.add(websocket)
     try:
-        send_cat_internal("BI1;")
         await websocket.send_text(json.dumps({
             "event": "state",
             "state": cw_engine_state
@@ -925,6 +1211,15 @@ async def websocket_cw_endpoint(websocket: WebSocket):
             try:
                 cmd = json.loads(raw)
                 action = cmd.get("action")
+                if radio_power_state is not True:
+                    if action == "key_up":
+                        force_release_transmit_controls()
+                        continue
+                    await websocket.send_text(json.dumps({
+                        "event": "error",
+                        "message": "Encienda la radio antes de usar los controles CW."
+                    }))
+                    continue
                 mode = cmd.get("mode", cw_engine_state.get("mode", "CW-U"))
                 cw_engine_state["mode"] = mode
 
@@ -955,7 +1250,10 @@ async def websocket_cw_endpoint(websocket: WebSocket):
 @app.websocket("/ws/ft8")
 async def websocket_ft8_endpoint(websocket: WebSocket):
     global ft8_tx_active
+    if not await authenticate_websocket(websocket):
+        return
     await websocket.accept()
+    track_websocket_session(websocket)
     ft8_clients.add(websocket)
     try:
         await websocket.send_text(json.dumps({
@@ -968,6 +1266,12 @@ async def websocket_ft8_endpoint(websocket: WebSocket):
                 cmd = json.loads(raw)
                 action = cmd.get("action")
                 if action == "arm_tx":
+                    if radio_power_state is not True:
+                        await websocket.send_text(json.dumps({
+                            "event": "error",
+                            "message": "Encienda la radio antes de habilitar transmisión FT8."
+                        }))
+                        continue
                     ft8_engine_state["tx_armed"] = True
                     ft8_engine_state["tx_msg"] = cmd.get("msg", "")
                     ft8_engine_state["tx_freq"] = int(cmd.get("freq", 1250))
@@ -989,13 +1293,26 @@ async def websocket_ft8_endpoint(websocket: WebSocket):
                     broadcast_ft8_event({"event": "tx_status", "state": ft8_engine_state})
                 elif action == "set_mode":
                     m = cmd.get("mode", "FT8").upper()
-                    ft8_engine_state["mode"] = m
-                    ft8_engine_state["slot_duration"] = 7.5 if m == "FT4" else 15.0
+                    if m != "FT8":
+                        await websocket.send_text(json.dumps({
+                            "event": "error",
+                            "message": "FT4 no está soportado; el motor disponible solo transmite y decodifica FT8."
+                        }))
+                        continue
+                    ft8_engine_state["mode"] = "FT8"
+                    ft8_engine_state["slot_duration"] = 15.0
                     broadcast_ft8_event({"event": "tx_status", "state": ft8_engine_state})
             except Exception as e:
                 print(f"[WS FT8] Error en comando: {e}")
     except WebSocketDisconnect:
         ft8_clients.discard(websocket)
+        if not ft8_clients:
+            ft8_engine_state["tx_armed"] = False
+            ft8_tx_active = False
+            set_hardware_ptt(False)
+            with tx_lock:
+                tx_pcm_buffer.clear()
+                tx_prebuffering = True
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=HTTP_PORT, log_level="info")

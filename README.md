@@ -1,6 +1,6 @@
-# Yaesu FT-891 WebCAT Station, CW Workstation & Remote Digital Pro 📻⚡📟
+# Yaesu FT-891 WebCAT Station, CW Workstation & FT8 📻⚡📟
 
-Plataforma web integral de alto rendimiento para el control CAT bidireccional, streaming de audio dúplex de baja latencia (48 kHz), **estación de telegrafía CW nativa (decodificador DSP Biquad y keyer por hardware/AFSK)** y **estación autónoma de modos digitales FT8 y FT4** para el transceptor **Yaesu FT-891**, optimizada para operar desde cualquier navegador moderno en PC, tablets o smartphones mediante una interfaz **Digirig DR-891** sobre Linux y Docker.
+Plataforma web integral para el control CAT bidireccional, streaming de audio dúplex (48 kHz), **telegrafía CW nativa** y **modo digital FT8** para el transceptor **Yaesu FT-891**, optimizada para navegadores modernos mediante una interfaz Digirig DR-891 sobre Linux y Docker. **FT4 no está implementado y no se puede transmitir ni decodificar con el motor actual.**
 
 ---
 
@@ -12,7 +12,7 @@ Plataforma web integral de alto rendimiento para el control CAT bidireccional, s
    - [Doble Modo: CW-U Nativo (DAKY) vs. DATA-U (AFSK)](#doble-modo-cw-u-nativo-daky-vs-data-u-afsk)
    - [Decodificador DSP Biquad en Tiempo Real](#decodificador-dsp-biquad-en-tiempo-real)
    - [Keyer de Teclado, Macros y Paddle Virtual](#keyer-de-teclado-macros-y-paddle-virtual)
-4. [Módulo Digital FT8 & FT4](#-módulo-digital-ft8--ft4)
+4. [Módulo Digital FT8](#-módulo-digital-ft8)
    - [Decodificación Temprana (Early Decoding)](#decodificación-temprana-early-decoding)
    - [Máquina de Estados de QSO (FSM) y Auto-CQ](#máquina-de-estados-de-qso-fsm-y-auto-cq)
    - [Calibración de SNR según Estándar WSJT-X](#calibración-de-snr-según-estándar-wsjt-x)
@@ -26,9 +26,9 @@ Plataforma web integral de alto rendimiento para el control CAT bidireccional, s
 
 ## 🌟 Novedades y Últimas Actualizaciones
 
-- **Decodificación FT8 Temprana (*Early Decoding*):** La captura y decodificación de audio de FT8 ahora se dispara a los **12.8 segundos** (y a los **5.0 s** en FT4) en lugar de esperar al final del slot (14.1 s / 15.0 s). Dado que la emisión en el aire finaliza a los 12.64 s, los decodes se entregan al navegador a los ~13.3 s, otorgando **más de 1.5 segundos de holgura** para preparar y armar el siguiente ciclo de transmisión.
+- **Decodificación FT8 Temprana (*Early Decoding*):** La captura y decodificación de audio FT8 se dispara a los **12.8 segundos** de su ranura de 15 segundos.
 - **Resolución de Bloqueos en Secuencia FT8 (`Tx3`):** Se rediseñó la precedencia de la máquina de estados. Al recibir el reporte de retorno de un corresponsal activo (`-10` o `R-10`), el sistema transiciona directamente a `Tx5` (`RR73`), sincroniza la ranura opuesta (`even`/`odd`) y mantiene la estación transmitiendo sin detenerse.
-- **QSY Digital Inteligente para Spots:** Al pulsar sobre un spot de FT8 o FT4, el sistema:
+- **QSY Digital Inteligente para Spots FT8:** Al pulsar sobre un spot de FT8, el sistema:
   1. Sintoniza el VFO en el dial estándar de la banda correspondiente (`14.074.000 Hz`, `7.074.000 Hz`, etc.).
   2. Ajusta el offset de audio (`txFreq`) a la posición exacta anunciada por el spot.
   3. Fija el modo en `DATA-U` y actualiza el selector de banda digital.
@@ -114,7 +114,9 @@ El flujo de audio PCM recibido a 48 kHz pasa por un procesador digital en JavaSc
 
 ---
 
-## 📟 Módulo Digital FT8 & FT4
+## 📟 Módulo Digital FT8
+
+El motor digital implementado utiliza `ft8_lib` para FT8. FT4 puede aparecer en los spots externos, pero el cliente lo marca como no disponible y no permite sintonizarlo desde ese spot. No se debe transmitir ni asumir decodificación FT4.
 
 ### Decodificación Temprana (Early Decoding)
 
@@ -149,7 +151,7 @@ El servidor sondea en segundo plano las APIs de **POTA**, **SOTA**, **LLOTA** y 
 
 ### Lógica de Sintonización Automática por Modo
 
-- **Si el spot es FT8 o FT4:**
+- **Si el spot es FT8:**
   - Sintoniza la frecuencia base de la banda en el VFO (`14.074.000 Hz`, `7.074.000 Hz`, etc.).
   - Configura el modo en `DATA-U` (`MD0C;`).
   - Asigna el delta de frecuencia como audio offset (`Ft8State.txFreq`).
@@ -165,6 +167,10 @@ El servidor sondea en segundo plano las APIs de **POTA**, **SOTA**, **LLOTA** y 
 ---
 
 ## 📻 Consola Radio & Mandos CAT
+
+La cabecera fija comparte los controles de banda y modo entre las vistas Radio, CW y Digital. Al cambiar banda, Radio aplica su frecuencia/modo predeterminados; Digital sintoniza el dial estándar FT8 en DATA-U; CW conserva CW-U, CW-L o DATA-U. Al entrar en Digital se selecciona DATA-U y al entrar en CW se conserva un modo compatible o se selecciona CW-U; al volver a Radio desde un modo digital/CW se aplica el modo predeterminado de la banda. La cabecera también contiene potencia RF y ganancia de micrófono del audio del navegador (no es un ajuste CAT de ganancia MIC del transceptor).
+
+Con CAT desconectado o la radio en standby, los controles de operación quedan deshabilitados. En ese estado solo se permite consultar el estado (`PS;`) o encender/apagar (`PS1;` / `PS0;`); la interfaz habilita los demás controles al recibir el estado de encendido desde la radio.
 
 - **Dial Rotatorio Virtual:** Knob interactivo con soporte de rueda de ratón, gestos táctiles e inercia.
 - **Selector de Paso de Sintonía:** Pasos rápidos de 100 Hz, 1 kHz, 5 kHz y 10 kHz, más entrada directa de frecuencia numérica en kHz.
@@ -208,39 +214,28 @@ Para que el transceptor responda a la manipulación por hardware y conmutación 
 
 ### 2. Archivo `docker-compose.yml`
 
-```yaml
-services:
-  yaesu-webcat:
-    build: .
-    container_name: yaesu-ft891-station
-    restart: unless-stopped
-    network_mode: host
-    privileged: true
-    devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
-      - "/dev/ttyUSB1:/dev/ttyUSB1"
-      - "/dev/snd:/dev/snd"
-    environment:
-      - SERIAL_PORT=/dev/ttyUSB0
-      - CW_KEY_PORT=/dev/ttyUSB1
-      - BAUD_RATE=38400
-      - HTTP_PORT=8000
-      - AUDIO_SAMPLE_RATE=48000
-      - AUDIO_CARD_KEYWORD=USB
-      - DEMO_FALLBACK=true
-    volumes:
-      - ./static:/app/static
+El archivo `docker-compose.yml` versionado es la configuración activa y requiere credenciales. No publiques el servicio directamente en Internet. Para acceso remoto, utiliza una VPN o un proxy HTTPS de confianza.
+
+El `Dockerfile` instala las versiones fijadas en `requirements.txt` y compila `ft8_lib` desde el commit fijado en `FT8_LIB_REF`.
+
+Prepara un archivo local de entorno (no se versiona) y sustituye todos los valores de ejemplo:
+
+```bash
+cp .env.example .env
+chmod 600 .env
+openssl rand -hex 32
 ```
+
+Usa el resultado de `openssl rand -hex 32` como `STATION_SESSION_SECRET` en `.env` y configura una contraseña larga y única. `COOKIE_SECURE=false` solo es adecuado para acceso HTTP dentro de una red local/VPN confiable. Si sirves la aplicación por HTTPS/WSS, cambia a `COOKIE_SECURE=true`. Las credenciales se pasan al contenedor mediante variables de entorno; limita también quién tiene acceso al daemon Docker.
 
 ### 3. Comandos de Puesta en Marcha
 
 ```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/ft891-webcat-station.git
-cd ft891-webcat-station
+# Desde el directorio del proyecto, después de crear .env
+docker compose config --quiet
 
 # Construir y levantar el contenedor en segundo plano
-docker compose down && docker compose up -d --build
+docker compose up -d --build
 
 # Monitorear registros de ejecución (CAT, Audio y FT8)
 docker compose logs -f
@@ -248,11 +243,24 @@ docker compose logs -f
 
 Una vez levantado, ingresa desde cualquier navegador web en la red local:
 ```
-http://<IP-DE-TU-SERVIDOR>:8000
+http://<IP-DE-TU-SERVIDOR>:8085
+```
+
+La aplicación solicitará usuario y contraseña antes de conectar CAT, audio, CW o FT8. La sesión expira a las 12 horas; los inicios fallidos se limitan temporalmente. Para apagarla, usa `docker compose down`.
+
+### Validaciones
+
+Ejecuta las pruebas dentro de una imagen Docker ya construida (no en el host):
+
+```bash
+docker run --rm --env-file .env \
+  -v "$PWD/tests:/tests:ro" \
+  --entrypoint python 891webcat:local \
+  -m unittest discover -s /tests
 ```
 
 ---
 
 ## 📄 Licencia
 
-Este proyecto está distribuido bajo la **Licencia MIT**. Consulta el archivo `LICENCIA_MIT.md` para más información sobre términos de uso, modificación, compatibilidad con `ft8_lib` y exención de responsabilidad ante equipos de radiofrecuencia.
+Este proyecto está distribuido bajo la **Licencia MIT**. Consulta el archivo `LICENSE`.

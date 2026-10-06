@@ -14,8 +14,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Compilar e instalar herramientas nativas de modulación y demodulación FT8 (ft8_lib de Karlis Goba)
-RUN git clone --depth 1 https://github.com/kgoba/ft8_lib.git /tmp/ft8_lib \
+# Compilar ft8_lib desde una revisión fijada para obtener builds reproducibles.
+ARG FT8_LIB_REF=9fec6ca39886edbf96f4f5e71edc76da5074e871
+RUN git init /tmp/ft8_lib \
+    && git -C /tmp/ft8_lib remote add origin https://github.com/kgoba/ft8_lib.git \
+    && git -C /tmp/ft8_lib fetch --depth 1 origin "$FT8_LIB_REF" \
+    && git -C /tmp/ft8_lib checkout --detach FETCH_HEAD \
     && cd /tmp/ft8_lib \
     && make -j$(nproc) \
     && cp gen_ft8 decode_ft8 /usr/local/bin/ \
@@ -27,19 +31,14 @@ WORKDIR /app
 # Crear directorio estático
 RUN mkdir -p /app/static
 
-# Instalar dependencias de Python
-RUN pip install --no-cache-dir \
-    "fastapi>=0.110.0,<1.0.0" \
-    "uvicorn[standard]>=0.28.0,<1.0.0" \
-    "websockets>=12.0,<13.0" \
-    "pyserial>=3.5,<4.0" \
-    "sounddevice>=0.4.6,<1.0.0" \
-    "numpy>=1.26.0,<2.0.0" \
-    "scipy>=1.12.0,<2.0.0"
+# Instalar dependencias Python directas y transitivas con versiones fijadas.
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
 # Copiar el backend y la interfaz web
 COPY server.py /app/server.py
 COPY index.html /app/static/index.html
+RUN python -m compileall -q /app/server.py
 
 EXPOSE 8085
 

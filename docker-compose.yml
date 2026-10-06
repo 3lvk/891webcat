@@ -1,8 +1,7 @@
-version: '3.8'
-
 services:
   ft891-webcat:
     build: .
+    image: 891webcat:local
     container_name: 891webcat
     restart: unless-stopped
     network_mode: host # Baja latencia para WebSockets y acceso directo a la red local
@@ -22,6 +21,10 @@ services:
       - BAUD_RATE=38400
       - HTTP_PORT=8085
       - AUDIO_SAMPLE_RATE=48000
+      - STATION_USERNAME=${STATION_USERNAME:?Set STATION_USERNAME in .env}
+      - STATION_PASSWORD=${STATION_PASSWORD:?Set STATION_PASSWORD in .env}
+      - STATION_SESSION_SECRET=${STATION_SESSION_SECRET:?Set STATION_SESSION_SECRET in .env}
+      - COOKIE_SECURE=${COOKIE_SECURE:-false}
       # Subcadena identificadora de la tarjeta de sonido del Digirig (ej. "USB", "Digirig")
       - AUDIO_CARD_KEYWORD=USB
       # Permite operar en modo simulación si la radio está apagada o desconectada
@@ -30,4 +33,3 @@ services:
     volumes:
       # Monta la interfaz web para aplicar cambios sin tener que reconstruir la imagen
       - ./index.html:/app/static/index.html:ro
-
