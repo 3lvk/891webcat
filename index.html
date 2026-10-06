@@ -147,7 +147,8 @@
     </form>
   </section>
 
-  <header class="theme-panel border-b px-3 py-2 flex flex-wrap items-center justify-between sticky top-0 z-30 shadow-md">
+  <div class="sticky top-0 z-30 shadow-md">
+  <header class="theme-panel border-b px-3 py-2 flex flex-wrap items-center justify-between">
     <div class="flex items-center gap-2">
       <div class="w-7 h-7 rounded bg-amber-500 flex items-center justify-center font-lcd font-bold text-black text-sm shadow shrink-0">
         891
@@ -228,9 +229,69 @@
         <span id="val-pwr" class="w-10 text-right font-bold text-amber-400">100W</span>
       </label>
     </div>
+
+    <div id="global-filter-controls" class="basis-full border-t border-slate-700/60 pt-2 font-mono text-[10px]">
+      <span class="font-bold text-slate-400 uppercase text-[9px] block mb-1">Filtros DSP FI Transceptor:</span>
+      <div class="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5">
+              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold">DNR</span>
+                  <button id="btn-toggle-dnr" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]">OFF</button>
+                </div>
+                <div class="flex items-center gap-1 mt-1">
+                  <span class="text-slate-400 text-[9px]">N:</span>
+                  <input type="range" id="slider-dnr-level" min="1" max="15" value="1" class="w-full accent-amber-500 h-1">
+                  <span id="val-dnr-level" class="text-amber-400 font-bold">1</span>
+                </div>
+              </div>
+
+              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
+                <span class="font-bold">DNF (Auto)</span>
+                <button id="btn-toggle-dnf" class="px-1.5 py-0.5 rounded theme-btn border text-[9px]">OFF</button>
+              </div>
+
+              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold">NOTCH</span>
+                  <button id="btn-toggle-notch" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]">OFF</button>
+                </div>
+                <div class="flex items-center justify-between text-slate-400 text-[9px] mt-1">
+                  <span id="val-notch-freq">1500Hz</span>
+                  <input type="range" id="slider-notch-freq" min="100" max="3200" step="50" value="1500" class="w-12 accent-amber-500 h-1">
+                </div>
+              </div>
+
+              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
+                <span class="font-bold">PRE/IPO</span>
+                <div class="flex gap-0.5">
+                  <button id="btn-ipo-norm" class="px-1 py-0.5 rounded theme-btn border btn-active-theme text-[9px]">A1</button>
+                  <button id="btn-ipo-on" class="px-1 py-0.5 rounded theme-btn border text-[9px]">IPO</button>
+                </div>
+              </div>
+
+              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
+                <span class="font-bold">ATT 12dB</span>
+                <button id="btn-toggle-att" class="px-1.5 py-0.5 rounded theme-btn border text-[9px]">OFF</button>
+              </div>
+
+              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold">FI WIDTH</span>
+                  <button id="btn-toggle-narrow" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]" title="Filtro estrecho (NAR)">NAR OFF</button>
+                  <span id="label-width-val" class="text-cyan-400 font-bold">2.4k</span>
+                </div>
+                <div class="flex items-center gap-0.5 mt-0.5">
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="500">.5k</button>
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="1800">1.8k</button>
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border btn-active-theme text-[8px]" data-width="2400">2.4k</button>
+                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="3000">3.0k</button>
+                </div>
+              </div>
+            </div>
+    </div>
   </header>
 
-  <nav class="lg:hidden theme-panel border-b px-2 py-1.5 sticky top-[102px] z-20 flex gap-1 font-mono text-xs">
+  <nav class="lg:hidden theme-panel border-b px-2 py-1.5 flex gap-1 font-mono text-xs">
     <button id="tab-btn-radio" onclick="switchMobileTab('radio')" class="flex-1 py-1.5 rounded font-bold text-center border border-amber-500 bg-amber-950/40 text-amber-300">
       📻 Radio
     </button>
@@ -244,6 +305,7 @@
       🎯 Spots (<span id="spots-count-badge">0</span>)
     </button>
   </nav>
+  </div>
 
   <main id="module-main-radio" class="flex-1 p-2 sm:p-3 grid grid-cols-1 lg:grid-cols-12 gap-3 max-w-[1650px] w-full mx-auto">
     <div class="lg:col-span-7 flex flex-col gap-2.5">
@@ -362,66 +424,6 @@
                 <span id="val-sql" class="text-amber-400 font-bold">0</span>
               </div>
               <input type="range" id="slider-sql" min="0" max="255" value="0" class="w-full accent-amber-500 h-1">
-            </div>
-          </div>
-
-          <div class="pt-1.5 border-t border-slate-700/60 font-mono text-[10px]">
-            <span class="font-bold text-slate-400 uppercase text-[9px] block mb-1">Filtros DSP FI Transceptor:</span>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
-              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold">DNR</span>
-                  <button id="btn-toggle-dnr" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]">OFF</button>
-                </div>
-                <div class="flex items-center gap-1 mt-1">
-                  <span class="text-slate-400 text-[9px]">N:</span>
-                  <input type="range" id="slider-dnr-level" min="1" max="15" value="1" class="w-full accent-amber-500 h-1">
-                  <span id="val-dnr-level" class="text-amber-400 font-bold">1</span>
-                </div>
-              </div>
-
-              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
-                <span class="font-bold">DNF (Auto)</span>
-                <button id="btn-toggle-dnf" class="px-1.5 py-0.5 rounded theme-btn border text-[9px]">OFF</button>
-              </div>
-
-              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold">NOTCH</span>
-                  <button id="btn-toggle-notch" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]">OFF</button>
-                </div>
-                <div class="flex items-center justify-between text-slate-400 text-[9px] mt-1">
-                  <span id="val-notch-freq">1500Hz</span>
-                  <input type="range" id="slider-notch-freq" min="100" max="3200" step="50" value="1500" class="w-12 accent-amber-500 h-1">
-                </div>
-              </div>
-
-              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
-                <span class="font-bold">PRE/IPO</span>
-                <div class="flex gap-0.5">
-                  <button id="btn-ipo-norm" class="px-1 py-0.5 rounded theme-btn border btn-active-theme text-[9px]">A1</button>
-                  <button id="btn-ipo-on" class="px-1 py-0.5 rounded theme-btn border text-[9px]">IPO</button>
-                </div>
-              </div>
-
-              <div class="theme-card p-1.5 rounded border flex items-center justify-between">
-                <span class="font-bold">ATT 12dB</span>
-                <button id="btn-toggle-att" class="px-1.5 py-0.5 rounded theme-btn border text-[9px]">OFF</button>
-              </div>
-
-              <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold">FI WIDTH</span>
-                  <button id="btn-toggle-narrow" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]" title="Filtro estrecho (NAR)">NAR OFF</button>
-                  <span id="label-width-val" class="text-cyan-400 font-bold">2.4k</span>
-                </div>
-                <div class="flex items-center gap-0.5 mt-0.5">
-                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="500">.5k</button>
-                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="1800">1.8k</button>
-                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border btn-active-theme text-[8px]" data-width="2400">2.4k</button>
-                  <button class="btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]" data-width="3000">3.0k</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -1122,6 +1124,7 @@
       const enabled = isRadioControlAvailable();
       const selectors = [
         '#global-radio-controls select, #global-radio-controls input',
+        '#global-filter-controls button, #global-filter-controls input',
         '#panel-rig button, #panel-rig input, #panel-rig select',
         '#module-main-cw button, #module-main-cw input, #module-main-cw select, #module-main-cw textarea',
         '#module-main-ft8 button, #module-main-ft8 input, #module-main-ft8 select, #module-main-ft8 textarea',
