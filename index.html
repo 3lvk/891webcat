@@ -201,7 +201,7 @@
     <div id="global-radio-controls" class="basis-full flex flex-wrap items-center gap-2 border-t border-slate-700/60 pt-2 font-mono text-[10px]">
       <label class="flex items-center gap-1 text-slate-400">
         <span class="font-bold">BANDA</span>
-        <select id="global-band-select" disabled class="theme-btn rounded border px-2 py-1 font-bold text-amber-400">
+        <select id="global-band-select" class="theme-btn rounded border px-2 py-1 font-bold text-amber-400">
           <option value="160m">160m</option><option value="80m">80m</option><option value="60m">60m</option>
           <option value="40m">40m</option><option value="30m">30m</option><option value="20m">20m</option>
           <option value="17m">17m</option><option value="15m">15m</option><option value="12m">12m</option>
@@ -210,7 +210,7 @@
       </label>
       <label class="flex items-center gap-1 text-slate-400">
         <span class="font-bold">MODO</span>
-        <select id="global-mode-select" disabled class="theme-btn rounded border px-2 py-1 font-bold text-cyan-300">
+        <select id="global-mode-select" class="theme-btn rounded border px-2 py-1 font-bold text-cyan-300">
           <option value="LSB">LSB</option><option value="USB">USB</option>
           <option value="CW-U">CW-U</option><option value="CW-L">CW-L</option>
           <option value="DATA-U">DATA-U</option><option value="DATA-L">DATA-L</option>
@@ -219,12 +219,12 @@
       </label>
       <label class="flex min-w-[135px] flex-1 items-center gap-2 text-slate-400 sm:max-w-[220px]">
         <span class="shrink-0 font-bold">MIC (WEB)</span>
-        <input type="range" id="slider-mic-gain" min="10" max="200" value="100" disabled class="w-full accent-amber-500">
+        <input type="range" id="slider-mic-gain" min="10" max="200" value="100" class="w-full accent-amber-500">
         <span id="val-mic-gain" class="w-10 text-right font-bold text-amber-400">100%</span>
       </label>
       <label class="flex min-w-[135px] flex-1 items-center gap-2 text-slate-400 sm:max-w-[220px]">
         <span class="shrink-0 font-bold">POTENCIA</span>
-        <input type="range" id="slider-pwr" min="5" max="100" value="100" step="5" disabled class="w-full accent-amber-500">
+        <input type="range" id="slider-pwr" min="5" max="100" value="100" step="5" class="w-full accent-amber-500">
         <span id="val-pwr" class="w-10 text-right font-bold text-amber-400">100W</span>
       </label>
     </div>
@@ -412,6 +412,7 @@
               <div class="theme-card p-1.5 rounded border flex flex-col justify-between">
                 <div class="flex items-center justify-between">
                   <span class="font-bold">FI WIDTH</span>
+                  <button id="btn-toggle-narrow" class="px-1.5 py-0.2 rounded theme-btn border text-[9px]" title="Filtro estrecho (NAR)">NAR OFF</button>
                   <span id="label-width-val" class="text-cyan-400 font-bold">2.4k</span>
                 </div>
                 <div class="flex items-center gap-0.5 mt-0.5">
@@ -916,6 +917,7 @@
       ipo: false,
       att: false,
       ifWidth: 2400,
+      narrow: false,
       ifShift: 0,
       wsCat: null
     };
@@ -1081,6 +1083,41 @@
       return RigState.connected && RigState.powerKnown && RigState.isPowerOn;
     }
 
+    const IF_WIDTH_TABLES = {
+      cw: { narrowMax: 500, widths: [0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 800, 1200, 1400, 1700, 2000, 2400, 3000] },
+      ssb: { narrowMax: 1800, widths: [0, 200, 400, 600, 850, 1100, 1350, 1500, 1650, 1800, 1950, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3200] }
+    };
+
+    function getIfWidthTable() {
+      if (['CW-U', 'CW-L', 'DATA-U', 'DATA-L'].includes(RigState.mode)) return IF_WIDTH_TABLES.cw;
+      if (['LSB', 'USB'].includes(RigState.mode)) return IF_WIDTH_TABLES.ssb;
+      return null;
+    }
+
+    function refreshIfWidthSoon() {
+      setTimeout(() => {
+        sendCATCommand('NA0;');
+        sendCATCommand('SH0;');
+      }, 400);
+    }
+
+    function renderIfWidth() {
+      const btn = document.getElementById('btn-toggle-narrow');
+      if (btn) {
+        btn.textContent = RigState.narrow ? 'NAR ON' : 'NAR OFF';
+        btn.className = `px-1.5 py-0.2 rounded theme-btn border text-[9px]${RigState.narrow ? ' btn-active-theme' : ''}`;
+      }
+      const label = document.getElementById('label-width-val');
+      const disp = document.getElementById('disp-filter');
+      const text = RigState.ifWidth ? `${(RigState.ifWidth / 1000).toFixed(2).replace(/0$/, '')}k` : '--';
+      if (label) label.textContent = text;
+      if (disp) disp.textContent = `WIDTH: ${text}${RigState.narrow ? ' NAR' : ''}`;
+      document.querySelectorAll('.btn-width-preset').forEach(b => {
+        const active = RigState.ifWidth && Math.abs(parseInt(b.dataset.width, 10) - RigState.ifWidth) <= 300;
+        b.className = `btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]${active ? ' btn-active-theme' : ''}`;
+      });
+    }
+
     function updateRadioControlsAvailability() {
       const enabled = isRadioControlAvailable();
       const selectors = [
@@ -1168,6 +1205,7 @@
       } else {
         sendCATCommand(`${preset.code};`);
         renderRigDisplay();
+        refreshIfWidthSoon();
       }
     }
 
@@ -1197,6 +1235,7 @@
       } else {
         sendCATCommand(`${preset.code};`);
         renderRigDisplay();
+        refreshIfWidthSoon();
       }
     }
 
@@ -1291,6 +1330,8 @@
         sendCATCommand('FA;');
         sendCATCommand('FB;');
         sendCATCommand('MD0;');
+        sendCATCommand('NA0;');
+        sendCATCommand('SH0;');
         sendCATCommand('SM0;');
         if (CwState.ws && CwState.ws.readyState === WebSocket.OPEN) {
           sendCwSocket({ action: 'enable_breakin' });
@@ -1486,6 +1527,18 @@
             RigState.mode = modes[modeCode];
             RigState.catModeCode = `MD0${modeCode}`;
             renderRigDisplay();
+            sendCATCommand('NA0;');
+            sendCATCommand('SH0;');
+          }
+        } else if (cmd.startsWith('NA0')) {
+          RigState.narrow = cmd.substring(3, 4) === '1';
+          renderIfWidth();
+        } else if (cmd.startsWith('SH0')) {
+          const table = getIfWidthTable();
+          const idx = parseInt(cmd.substring(3), 10);
+          if (table && idx >= 0 && idx < table.widths.length) {
+            RigState.ifWidth = idx === 0 ? (RigState.narrow ? (table === IF_WIDTH_TABLES.cw ? 500 : 1500) : 2400) : table.widths[idx];
+            renderIfWidth();
           }
         } else if (cmd.startsWith('RM6')) {
           const rawSwr = parseInt(cmd.substring(3), 10);
@@ -1944,6 +1997,7 @@
         sendCATCommand('MD0C;');
       }
       renderRigDisplay();
+      refreshIfWidthSoon();
     }
 
     function updateCwSpeed(val, syncSocket = true) {
@@ -3239,15 +3293,35 @@
         }
       });
 
+      document.getElementById('btn-toggle-narrow')?.addEventListener('click', () => {
+        if (!isRadioControlAvailable()) return;
+        if (!getIfWidthTable()) {
+          showQsyAlert('NAR/ancho FI no aplica en el modo actual.');
+          return;
+        }
+        sendCATCommand(`NA0${RigState.narrow ? '0' : '1'};`);
+        sendCATCommand('NA0;');
+        sendCATCommand('SH0;');
+      });
+
       document.querySelectorAll('.btn-width-preset').forEach(btn => {
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.btn-width-preset').forEach(b => b.className = 'btn-width-preset flex-1 py-0.2 rounded theme-btn border text-[8px]');
-          btn.className = 'btn-width-preset flex-1 py-0.2 rounded theme-btn border btn-active-theme text-[8px]';
-          RigState.ifWidth = parseInt(btn.dataset.width, 10);
-          sendCATCommand(`SH0${String(Math.round(RigState.ifWidth / 10)).padStart(3, '0')};`);
-          const valKHz = (RigState.ifWidth / 1000).toFixed(1);
-          document.getElementById('label-width-val').textContent = `${valKHz}k`;
-          document.getElementById('disp-filter').textContent = `WIDTH: ${valKHz}k`;
+          if (!isRadioControlAvailable()) return;
+          const table = getIfWidthTable();
+          if (!table) {
+            showQsyAlert('El ancho FI no se puede ajustar en el modo actual.');
+            return;
+          }
+          const target = parseInt(btn.dataset.width, 10);
+          let index = 1;
+          for (let i = 1; i < table.widths.length; i++) {
+            if (Math.abs(table.widths[i] - target) < Math.abs(table.widths[index] - target)) index = i;
+          }
+          // La radio exige fijar NAR antes que el ancho
+          sendCATCommand(`NA0${table.widths[index] <= table.narrowMax ? '1' : '0'};`);
+          sendCATCommand(`SH00${String(index).padStart(2, '0')};`);
+          sendCATCommand('NA0;');
+          sendCATCommand('SH0;');
         });
       });
 
