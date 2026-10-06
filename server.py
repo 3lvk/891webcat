@@ -104,6 +104,7 @@ ft8_engine_state = {
     "tx_msg": "",
     "tx_freq": 1250,
     "tx_slot": "even",
+    "tx_level": 50,
     "last_decoded": []
 }
 
@@ -488,7 +489,7 @@ def ft8_cycle_worker(stop_event):
                             raw_12k = wf.readframes(n_frames)
                             samples_12k = np.frombuffer(raw_12k, dtype=np.int16)
                             samples_48k = np.repeat(samples_12k, 4)
-                            scaled_48k = (samples_48k * 0.85).astype(np.int16)
+                            scaled_48k = (samples_48k * (ft8_engine_state["tx_level"] / 100.0)).astype(np.int16)
 
                         tx_duration = len(samples_48k) / actual_sample_rate
                         ft8_tx_active = True
@@ -1277,6 +1278,11 @@ async def websocket_ft8_endpoint(websocket: WebSocket):
                     ft8_engine_state["tx_freq"] = int(cmd.get("freq", 1250))
                     ft8_engine_state["tx_slot"] = cmd.get("slot", "even")
                     broadcast_ft8_event({"event": "tx_status", "state": ft8_engine_state})
+                elif action == "set_tx_level":
+                    try:
+                        ft8_engine_state["tx_level"] = min(100, max(1, int(cmd.get("level", 50))))
+                    except (TypeError, ValueError):
+                        pass
                 elif action == "abort_tx":
                     ft8_engine_state["tx_armed"] = False
                     ft8_tx_active = False

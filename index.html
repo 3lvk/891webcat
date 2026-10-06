@@ -219,9 +219,9 @@
         </select>
       </label>
       <label class="flex min-w-[135px] flex-1 items-center gap-2 text-slate-400 sm:max-w-[220px]">
-        <span class="shrink-0 font-bold">MIC (WEB)</span>
-        <input type="range" id="slider-mic-gain" min="10" max="200" value="100" class="w-full accent-amber-500">
-        <span id="val-mic-gain" class="w-10 text-right font-bold text-amber-400">100%</span>
+        <span class="shrink-0 font-bold">MIC GAIN</span>
+        <input type="range" id="slider-mic-gain" min="0" max="100" value="50" class="w-full accent-amber-500">
+        <span id="val-mic-gain" class="w-10 text-right font-bold text-amber-400">50</span>
       </label>
       <label class="flex min-w-[135px] flex-1 items-center gap-2 text-slate-400 sm:max-w-[220px]">
         <span class="shrink-0 font-bold">POTENCIA</span>
@@ -706,6 +706,10 @@
             <div>
               <span class="text-[8px] text-slate-400 font-bold block">AUDIO (Hz):</span>
               <input type="number" id="ft8-tx-freq" value="1250" step="10" min="200" max="3000" onchange="updateStationConfig()" class="w-full theme-btn border rounded px-1 py-0.5 text-center font-bold text-cyan-400 text-xs">
+            </div>
+            <div>
+              <span class="text-[8px] text-slate-400 font-bold block">NIVEL TX: <span id="val-ft8-level">50</span>%</span>
+              <input type="range" id="ft8-tx-level" min="1" max="100" value="50" class="w-full accent-amber-500 h-1" oninput="setFt8TxLevel(this.value)">
             </div>
             <div>
               <span class="text-[8px] text-slate-400 font-bold block">CICLO TX:</span>
@@ -1339,6 +1343,8 @@
       if (modeSelect) modeSelect.value = modeName;
     }
 
+    let micGainTimer = null;
+
     function setToggleButton(id, active) {
       const btn = document.getElementById(id);
       if (!btn) return;
@@ -1365,7 +1371,7 @@
 
     // Lee de la radio el estado real de filtros y banda/modo para reflejarlo en la interfaz
     function syncRadioState(full = true) {
-      const commands = ['NR0;', 'RL0;', 'BC0;', 'BP00;', 'BP01;', 'PA0;', 'RA0;', 'NA0;', 'SH0;'];
+      const commands = ['NR0;', 'RL0;', 'BC0;', 'BP00;', 'BP01;', 'PA0;', 'RA0;', 'MG;', 'NA0;', 'SH0;'];
       if (full) commands.unshift('FA;', 'FB;', 'MD0;', 'SM0;');
       sendCATSequence(commands, 120);
     }
@@ -1612,6 +1618,15 @@
             renderRigDisplay();
             sendCATCommand('NA0;');
             sendCATCommand('SH0;');
+          }
+        } else if (cmd.startsWith('MG') && cmd.length >= 5) {
+          const mg = parseInt(cmd.substring(2, 5), 10);
+          if (mg >= 0 && mg <= 100) {
+            RigState.micGain = mg;
+            const sl = document.getElementById('slider-mic-gain');
+            if (sl && document.activeElement !== sl) sl.value = mg;
+            const lb = document.getElementById('val-mic-gain');
+            if (lb) lb.textContent = mg;
           }
         } else if (cmd.startsWith('NR0') && cmd.length >= 4) {
           RigState.dnr = cmd.substring(3, 4) === '1';
@@ -2704,6 +2719,13 @@
         } catch (e) {}
       };
 
+      Ft8State.ws.onopen = () => {
+        const saved = localStorage.getItem('ft8_tx_level');
+        const slider = document.getElementById('ft8-tx-level');
+        if (saved && slider) slider.value = saved;
+        if (slider) setFt8TxLevel(slider.value);
+      };
+
       Ft8State.ws.onclose = () => setTimeout(initFt8WebSocket, 3000);
     }
 
@@ -2711,6 +2733,13 @@
       if (Ft8State.ws && Ft8State.ws.readyState === WebSocket.OPEN) {
         Ft8State.ws.send(JSON.stringify(cmdObj));
       }
+    }
+
+    function setFt8TxLevel(value) {
+      const level = Math.min(100, Math.max(1, parseInt(value, 10) || 50));
+      document.getElementById('val-ft8-level').textContent = level;
+      localStorage.setItem('ft8_tx_level', String(level));
+      sendFt8Command({ action: 'set_tx_level', level });
     }
 
     function updateStationConfig() {
@@ -3360,8 +3389,10 @@
       document.getElementById('slider-mic-gain')?.addEventListener('input', (e) => {
         if (!isRadioControlAvailable()) return;
         const val = parseInt(e.target.value, 10);
-        document.getElementById('val-mic-gain').textContent = `${val}%`;
-        AudioEngine.txGain = val / 100.0;
+        document.getElementById('val-mic-gain').textContent = val;
+        RigState.micGain = val;
+        clearTimeout(micGainTimer);
+        micGainTimer = setTimeout(() => sendCATCommand(`MG${String(val).padStart(3, '0')};`), 120);
       });
 
       document.getElementById('slider-sql')?.addEventListener('input', (e) => {

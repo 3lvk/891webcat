@@ -168,7 +168,7 @@ El servidor sondea en segundo plano las APIs de **POTA**, **SOTA**, **LLOTA** y 
 
 ## 📻 Consola Radio & Mandos CAT
 
-La cabecera fija comparte los controles de banda y modo entre las vistas Radio, CW y Digital. Al cambiar banda, Radio aplica su frecuencia/modo predeterminados; Digital sintoniza el dial estándar FT8 en DATA-U; CW conserva CW-U, CW-L o DATA-U. Al entrar en Digital se selecciona DATA-U y al entrar en CW se conserva un modo compatible o se selecciona CW-U; al volver a Radio desde un modo digital/CW se aplica el modo predeterminado de la banda. La cabecera también contiene potencia RF y ganancia de micrófono del audio del navegador (no es un ajuste CAT de ganancia MIC del transceptor).
+La cabecera fija comparte los controles de banda y modo entre las vistas Radio, CW y Digital. Al cambiar banda, Radio aplica su frecuencia/modo predeterminados; Digital sintoniza el dial estándar FT8 en DATA-U; CW conserva CW-U, CW-L o DATA-U. Al entrar en Digital se selecciona DATA-U y al entrar en CW se conserva un modo compatible o se selecciona CW-U; al volver a Radio desde un modo digital/CW se aplica el modo predeterminado de la banda. La cabecera también contiene potencia RF y la ganancia MIC del transceptor (CAT `MG`, sincronizada con la radio). En la vista Digital, «NIVEL TX» ajusta el nivel de audio FT8 enviado a la interfaz USB; bájalo si el ALC marca ALTO.
 
 Con CAT desconectado o la radio en standby, los controles de operación quedan deshabilitados. En ese estado solo se permite consultar el estado (`PS;`) o encender/apagar (`PS1;` / `PS0;`); la interfaz habilita los demás controles al recibir el estado de encendido desde la radio.
 
