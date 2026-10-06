@@ -2053,6 +2053,7 @@
       if (stream) stream.innerHTML = '<span class="text-slate-500 italic text-xs">Esperando tonos telegráficos...</span>';
       CwState.currentSymbolBuffer = '';
       cwWordSpaceAppended = true;
+      showToast('Pantalla CW limpiada', 'success');
     }
 
     setInterval(() => {
@@ -2290,14 +2291,34 @@
       renderRigDisplay();
     }
 
-    function showQsyAlert(msg) {
-      const qsyMsg = document.getElementById('qsy-msg');
-      const qsyAlert = document.getElementById('qsy-alert');
-      if (qsyMsg) qsyMsg.textContent = msg;
-      if (qsyAlert) {
-        qsyAlert.classList.remove('hidden');
-        setTimeout(() => qsyAlert.classList.add('hidden'), 4000);
+    let toastContainer = null;
+
+    function showToast(msg, type = 'info') {
+      if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.className = 'fixed bottom-4 right-4 z-[100] flex flex-col gap-2 items-end pointer-events-none';
+        toastContainer.setAttribute('role', 'status');
+        toastContainer.setAttribute('aria-live', 'polite');
+        document.body.appendChild(toastContainer);
       }
+      const styles = {
+        success: 'bg-emerald-950 border-emerald-500 text-emerald-200',
+        warn: 'bg-amber-950 border-amber-500 text-amber-200',
+        error: 'bg-red-950 border-red-500 text-red-200',
+        info: 'bg-slate-900 border-slate-500 text-slate-100'
+      };
+      const icons = { success: '✅', warn: '⚠️', error: '⛔', info: 'ℹ️' };
+      const toast = document.createElement('div');
+      toast.className = `px-3 py-2 rounded-lg border shadow-lg text-xs font-mono transition-opacity duration-300 ${styles[type] || styles.info}`;
+      toast.textContent = `${icons[type] || icons.info} ${msg}`;
+      toastContainer.appendChild(toast);
+      while (toastContainer.children.length > 4) toastContainer.firstChild.remove();
+      setTimeout(() => { toast.style.opacity = '0'; }, 3200);
+      setTimeout(() => toast.remove(), 3600);
+    }
+
+    function showQsyAlert(msg) {
+      showToast(msg, /^(Encienda|No |El |NAR|Log vac)/.test(msg) ? 'warn' : 'info');
     }
 
     function normalizeRadioMode(modeStr, freqHz) {
@@ -3136,6 +3157,7 @@
     function clearFt8Decodes() {
       Ft8State.decodes = [];
       renderFt8Decodes();
+      showToast('Decodificaciones limpiadas', 'success');
     }
 
     function resetCurrentQso() {
@@ -3148,10 +3170,21 @@
       selectTxMessageRow(1);
       recalculateQsoMsgs();
       armFt8Tx(false);
+      showToast('QSO actual limpiado', 'success');
     }
 
     function logCurrentQso() {
-      if (!Ft8State.dxCall) return;
+      if (!Ft8State.dxCall) {
+        showToast('No hay un DX CALL para guardar.', 'warn');
+        return;
+      }
+      const nowMs = Date.now();
+      const freqStr = (RigState.freqA / 1000000).toFixed(6);
+      const duplicate = Ft8State.completedQSOs.find(q => q.call === Ft8State.dxCall && q.freq === freqStr && nowMs - (q.savedAt || 0) < 15 * 60 * 1000);
+      if (duplicate) {
+        showToast(`QSO con ${Ft8State.dxCall} ya estaba guardado (${duplicate.time.slice(0, 2)}:${duplicate.time.slice(2, 4)}z)`, 'warn');
+        return;
+      }
       const qso = {
         date: new Date().toISOString().slice(0, 10).replace(/-/g, ''),
         time: new Date().toISOString().slice(11, 19).replace(/:/g, ''),
@@ -3160,16 +3193,17 @@
         freq: (RigState.freqA / 1000000).toFixed(6),
         rstSent: Ft8State.dxReport,
         rstRcvd: Ft8State.mySentReport,
-        grid: Ft8State.dxGrid
+        grid: Ft8State.dxGrid,
+        savedAt: nowMs
       };
       Ft8State.completedQSOs.push(qso);
       localStorage.setItem('ft8_qso_log', JSON.stringify(Ft8State.completedQSOs));
-      showQsyAlert(`QSO guardado con ${qso.call}`);
+      showToast(`QSO guardado con ${qso.call} (total: ${Ft8State.completedQSOs.length})`, 'success');
     }
 
     function exportAdifLog() {
       if (!Ft8State.completedQSOs.length) {
-        showQsyAlert('Log vacío.');
+        showToast('El log está vacío, no hay nada que exportar.', 'warn');
         return;
       }
       let adif = "FT-891 ADIF Log\n<EOH>\n";
@@ -3179,8 +3213,11 @@
       const blob = new Blob([adif], { type: 'text/plain' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `FT891_Log_${new Date().toISOString().slice(0, 10)}.adi`;
+      const fileName = `FT891_Log_${new Date().toISOString().slice(0, 10)}.adi`;
+      a.download = fileName;
       a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      showToast(`Log exportado: ${fileName} (${Ft8State.completedQSOs.length} QSO)`, 'success');
     }
 
     function updateUtcClock() {
