@@ -2788,21 +2788,52 @@
 
     function toggleAutoCqMode(enabled) {
       Ft8State.autoCq = enabled;
+      if (enabled && !isRadioControlAvailable()) {
+        showQsyAlert('Encienda la radio y espere el estado CAT antes de habilitar TX.');
+      }
       if (enabled && (!Ft8State.dxCall || Ft8State.activeTxRow === 1)) {
         selectTxMessageRow(1);
         armFt8Tx(true);
       }
     }
 
+    function shouldKeepTxArmed() {
+      return Ft8State.autoCq || !!document.getElementById('check-auto-tx')?.checked;
+    }
+
+    function resumeCqCycle() {
+      Ft8State.retryCount = 0;
+      Ft8State.pendingSpotCall = null;
+      Ft8State.dxCall = '';
+      Ft8State.dxGrid = '';
+      const callEl = document.getElementById('qso-dx-call');
+      const gridEl = document.getElementById('qso-dx-grid');
+      if (callEl) callEl.value = '';
+      if (gridEl) gridEl.value = '';
+      const counter = document.getElementById('fsm-retry-counter');
+      if (counter) counter.textContent = `0/${Ft8State.maxRetries}`;
+      recalculateQsoMsgs();
+      selectTxMessageRow(1);
+      armFt8Tx(true);
+    }
+
     function handleTxFinishedWait() {
+      const keepArmed = shouldKeepTxArmed();
+
       if (Ft8State.activeTxRow === 6) {
         logCurrentQso();
-        if (Ft8State.autoCq) {
-          selectTxMessageRow(1);
-          armFt8Tx(true);
+        if (keepArmed) {
+          resumeCqCycle();
         } else {
           armFt8Tx(false);
         }
+        return;
+      }
+
+      // Un CQ sin respuesta no es un QSO fallido: en modo continuo se repite indefinidamente
+      if (Ft8State.activeTxRow === 1 && keepArmed) {
+        Ft8State.retryCount = 0;
+        if (!Ft8State.txArmed) armFt8Tx(true);
         return;
       }
 
@@ -2811,7 +2842,11 @@
       if (counter) counter.textContent = `${Ft8State.retryCount}/${Ft8State.maxRetries}`;
 
       if (Ft8State.retryCount >= Ft8State.maxRetries) {
-        abortFt8Tx();
+        if (keepArmed) {
+          resumeCqCycle();
+        } else {
+          abortFt8Tx();
+        }
       }
     }
 
