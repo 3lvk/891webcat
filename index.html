@@ -1313,6 +1313,37 @@
       if (modeSelect) modeSelect.value = modeName;
     }
 
+    function setToggleButton(id, active) {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.textContent = active ? 'ON' : 'OFF';
+      btn.classList.toggle('btn-active-theme', !!active);
+    }
+
+    function renderFilterStates() {
+      setToggleButton('btn-toggle-dnr', RigState.dnr);
+      setToggleButton('btn-toggle-dnf', RigState.dnf);
+      setToggleButton('btn-toggle-notch', RigState.manualNotch);
+      setToggleButton('btn-toggle-att', RigState.att);
+      document.getElementById('btn-ipo-on')?.classList.toggle('btn-active-theme', !!RigState.ipo);
+      document.getElementById('btn-ipo-norm')?.classList.toggle('btn-active-theme', !RigState.ipo);
+      const dnrLevel = document.getElementById('slider-dnr-level');
+      if (dnrLevel) dnrLevel.value = RigState.dnrLevel;
+      const dnrLabel = document.getElementById('val-dnr-level');
+      if (dnrLabel) dnrLabel.textContent = RigState.dnrLevel;
+      const notchFreq = document.getElementById('slider-notch-freq');
+      if (notchFreq) notchFreq.value = RigState.notchFreq;
+      const notchLabel = document.getElementById('val-notch-freq');
+      if (notchLabel) notchLabel.textContent = `${RigState.notchFreq}Hz`;
+    }
+
+    // Lee de la radio el estado real de filtros y banda/modo para reflejarlo en la interfaz
+    function syncRadioState(full = true) {
+      const commands = ['NR0;', 'RL0;', 'BC0;', 'BP00;', 'BP01;', 'PA0;', 'RA0;', 'NA0;', 'SH0;'];
+      if (full) commands.unshift('FA;', 'FB;', 'MD0;', 'SM0;');
+      sendCATSequence(commands, 120);
+    }
+
     function updatePowerUI(isOn, known = true) {
       const wasOn = RigState.isPowerOn;
       RigState.isPowerOn = isOn;
@@ -1345,12 +1376,7 @@
       }
       updateRadioControlsAvailability();
       if (isOn && known && !wasOn) {
-        sendCATCommand('FA;');
-        sendCATCommand('FB;');
-        sendCATCommand('MD0;');
-        sendCATCommand('NA0;');
-        sendCATCommand('SH0;');
-        sendCATCommand('SM0;');
+        syncRadioState();
         if (CwState.ws && CwState.ws.readyState === WebSocket.OPEN) {
           sendCwSocket({ action: 'enable_breakin' });
           sendCwSocket({ action: 'set_speed', wpm: CwState.wpm });
@@ -1476,6 +1502,7 @@
 
         if (RigState.pollingIntervalId) clearInterval(RigState.pollingIntervalId);
         let lastPowerQueryAt = 0;
+        let lastFilterSyncAt = Date.now();
         RigState.pollingIntervalId = setInterval(() => {
           if (!RigState.connected) return;
           if (!RigState.powerKnown || !RigState.isPowerOn) {
@@ -1486,6 +1513,10 @@
           } else if (!RigState.isTx) {
             sendCATCommand('FA;');
             sendCATCommand('SM0;');
+            if (Date.now() - lastFilterSyncAt >= 5000) {
+              lastFilterSyncAt = Date.now();
+              syncRadioState(false);
+            }
           } else {
             sendCATCommand('RM4;');
             sendCATCommand('RM6;');
@@ -1548,6 +1579,30 @@
             sendCATCommand('NA0;');
             sendCATCommand('SH0;');
           }
+        } else if (cmd.startsWith('NR0') && cmd.length >= 4) {
+          RigState.dnr = cmd.substring(3, 4) === '1';
+          renderFilterStates();
+        } else if (cmd.startsWith('RL0') && cmd.length >= 5) {
+          const level = parseInt(cmd.substring(3, 5), 10);
+          if (level >= 1 && level <= 15) RigState.dnrLevel = level;
+          renderFilterStates();
+        } else if (cmd.startsWith('BC0') && cmd.length >= 4) {
+          RigState.dnf = cmd.substring(3, 4) === '1';
+          renderFilterStates();
+        } else if (cmd.startsWith('BP0') && cmd.length >= 7) {
+          const value = parseInt(cmd.substring(4, 7), 10);
+          if (cmd.substring(3, 4) === '0') {
+            RigState.manualNotch = value === 1;
+          } else if (value >= 1 && value <= 320) {
+            RigState.notchFreq = value * 10;
+          }
+          renderFilterStates();
+        } else if (cmd.startsWith('PA0') && cmd.length >= 4) {
+          RigState.ipo = cmd.substring(3, 4) === '0';
+          renderFilterStates();
+        } else if (cmd.startsWith('RA0') && cmd.length >= 4) {
+          RigState.att = cmd.substring(3, 4) === '1';
+          renderFilterStates();
         } else if (cmd.startsWith('NA0')) {
           RigState.narrow = cmd.substring(3, 4) === '1';
           renderIfWidth();
